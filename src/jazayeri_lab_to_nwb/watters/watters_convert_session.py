@@ -17,27 +17,51 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
         output_dir_path = output_dir_path / "nwb_stub"
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    session_id = "subject_identifier_usually"
+    session_id = "monkey0_2022_06_01"
     nwbfile_path = output_dir_path / f"{session_id}.nwb"
 
     source_data = dict()
     conversion_options = dict()
 
     # Add Recording
-    source_data.update(dict(Recording=dict()))
-    conversion_options.update(dict(Recording=dict()))
+    # source_data.update(dict(Recording=dict(file_path=str(
+    #     data_dir_path / "raw_data" / "spikeglx" / "2022_06_01_perle_g0" /
+    #     "2022_06_01_perle_g0_imec0" / "2022_06_01_perle_g0_t0.imec0.ap.bin"
+    # ))))
+    # conversion_options.update(dict(Recording=dict(stub_test=True)))
 
     # Add LFP
-    source_data.update(dict(LFP=dict()))
-    conversion_options.update(dict(LFP=dict()))
+    # source_data.update(dict(LFP=dict(file_path=str(
+    #     data_dir_path / "raw_data" / "spikeglx" / "2022_06_01_perle_g0" /
+    #     "2022_06_01_perle_g0_imec0" / "2022_06_01_perle_g0_t0.imec0.lf.bin"
+    # ))))
+    # conversion_options.update(dict(LFP=dict(write_as="lfp", stub_test=True)))
+
+    # Add NIDQ
+    # source_data.update(dict(NIDQ=dict(file_path=str(
+    #     data_dir_path / "raw_data" / "spikeglx" / "2022_06_01_perle_g0" /
+    #     "2022_06_01_perle_g0_t0.nidq.bin"
+    # ))))
+    # conversion_options.update(dict(NIDQ=dict(stub_test=True)))
+
+    # Add V-probe recording
+    source_data.update(
+        dict(
+            OERecording=dict(
+                folder_path=str(data_dir_path / "raw_data" / "open_ephys" / "2022-06-01_13-46-03" / "Record_Node_104"),
+                stream_name="Signals CH",
+            )
+        )
+    )
+    conversion_options.update(dict(OERecording=dict(stub_test=True)))
 
     # Add Sorting
-    source_data.update(dict(Sorting=dict()))
-    conversion_options.update(dict(Sorting=dict()))
+    # source_data.update(dict(Sorting=dict()))
+    # conversion_options.update(dict(Sorting=dict()))
 
     # Add Behavior
-    source_data.update(dict(Behavior=dict()))
-    conversion_options.update(dict(Behavior=dict()))
+    # source_data.update(dict(Behavior=dict()))
+    # conversion_options.update(dict(Behavior=dict()))
 
     converter = WattersNWBConverter(source_data=source_data)
 
@@ -59,8 +83,8 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
 if __name__ == "__main__":
 
     # Parameters for conversion
-    data_dir_path = Path("/Directory/With/Raw/Formats/")
-    output_dir_path = Path("~/conversion_nwb/")
+    data_dir_path = Path("/shared/catalystneuro/JazLab/monkey0/2022-06-01/")
+    output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_openephys/").expanduser()
     stub_test = False
 
     session_to_nwb(
