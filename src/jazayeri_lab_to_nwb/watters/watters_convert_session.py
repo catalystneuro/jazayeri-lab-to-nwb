@@ -28,36 +28,105 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     #     data_dir_path / "raw_data" / "spikeglx" / "2022_06_01_perle_g0" /
     #     "2022_06_01_perle_g0_imec0" / "2022_06_01_perle_g0_t0.imec0.ap.bin"
     # ))))
-    # conversion_options.update(dict(Recording=dict(stub_test=True)))
+    # conversion_options.update(dict(Recording=dict(stub_test=stub_test)))
 
     # Add LFP
     # source_data.update(dict(LFP=dict(file_path=str(
     #     data_dir_path / "raw_data" / "spikeglx" / "2022_06_01_perle_g0" /
     #     "2022_06_01_perle_g0_imec0" / "2022_06_01_perle_g0_t0.imec0.lf.bin"
     # ))))
-    # conversion_options.update(dict(LFP=dict(write_as="lfp", stub_test=True)))
+    # conversion_options.update(dict(LFP=dict(write_as="lfp", stub_test=stub_test)))
 
     # Add NIDQ
-    # source_data.update(dict(NIDQ=dict(file_path=str(
-    #     data_dir_path / "raw_data" / "spikeglx" / "2022_06_01_perle_g0" /
-    #     "2022_06_01_perle_g0_t0.nidq.bin"
-    # ))))
-    # conversion_options.update(dict(NIDQ=dict(stub_test=True)))
+    """
+    source_data.update(dict(NIDQ=dict(file_path=str(
+        data_dir_path / "raw_data" / "spikeglx" / "2022_06_01_perle_g0" /
+        "2022_06_01_perle_g0_t0.nidq.bin"
+    ))))
+    conversion_options.update(dict(NIDQ=dict(stub_test=stub_test)))
+    """
 
-    # Add V-probe recording
+    # Add V-probe recording (legacy)
+    """
     source_data.update(
         dict(
             OERecording=dict(
                 folder_path=str(data_dir_path / "raw_data" / "open_ephys" / "2022-06-01_13-46-03" / "Record_Node_104"),
                 stream_name="Signals CH",
+                make_temporary_tree=True,
             )
         )
     )
-    conversion_options.update(dict(OERecording=dict(stub_test=True)))
+    conversion_options.update(dict(OERecording=dict(stub_test=stub_test)))
+    """
+
+    # Add V-probe recording (binary)
+    """
+    source_data.update(
+        dict(
+            VP1Recording=dict(
+                # folder_path=str(data_dir_path / "raw_data" / "open_ephys" / "2022-06-01_13-46-03" / "Record_Node_104"),
+                folder_path=str(data_dir_path / "raw_data" / "temp_dir"),
+                dat_folder_paths=[
+                    str(data_dir_path / "raw_data" / "v_probe_0"),
+                    str(data_dir_path / "raw_data" / "v_probe_1"),
+                ],
+                stream_name="v_probe_0",
+                es_key="ElectricalSeries0",
+                make_temporary_tree=False,
+            )
+        )
+    )
+    conversion_options.update(dict(VP1Recording=dict(stub_test=stub_test)))
+    source_data.update(
+        dict(
+            VP2Recording=dict(
+                # folder_path=str(data_dir_path / "raw_data" / "open_ephys" / "2022-06-01_13-46-03" / "Record_Node_104"),
+                folder_path=str(data_dir_path / "raw_data" / "temp_dir"),
+                dat_folder_paths=[
+                    str(data_dir_path / "raw_data" / "v_probe_0"),
+                    str(data_dir_path / "raw_data" / "v_probe_1"),
+                ],
+                stream_name="v_probe_1",
+                es_key="ElectricalSeries1",
+                make_temporary_tree=False,
+            )
+        )
+    )
+    conversion_options.update(dict(VP2Recording=dict(stub_test=stub_test)))
+    """
 
     # Add Sorting
-    # source_data.update(dict(Sorting=dict()))
-    # conversion_options.update(dict(Sorting=dict()))
+
+    source_data.update(
+        dict(
+            NPSorting=dict(
+                folder_path=str(data_dir_path / "spike_sorting_raw" / "np"),
+                keep_good_only=True,
+            )
+        )
+    )
+    conversion_options.update(dict(NPSorting=dict(stub_test=stub_test)))
+
+    source_data.update(
+        dict(
+            VP1Sorting=dict(
+                folder_path=str(data_dir_path / "spike_sorting_raw" / "v_probe_0"),
+                keep_good_only=True,
+            )
+        )
+    )
+    conversion_options.update(dict(VP1Sorting=dict(stub_test=stub_test)))
+
+    source_data.update(
+        dict(
+            VP2Sorting=dict(
+                folder_path=str(data_dir_path / "spike_sorting_raw" / "v_probe_1"),
+                keep_good_only=True,
+            )
+        )
+    )
+    conversion_options.update(dict(VP2Sorting=dict(stub_test=stub_test)))
 
     # Add Behavior
     # source_data.update(dict(Behavior=dict()))
@@ -84,8 +153,8 @@ if __name__ == "__main__":
 
     # Parameters for conversion
     data_dir_path = Path("/shared/catalystneuro/JazLab/monkey0/2022-06-01/")
-    output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_openephys/").expanduser()
-    stub_test = False
+    output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_kilosortvp/").expanduser()
+    stub_test = True
 
     session_to_nwb(
         data_dir_path=data_dir_path,

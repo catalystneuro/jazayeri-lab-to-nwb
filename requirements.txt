@@ -3,3 +3,4 @@ nwbwidgets
 nwbinspector
 pre-commit
 pyopenephys
+spikeinterface>=0.98.0
