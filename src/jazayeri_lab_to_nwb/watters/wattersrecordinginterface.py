@@ -23,6 +23,7 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
         t_start: float = 0.0,
         sampling_frequency: float = 30000.0,
         channel_ids: Optional[list] = None,
+        gain_to_uv: list = [1.0],
     ):
         traces = np.memmap(file_path, dtype=dtype, mode="r").reshape(-1, channel_count)
         source_data = {
@@ -32,3 +33,12 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
             "channel_ids": channel_ids,
         }
         super().__init__(verbose=verbose, es_key=es_key, **source_data)
+        if gain_to_uv is not None:
+            if len(gain_to_uv) == 1:
+                gain_to_uv = np.full((channel_count,), gain_to_uv[0], dtype=float)
+            else:
+                assert len(gain_to_uv) == channel_count, (
+                    f"There are {channel_count} channels " f"but `gain_to_uv` has length {len(gain_to_uv)}"
+                )
+                gain_to_uv = np.array(gain_to_uv, dtype=float)
+            self.recording_extractor.set_property("gain_to_uV", gain_to_uv)
