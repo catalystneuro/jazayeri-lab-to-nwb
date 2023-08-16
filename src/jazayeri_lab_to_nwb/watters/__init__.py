@@ -1,2 +1,2 @@
-from .wattersbehaviorinterface import WattersBehaviorInterface
+from .wattersbehaviorinterface import WattersEyePositionInterface, WattersPupilSizeInterface
 from .wattersnwbconverter import WattersNWBConverter
