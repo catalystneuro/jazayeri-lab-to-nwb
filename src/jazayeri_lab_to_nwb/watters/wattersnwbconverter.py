@@ -6,15 +6,19 @@ from neuroconv.datainterfaces import (
     PhySortingInterface,
 )
 
-from jazayeri_lab_to_nwb.watters import WattersBehaviorInterface
+from jazayeri_lab_to_nwb.watters import (
+    WattersBehaviorInterface,
+    WattersTrialsInterface,
+)
 
 
 class WattersNWBConverter(NWBConverter):
     """Primary conversion class for my extracellular electrophysiology dataset."""
 
     data_interface_classes = dict(
-        Recording=SpikeGLXRecordingInterface,
-        LFP=SpikeGLXLFPInterface,
-        Sorting=PhySortingInterface,
-        Behavior=WattersBehaviorInterface,
+        # Recording=SpikeGLXRecordingInterface,
+        # LFP=SpikeGLXLFPInterface,
+        # Sorting=PhySortingInterface,
+        # Behavior=WattersBehaviorInterface,
+        Trials=WattersTrialsInterface,
     )
