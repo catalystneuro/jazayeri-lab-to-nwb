@@ -49,7 +49,7 @@ class WattersEyePositionInterface(BaseDataInterface):
             data=H5DataIO(eye_pos, compression="gzip"),
             reference_frame="(0,0) is bottom left corner of screen",
             unit="meters",
-            conversion=1.0,  # TODO: determine this
+            conversion=0.257,
             timestamps=H5DataIO(timestamps, compression="gzip"),
             description="Eye position data recorded by EyeLink camera",
         )
