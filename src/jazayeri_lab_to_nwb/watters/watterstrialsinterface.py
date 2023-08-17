@@ -25,7 +25,7 @@ class WattersTrialsInterface(BaseDataInterface):
             "task/trials.relative_phase_times.json",
             "task/trials.reward.duration.json",
             "task/trials.reward.time.json",
-            # 'task/trials.stimuli_init.json',
+            "task/trials.stimuli_init.json",
         ]
         for field in all_fields:
             assert (folder_path / field).exists(), f"Could not find {folder_path / field}"
@@ -49,7 +49,8 @@ class WattersTrialsInterface(BaseDataInterface):
             description="Position of the subject's response fixation, in units of display sidelength, with (0,0) being the bottom left corner of the display.",
         )
         nwbfile.add_trial_column(
-            name="response_object", description="The index of the stimulus object nearst to the subject's response."
+            name="response_object",
+            description="The index of the stimulus object nearst to the subject's response. Indices correspond to the object ordering in the stimuli description fields of the trials table.",
         )
         nwbfile.add_trial_column(
             name="object_blank",
@@ -62,14 +63,31 @@ class WattersTrialsInterface(BaseDataInterface):
         nwbfile.add_trial_column(name="reveal_time", description="Time of reveal of correct object position.")
         nwbfile.add_trial_column(name="reward_duration", description="Duration of juice reward, in seconds.")
         nwbfile.add_trial_column(name="reward_time", description="Time of reward delivery.")
-        # nwbfile.add_trial_column(name="stimuli_init", index=True, description="Description of the stimulus objects. For each object, the values are (x position, y position, x velocity, y velocity, object id, target) where position and velocity are floats in units of display sidelength, object id is 'a' for apple, 'b' for blueberry, and 'c' for orange, and target is a boolean indicating whether the given object is the target object.")
+        nwbfile.add_trial_column(
+            name="stimuli_position",
+            index=True,
+            description="Positions of the stimuli objects. Values are (x,y) coordinates in unites of screen sidelength, with (0,0) being the bottom left corner.",
+        )
+        nwbfile.add_trial_column(
+            name="stimuli_velocity",
+            index=True,
+            description="Velocity of the stimuli objects. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep.",
+        )
+        nwbfile.add_trial_column(
+            name="stimuli_id",
+            index=True,
+            description="Object IDs of the stimuli objects, 'a' for apple, 'b' for blueberry, and 'c' for orange.",
+        )
+        nwbfile.add_trial_column(
+            name="stimuli_target",
+            index=True,
+            description="Boolean for each stimulus object indicating whether it is the target object.",
+        )
 
         # add trials to table
         n_trials = len(data_dict["task/trials.start_times.json"])
         for i in range(n_trials):
             start_time = data_dict["task/trials.start_times.json"][i]
-            # struct_dtype = [('x', float), ('y', float), ('x_vel', float), ('y_vel', float), ('id', 'U10'), ('target', bool)]
-            # stimuli_init = [np.array([[d['x'], d['y'], d['x_vel'], d['y_vel'], d['id'], d['target']]], dtype=struct_dtype) for d in data_dict['task/trials.stimuli_init.json'][i]]
             get_by_index = lambda lst, idx: np.nan if (idx >= len(lst)) else lst[idx]
             none_to_nan = lambda val, dim: val or (np.nan if dim <= 1 else np.full((dim,), np.nan).tolist())
             nwbfile.add_trial(
@@ -87,7 +105,10 @@ class WattersTrialsInterface(BaseDataInterface):
                 reveal_time=get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 4),
                 reward_duration=none_to_nan(data_dict["task/trials.reward.duration.json"][i], 1),
                 reward_time=none_to_nan(data_dict["task/trials.reward.time.json"][i], 1),
-                # stimuli_init=stimuli_init,
+                stimuli_position=[[d["x"], d["y"]] for d in data_dict["task/trials.stimuli_init.json"][i]],
+                stimuli_velocity=[[d["x_vel"], d["y_vel"]] for d in data_dict["task/trials.stimuli_init.json"][i]],
+                stimuli_id=[d["id"] for d in data_dict["task/trials.stimuli_init.json"][i]],
+                stimuli_target=[d["target"] for d in data_dict["task/trials.stimuli_init.json"][i]],
             )
 
         return nwbfile
