@@ -50,7 +50,7 @@ class WattersTrialsInterface(BaseDataInterface):
         )
         nwbfile.add_trial_column(
             name="response_object",
-            description="The index of the stimulus object nearst to the subject's response. Indices correspond to the object ordering in the stimuli description fields of the trials table.",
+            description="The ID of the stimulus object nearest to the subject's response, one of 'a' for Apple, 'b' for Blueberry, or 'c' for Orange. If the trial ended prematurely, the field is left blank.",
         )
         nwbfile.add_trial_column(
             name="object_blank",
@@ -64,24 +64,38 @@ class WattersTrialsInterface(BaseDataInterface):
         nwbfile.add_trial_column(name="reward_duration", description="Duration of juice reward, in seconds.")
         nwbfile.add_trial_column(name="reward_time", description="Time of reward delivery.")
         nwbfile.add_trial_column(
-            name="stimuli_position",
-            index=True,
-            description="Positions of the stimuli objects. Values are (x,y) coordinates in unites of screen sidelength, with (0,0) being the bottom left corner.",
+            name="target_object",
+            description="ID of the stimulus object that is the target object, one of 'a' for Apple, 'b' for Blueberry, or 'c' for Orange.",
         )
         nwbfile.add_trial_column(
-            name="stimuli_velocity",
+            name="object_a_position",
             index=True,
-            description="Velocity of the stimuli objects. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep.",
+            description="Position of stimulus object 'a', or Apple. Values are (x,y) coordinates in units of screen sidelength, with (0,0) being the bottom left corner. If the object is not presented in a particular trial, the position is empty.",
         )
         nwbfile.add_trial_column(
-            name="stimuli_id",
+            name="object_a_velocity",
             index=True,
-            description="Object IDs of the stimuli objects, 'a' for apple, 'b' for blueberry, and 'c' for orange.",
+            description="Velocity of stimulus object 'a', or Apple. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep. If the object is not presented in a particular trial, the velocity is empty.",
         )
         nwbfile.add_trial_column(
-            name="stimuli_target",
+            name="object_b_position",
             index=True,
-            description="Boolean for each stimulus object indicating whether it is the target object.",
+            description="Position of stimulus object 'b', or Blueberry. Values are (x,y) coordinates in units of screen sidelength, with (0,0) being the bottom left corner. If the object is not presented in a particular trial, the position is empty.",
+        )
+        nwbfile.add_trial_column(
+            name="object_b_velocity",
+            index=True,
+            description="Velocity of stimulus object 'b', or Blueberry. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep. If the object is not presented in a particular trial, the velocity is empty.",
+        )
+        nwbfile.add_trial_column(
+            name="object_c_position",
+            index=True,
+            description="Position of stimulus object 'c', or Orange. Values are (x,y) coordinates in units of screen sidelength, with (0,0) being the bottom left corner. If the object is not presented in a particular trial, the position is empty.",
+        )
+        nwbfile.add_trial_column(
+            name="object_c_velocity",
+            index=True,
+            description="Velocity of stimulus object 'c', or Orange. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep. If the object is not presented in a particular trial, the velocity is empty.",
         )
 
         # add trials to table
@@ -90,25 +104,46 @@ class WattersTrialsInterface(BaseDataInterface):
             start_time = data_dict["task/trials.start_times.json"][i]
             get_by_index = lambda lst, idx: np.nan if (idx >= len(lst)) else lst[idx]
             none_to_nan = lambda val, dim: val or (np.nan if dim <= 1 else np.full((dim,), np.nan).tolist())
+
+            response_object = data_dict["behavior/trials.response.object.json"][i]
+            if response_object is None:
+                response_object = ""
+            else:
+                response_object = data_dict["task/trials.stimuli_init.json"][i][response_object]["id"]
+
+            object_info = {"a": {}, "b": {}, "c": {}}
+            target_object = None
+            for object_dict in data_dict["task/trials.stimuli_init.json"][i]:
+                object_id = object_dict["id"]
+                assert object_id in object_info.keys()
+                object_info[object_id]["position"] = [object_dict["x"], object_dict["y"]]
+                object_info[object_id]["velocity"] = [object_dict["x_vel"], object_dict["y_vel"]]
+                if object_dict["target"]:
+                    target_object = object_id
+            assert target_object is not None
+
             nwbfile.add_trial(
                 start_time=start_time,
                 stop_time=start_time + data_dict["task/trials.relative_phase_times.json"][i][-1],
                 broke_fixation=data_dict["behavior/trials.broke_fixation.json"][i],
                 response_error=none_to_nan(data_dict["behavior/trials.response.error.json"][i], 1),
                 response_location=none_to_nan(data_dict["behavior/trials.response.location.json"][i], 2),
-                response_object=none_to_nan(data_dict["behavior/trials.response.object.json"][i], 1),
+                response_object=response_object,
                 object_blank=data_dict["task/trials.object_blanks.json"][i],
-                stimulus_time=get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 0),
-                delay_start_time=get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 1),
-                cue_time=get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 2),
-                response_time=get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 3),
-                reveal_time=get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 4),
+                stimulus_time=start_time + get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 0),
+                delay_start_time=start_time + get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 1),
+                cue_time=start_time + get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 2),
+                response_time=start_time + get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 3),
+                reveal_time=start_time + get_by_index(data_dict["task/trials.relative_phase_times.json"][i], 4),
                 reward_duration=none_to_nan(data_dict["task/trials.reward.duration.json"][i], 1),
-                reward_time=none_to_nan(data_dict["task/trials.reward.time.json"][i], 1),
-                stimuli_position=[[d["x"], d["y"]] for d in data_dict["task/trials.stimuli_init.json"][i]],
-                stimuli_velocity=[[d["x_vel"], d["y_vel"]] for d in data_dict["task/trials.stimuli_init.json"][i]],
-                stimuli_id=[d["id"] for d in data_dict["task/trials.stimuli_init.json"][i]],
-                stimuli_target=[d["target"] for d in data_dict["task/trials.stimuli_init.json"][i]],
+                reward_time=start_time + none_to_nan(data_dict["task/trials.reward.time.json"][i], 1),
+                target_object=target_object,
+                object_a_position=object_info["a"].get("position", []),
+                object_a_velocity=object_info["a"].get("velocity", []),
+                object_b_position=object_info["b"].get("position", []),
+                object_b_velocity=object_info["b"].get("velocity", []),
+                object_c_position=object_info["c"].get("position", []),
+                object_c_velocity=object_info["c"].get("velocity", []),
             )
 
         return nwbfile
