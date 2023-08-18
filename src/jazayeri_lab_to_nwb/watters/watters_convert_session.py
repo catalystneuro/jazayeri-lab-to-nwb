@@ -52,7 +52,7 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     # source_data.update(dict(Behavior=dict()))
     # conversion_options.update(dict(Behavior=dict()))
 
-    converter = WattersNWBConverter(source_data=source_data)
+    converter = WattersNWBConverter(source_data=source_data, sync_dir=str(data_dir_path / "sync_pulses"))
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
