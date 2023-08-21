@@ -49,3 +49,5 @@ class WattersNWBConverter(NWBConverter):
             transform = json.load(f)
         aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
         self.data_interface_objects["Recording"].set_aligned_timestamps(aligned_timestamps)
+        # openephys sorting alignment
+        self.data_interface_objects["Sorting"].register_recording(self.data_interface_objects["Recording"])
