@@ -1,10 +1,10 @@
 """Primary NWBConverter class for this dataset."""
 import json
 from typing import Optional
-from neuroconv.utils import FolderPathType
 from pathlib import Path
 
 from neuroconv import NWBConverter
+from neuroconv.utils import FolderPathType
 from neuroconv.datainterfaces import (
     SpikeGLXRecordingInterface,
     KiloSortSortingInterface,
@@ -46,3 +46,9 @@ class WattersNWBConverter(NWBConverter):
             transform = json.load(f)
         aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
         self.data_interface_objects["Recording"].set_aligned_timestamps(aligned_timestamps)
+        # neuropixel LFP alignment
+        orig_timestamps = self.data_interface_objects["LFP"].get_timestamps()
+        aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
+        self.data_interface_objects["LFP"].set_aligned_timestamps(aligned_timestamps)
+        # neuropixel sorting alignment
+        self.data_interface_objects["Sorting"].register_recording(self.data_interface_objects["Recording"])
