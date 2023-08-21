@@ -35,7 +35,7 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     lfp_files = list(glob.glob(str(data_dir_path / "raw_data" / "spikeglx" / "*" / "*" / "*.lf.bin")))
     assert len(lfp_files) > 0, f"No .lf.bin files found in {data_dir_path}"
     assert len(lfp_files) == 1, f"Multiple .lf.bin files found in {data_dir_path}"
-    source_data.update(dict(LFP=dict(file_path=str(lfp_files[0]))))
+    source_data.update(dict(LFP=dict(file_path=str(lfp_files[0]), es_key="ElectricalSeriesLF")))
     conversion_options.update(dict(LFP=dict(write_as="lfp", stub_test=stub_test)))
 
     # Add Sorting
@@ -53,7 +53,7 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     # source_data.update(dict(Behavior=dict()))
     # conversion_options.update(dict(Behavior=dict()))
 
-    converter = WattersNWBConverter(source_data=source_data)
+    converter = WattersNWBConverter(source_data=source_data, sync_dir=str(data_dir_path / "sync_pulses"))
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
