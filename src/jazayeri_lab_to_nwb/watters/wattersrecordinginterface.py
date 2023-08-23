@@ -1,5 +1,6 @@
 """Primary class for Watters Plexon probe data."""
 import os
+import json
 import numpy as np
 from pynwb import NWBFile
 from pathlib import Path
@@ -7,6 +8,64 @@ from typing import Optional, Union
 
 from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
 from neuroconv.utils import FilePathType
+from spikeinterface import BaseRecording
+
+
+def add_electrode_locations(
+    recording_extractor: BaseRecording,
+    probe_metadata_file: FilePathType,
+    probe_name: str,
+) -> list[dict]:
+    with open(probe_metadata_file, "r") as f:
+        all_probe_metadata = json.load(f)
+    probe_metadata = None
+    for entry in all_probe_metadata:
+        if entry["label"] == probe_name:
+            probe_metadata = entry
+
+    if probe_metadata is None:
+        return []
+
+    probe_coord_system = probe_metadata["coordinate_system"]
+    coord_names = probe_coord_system.split("[")[1].split("]")[0].split(",")
+    electrode_metadata = [
+        {
+            "name": "x",
+            "description": f"{coord_names[0]} coordinate. {probe_coord_system}",
+        },
+        {
+            "name": "y",
+            "description": f"{coord_names[1]} coordinate. {probe_coord_system}",
+        },
+    ]
+    if len(coord_names) == 3:
+        electrode_metadata.append(
+            {
+                "name": "z",
+                "description": f"{coord_names[2]} coordinate. {probe_coord_system}",
+            },
+        )
+
+    channel_ids = recording_extractor.get_channel_ids()[[0, -1]]
+    coordinates = probe_metadata["coordinates"]
+    recording_extractor.set_property(
+        key="x",
+        values=[coordinates["first_channel"][0], coordinates["last_channel"][0]],
+        ids=channel_ids,
+    )
+    recording_extractor.set_property(
+        key="y",
+        values=[coordinates["first_channel"][1], coordinates["last_channel"][1]],
+        ids=channel_ids,
+    )
+    if len(coord_names) == 3:
+        recording_extractor.set_property(
+            key="z",
+            values=[coordinates["first_channel"][2], coordinates["last_channel"][2]],
+            ids=channel_ids,
+        )
+
+    return electrode_metadata
 
 
 class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
@@ -24,6 +83,8 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
         sampling_frequency: float = 30000.0,
         channel_ids: Optional[list] = None,
         gain_to_uv: list = [1.0],
+        probe_metadata_file: Optional[FilePathType] = None,
+        probe_name: Optional[str] = None,
     ):
         traces = np.memmap(file_path, dtype=dtype, mode="r").reshape(-1, channel_count)
         source_data = {
@@ -42,3 +103,20 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
                 )
                 gain_to_uv = np.array(gain_to_uv, dtype=float)
             self.recording_extractor.set_property("gain_to_uV", gain_to_uv)
+        self.probe_metadata_file = probe_metadata_file
+        self.probe_name = probe_name
+
+        self.electrode_metadata = None
+        if self.probe_metadata_file is not None and self.probe_name is not None:
+            self.electrode_metadata = add_electrode_locations(
+                self.recording_extractor, self.probe_metadata_file, self.probe_name
+            )
+
+    def get_metadata(self) -> dict:
+        metadata = super().get_metadata()
+
+        if self.electrode_metadata is None:
+            return metadata
+
+        metadata["Ecephys"]["Electrodes"] = self.electrode_metadata
+        return metadata

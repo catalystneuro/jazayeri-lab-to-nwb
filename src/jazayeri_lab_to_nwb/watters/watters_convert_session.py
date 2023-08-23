@@ -30,7 +30,15 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     recording_files = list(glob.glob(str(data_dir_path / "raw_data" / f"v_probe_{probe_num}" / "*.dat")))
     assert len(recording_files) > 0, f"No .dat files found in {data_dir_path}"
     assert len(recording_files) == 1, f"Multiple .dat files found in {data_dir_path}"
-    source_data.update(dict(Recording=dict(file_path=str(recording_files[0]))))
+    source_data.update(
+        dict(
+            Recording=dict(
+                file_path=str(recording_files[0]),
+                probe_metadata_file=str(data_dir_path / "data_open_source" / "probes.metadata.json"),
+                probe_name=f"probe{(probe_num+1):02d}",
+            )
+        )
+    )
     conversion_options.update(dict(Recording=dict(stub_test=stub_test)))
 
     # Add LFP
