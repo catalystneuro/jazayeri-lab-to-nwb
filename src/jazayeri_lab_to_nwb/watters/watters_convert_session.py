@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Union
 import datetime
 import glob
+import json
 from zoneinfo import ZoneInfo
 
 from neuroconv.utils import load_dict_from_file, dict_deep_update
@@ -54,6 +55,8 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     # conversion_options.update(dict(Behavior=dict()))
 
     converter = WattersNWBConverter(source_data=source_data, sync_dir=str(data_dir_path / "sync_pulses"))
+    # print(converter.get_metadata_schema())
+    # import pdb; pdb.set_trace()
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
@@ -66,6 +69,25 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
         metadata["Subject"]["subject_id"] = "Perle"
     elif "monkey1" in str(data_dir_path):
         metadata["Subject"]["subject_id"] = "Elgar"
+
+    # EcePhys
+    probe_metadata_file = data_dir_path / "data_open_source" / "probes.metadata.json"
+    with open(probe_metadata_file, "r") as f:
+        probe_metadata = json.load(f)
+    neuropixel_metadata = [entry for entry in probe_metadata if entry["label"] == "probe00"][0]
+    metadata["Ecephys"]["ElectrodeGroup"] = [
+        {
+            "name": "s0",
+            "description": "Electrodes on Neuropixel probe",
+            "device": "Neuropixel-Imec",
+            "location": "unknown",
+            "position": (
+                neuropixel_metadata["coordinates"][0],
+                neuropixel_metadata["coordinates"][1],
+                neuropixel_metadata["depth_from_surface"],
+            ),
+        },
+    ]
 
     # Update default metadata with the editable in the corresponding yaml file
     editable_metadata_path = Path(__file__).parent / "watters_metadata.yaml"
