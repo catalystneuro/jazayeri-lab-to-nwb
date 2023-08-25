@@ -118,9 +118,18 @@ class WattersTrialsInterface(TimeIntervalsInterface):
     ):
         column_descriptions = {
             "broke_fixation": "Whether the subject broke fixation before the response period.",
-            "response_error": "Euclidean distance between subject's response fixation position and the true target object's position, in units of display sidelength.",
-            "response_location": "Position of the subject's response fixation, in units of display sidelength, with (0,0) being the bottom left corner of the display.",
-            "response_object": "The ID of the stimulus object nearest to the subject's response, one of 'a' for Apple, 'b' for Blueberry, or 'c' for Orange. If the trial ended prematurely, the field is left blank.",
+            "response_error": (
+                "Euclidean distance between subject's response fixation position and the true target "
+                "object's position, in units of display sidelength."
+            ),
+            "response_location": (
+                "Position of the subject's response fixation, in units of display sidelength, with (0,0) "
+                "being the bottom left corner of the display."
+            ),
+            "response_object": (
+                "The ID of the stimulus object nearest to the subject's response, one of 'a' for Apple, "
+                "'b' for Blueberry, or 'c' for Orange. If the trial ended prematurely, the field is left blank."
+            ),
             "object_blank": "Whether the object locations were visible in the delay phase as blank disks.",
             "stimulus_time": "Time of stimulus presentation.",
             "delay_start_time": "Time of the beginning of the delay period.",
@@ -129,13 +138,40 @@ class WattersTrialsInterface(TimeIntervalsInterface):
             "reveal_time": "Time of reveal of correct object position.",
             "reward_duration": "Duration of juice reward, in seconds.",
             "reward_time": "Time of reward delivery.",
-            "target_object": "ID of the stimulus object that is the target object, one of 'a' for Apple, 'b' for Blueberry, or 'c' for Orange.",
-            "object_a_position": "Position of stimulus object 'a', or Apple. Values are (x,y) coordinates in units of screen sidelength, with (0,0) being the bottom left corner. If the object is not presented in a particular trial, the position is empty.",
-            "object_a_velocity": "Velocity of stimulus object 'a', or Apple. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep. If the object is not presented in a particular trial, the velocity is empty.",
-            "object_b_position": "Position of stimulus object 'b', or Blueberry. Values are (x,y) coordinates in units of screen sidelength, with (0,0) being the bottom left corner. If the object is not presented in a particular trial, the position is empty.",
-            "object_b_velocity": "Velocity of stimulus object 'b', or Blueberry. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep. If the object is not presented in a particular trial, the velocity is empty.",
-            "object_c_position": "Position of stimulus object 'c', or Orange. Values are (x,y) coordinates in units of screen sidelength, with (0,0) being the bottom left corner. If the object is not presented in a particular trial, the position is empty.",
-            "object_c_velocity": "Velocity of stimulus object 'c', or Orange. Values are (x,y) velocity vectors, in units of screen sidelength per simulation timestep. If the object is not presented in a particular trial, the velocity is empty.",
+            "target_object": (
+                "ID of the stimulus object that is the target object, one of 'a' for Apple, 'b' for Blueberry, "
+                "or 'c' for Orange."
+            ),
+            "object_a_position": (
+                "Position of stimulus object 'a', or Apple. Values are (x,y) coordinates in units of screen "
+                "sidelength, with (0,0) being the bottom left corner. If the object is not presented in a "
+                "particular trial, the position is empty."
+            ),
+            "object_a_velocity": (
+                "Velocity of stimulus object 'a', or Apple. Values are (x,y) velocity vectors, in units of "
+                "screen sidelength per simulation timestep. If the object is not presented in a particular "
+                "trial, the velocity is empty."
+            ),
+            "object_b_position": (
+                "Position of stimulus object 'b', or Blueberry. Values are (x,y) coordinates in units of "
+                "screen sidelength, with (0,0) being the bottom left corner. If the object is not presented "
+                "in a particular trial, the position is empty."
+            ),
+            "object_b_velocity": (
+                "Velocity of stimulus object 'b', or Blueberry. Values are (x,y) velocity vectors, in units "
+                "of screen sidelength per simulation timestep. If the object is not presented in a particular "
+                "trial, the velocity is empty."
+            ),
+            "object_c_position": (
+                "Position of stimulus object 'c', or Orange. Values are (x,y) coordinates in units of screen "
+                "sidelength, with (0,0) being the bottom left corner. If the object is not presented in a "
+                "particular trial, the position is empty."
+            ),
+            "object_c_velocity": (
+                "Velocity of stimulus object 'c', or Orange. Values are (x,y) velocity vectors, in units of "
+                "screen sidelength per simulation timestep. If the object is not presented in a particular "
+                "trial, the velocity is empty."
+            ),
         }
 
         return super().add_to_nwbfile(
