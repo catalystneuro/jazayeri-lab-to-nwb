@@ -7,7 +7,8 @@ from neuroconv.datainterfaces import (
 )
 
 from jazayeri_lab_to_nwb.watters import (
-    WattersBehaviorInterface,
+    WattersEyePositionInterface,
+    WattersPupilSizeInterface,
     WattersTrialsInterface,
 )
 
@@ -19,6 +20,7 @@ class WattersNWBConverter(NWBConverter):
         # Recording=SpikeGLXRecordingInterface,
         # LFP=SpikeGLXLFPInterface,
         # Sorting=PhySortingInterface,
-        # Behavior=WattersBehaviorInterface,
+        EyePosition=WattersEyePositionInterface,
+        PupilSize=WattersPupilSizeInterface,
         Trials=WattersTrialsInterface,
     )

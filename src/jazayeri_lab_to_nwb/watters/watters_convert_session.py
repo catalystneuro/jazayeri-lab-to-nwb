@@ -2,6 +2,7 @@
 from pathlib import Path
 from typing import Union
 import datetime
+import glob
 from zoneinfo import ZoneInfo
 
 from neuroconv.utils import load_dict_from_file, dict_deep_update
@@ -17,7 +18,7 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
         output_dir_path = output_dir_path / "nwb_stub"
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    session_id = f"20220601-trials"
+    session_id = f"20220601-behavior"
     nwbfile_path = output_dir_path / f"{session_id}.nwb"
 
     source_data = dict()
@@ -36,8 +37,11 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     # conversion_options.update(dict(Sorting=dict()))
 
     # Add Behavior
-    # source_data.update(dict(Behavior=dict()))
-    # conversion_options.update(dict(Behavior=dict()))
+    source_data.update(dict(EyePosition=dict(folder_path=str(data_dir_path / "data_open_source" / "behavior"))))
+    conversion_options.update(dict(EyePosition=dict()))
+
+    source_data.update(dict(PupilSize=dict(folder_path=str(data_dir_path / "data_open_source" / "behavior"))))
+    conversion_options.update(dict(PupilSize=dict()))
 
     # Add Trials
     source_data.update(dict(Trials=dict(folder_path=str(data_dir_path / "data_open_source"))))
@@ -70,7 +74,7 @@ if __name__ == "__main__":
 
     # Parameters for conversion
     data_dir_path = Path("/shared/catalystneuro/JazLab/monkey0/2022-06-01/")
-    output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_perle_trials/").expanduser()
+    output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_perle_behavior/").expanduser()
     stub_test = True
 
     session_to_nwb(
