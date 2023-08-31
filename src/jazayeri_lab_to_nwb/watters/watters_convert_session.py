@@ -43,6 +43,10 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     source_data.update(dict(PupilSize=dict(folder_path=str(data_dir_path / "data_open_source" / "behavior"))))
     conversion_options.update(dict(PupilSize=dict()))
 
+    # Add Trials
+    source_data.update(dict(Trials=dict(folder_path=str(data_dir_path / "data_open_source"))))
+    conversion_options.update(dict(Trials=dict()))
+
     converter = WattersNWBConverter(source_data=source_data)
 
     # Add datetime to conversion
