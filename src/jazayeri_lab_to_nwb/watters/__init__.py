@@ -1,3 +1,4 @@
 from .wattersbehaviorinterface import WattersBehaviorInterface
 from .wattersrecordinginterface import WattersDatRecordingInterface
+from .watterstrialsinterface import WattersTrialsInterface
 from .wattersnwbconverter import WattersNWBConverter
