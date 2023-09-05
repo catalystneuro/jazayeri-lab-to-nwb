@@ -12,49 +12,46 @@ from jazayeri_lab_to_nwb.watters import WattersNWBConverter
 
 def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, Path], stub_test: bool = False):
 
-    probe_num = 0
-
     data_dir_path = Path(data_dir_path)
     output_dir_path = Path(output_dir_path)
     if stub_test:
         output_dir_path = output_dir_path / "nwb_stub"
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    session_id = f"20220601-vprobe{probe_num}"
+    session_id = f"20220601-vprobe"
     nwbfile_path = output_dir_path / f"{session_id}.nwb"
 
     source_data = dict()
     conversion_options = dict()
 
-    # Add Recording
-    recording_files = list(glob.glob(str(data_dir_path / "raw_data" / f"v_probe_{probe_num}" / "*.dat")))
-    assert len(recording_files) > 0, f"No .dat files found in {data_dir_path}"
-    assert len(recording_files) == 1, f"Multiple .dat files found in {data_dir_path}"
-    source_data.update(
-        dict(
-            Recording=dict(
-                file_path=str(recording_files[0]),
-                probe_metadata_file=str(data_dir_path / "data_open_source" / "probes.metadata.json"),
-                probe_name=f"probe{(probe_num+1):02d}",
-            )
+    for probe_num in [0, 1]:
+        # Add V-Probe Recording
+        recording_files = list(glob.glob(str(data_dir_path / "raw_data" / f"v_probe_{probe_num}" / "*.dat")))
+        assert len(recording_files) > 0, f"No .dat files found in {data_dir_path}"
+        assert len(recording_files) == 1, f"Multiple .dat files found in {data_dir_path}"
+        source_data.update(
+            {
+                f"RecordingVP{probe_num}": dict(
+                    file_path=str(recording_files[0]),
+                    probe_metadata_file=str(data_dir_path / "data_open_source" / "probes.metadata.json"),
+                    probe_key=f"probe{(probe_num+1):02d}",
+                    probe_name=f"vprobe{probe_num}",
+                    es_key=f"ElectricalSeriesVP{probe_num}",
+                )
+            }
         )
-    )
-    conversion_options.update(dict(Recording=dict(stub_test=stub_test)))
+        conversion_options.update({f"RecordingVP{probe_num}": dict(stub_test=stub_test)})
 
-    # Add LFP
-    # source_data.update(dict(LFP=dict()))
-    # conversion_options.update(dict(LFP=dict()))
-
-    # Add Sorting
-    source_data.update(
-        dict(
-            Sorting=dict(
-                folder_path=str(data_dir_path / "spike_sorting_raw" / f"v_probe_{probe_num}"),
-                keep_good_only=True,
-            )
+        # Add V-Probe Sorting
+        source_data.update(
+            {
+                f"SortingVP{probe_num}": dict(
+                    folder_path=str(data_dir_path / "spike_sorting_raw" / f"v_probe_{probe_num}"),
+                    keep_good_only=True,
+                )
+            }
         )
-    )
-    conversion_options.update(dict(Sorting=dict(stub_test=stub_test, write_as="processing")))
+        conversion_options.update({f"SortingVP{probe_num}": dict(stub_test=stub_test, write_as="processing")})
 
     # Add Behavior
     # source_data.update(dict(Behavior=dict()))
