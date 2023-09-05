@@ -20,7 +20,6 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
     session_id = "20220601-combined"
-    session_id = f"20220601-behavior"
     nwbfile_path = output_dir_path / f"{session_id}.nwb"
 
     source_data = dict()
