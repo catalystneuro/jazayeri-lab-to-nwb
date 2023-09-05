@@ -29,8 +29,8 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     recording_files = list(glob.glob(str(data_dir_path / "raw_data" / "spikeglx" / "*" / "*" / "*.ap.bin")))
     assert len(recording_files) > 0, f"No .ap.bin files found in {data_dir_path}"
     assert len(recording_files) == 1, f"Multiple .ap.bin files found in {data_dir_path}"
-    source_data.update(dict(Recording=dict(file_path=str(recording_files[0]))))
-    conversion_options.update(dict(Recording=dict(stub_test=stub_test)))
+    source_data.update(dict(RecordingNP=dict(file_path=str(recording_files[0]))))
+    conversion_options.update(dict(RecordingNP=dict(stub_test=stub_test)))
 
     # Add LFP
     lfp_files = list(glob.glob(str(data_dir_path / "raw_data" / "spikeglx" / "*" / "*" / "*.lf.bin")))
@@ -42,21 +42,19 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     # Add Sorting
     source_data.update(
         dict(
-            Sorting=dict(
+            SortingNP=dict(
                 folder_path=str(data_dir_path / "spike_sorting_raw" / "np"),
                 keep_good_only=True,
             )
         )
     )
-    conversion_options.update(dict(Sorting=dict(stub_test=stub_test, write_as="processing")))
+    conversion_options.update(dict(SortingNP=dict(stub_test=stub_test, write_as="processing")))
 
     # Add Behavior
     # source_data.update(dict(Behavior=dict()))
     # conversion_options.update(dict(Behavior=dict()))
 
     converter = WattersNWBConverter(source_data=source_data, sync_dir=str(data_dir_path / "sync_pulses"))
-    # print(converter.get_metadata_schema())
-    # import pdb; pdb.set_trace()
 
     # Add datetime to conversion
     metadata = converter.get_metadata()
@@ -75,19 +73,14 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     with open(probe_metadata_file, "r") as f:
         probe_metadata = json.load(f)
     neuropixel_metadata = [entry for entry in probe_metadata if entry["label"] == "probe00"][0]
-    metadata["Ecephys"]["ElectrodeGroup"] = [
-        {
-            "name": "s0",
-            "description": "Electrodes on Neuropixel probe",
-            "device": "Neuropixel-Imec",
-            "location": "unknown",
-            "position": (
-                neuropixel_metadata["coordinates"][0],
-                neuropixel_metadata["coordinates"][1],
-                neuropixel_metadata["depth_from_surface"],
-            ),
-        },
-    ]
+    for entry in metadata["Ecephys"]["ElectrodeGroup"]:
+        if entry["device"] == "Neuropixel-Imec":
+            # entry.update(dict(position=[(
+            #     neuropixel_metadata["coordinates"][0],
+            #     neuropixel_metadata["coordinates"][1],
+            #     neuropixel_metadata["depth_from_surface"],
+            # )]
+            pass  # TODO: uncomment when fixed in pynwb
 
     # Update default metadata with the editable in the corresponding yaml file
     editable_metadata_path = Path(__file__).parent / "watters_metadata.yaml"
