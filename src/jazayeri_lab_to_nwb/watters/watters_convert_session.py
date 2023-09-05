@@ -10,7 +10,7 @@ from neuroconv.utils import load_dict_from_file, dict_deep_update
 from jazayeri_lab_to_nwb.watters import WattersNWBConverter
 
 
-def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, Path], stub_test: bool = False):
+def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, Path], stub_test: bool = False, num_v_probes: int = 0):
 
     data_dir_path = Path(data_dir_path)
     output_dir_path = Path(output_dir_path)
@@ -18,13 +18,13 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
         output_dir_path = output_dir_path / "nwb_stub"
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    session_id = f"20220601-vprobe"
+    session_id = f"20220601-combined"
     nwbfile_path = output_dir_path / f"{session_id}.nwb"
 
     source_data = dict()
     conversion_options = dict()
 
-    for probe_num in [0, 1]:
+    for probe_num in range(num_v_probes):
         # Add V-Probe Recording
         recording_files = list(glob.glob(str(data_dir_path / "raw_data" / f"v_probe_{probe_num}" / "*.dat")))
         assert len(recording_files) > 0, f"No .dat files found in {data_dir_path}"
@@ -54,8 +54,15 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
         conversion_options.update({f"SortingVP{probe_num}": dict(stub_test=stub_test, write_as="processing")})
 
     # Add Behavior
-    # source_data.update(dict(Behavior=dict()))
-    # conversion_options.update(dict(Behavior=dict()))
+    source_data.update(dict(EyePosition=dict(folder_path=str(data_dir_path / "data_open_source" / "behavior"))))
+    conversion_options.update(dict(EyePosition=dict()))
+
+    source_data.update(dict(PupilSize=dict(folder_path=str(data_dir_path / "data_open_source" / "behavior"))))
+    conversion_options.update(dict(PupilSize=dict()))
+
+    # Add Trials
+    source_data.update(dict(Trials=dict(folder_path=str(data_dir_path / "data_open_source"))))
+    conversion_options.update(dict(Trials=dict()))
 
     converter = WattersNWBConverter(source_data=source_data, sync_dir=str(data_dir_path / "sync_pulses"))
 
@@ -84,11 +91,12 @@ if __name__ == "__main__":
 
     # Parameters for conversion
     data_dir_path = Path("/shared/catalystneuro/JazLab/monkey0/2022-06-01/")
-    output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_perle_vprobe0/").expanduser()
+    output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_perle_combined/").expanduser()
     stub_test = True
 
     session_to_nwb(
         data_dir_path=data_dir_path,
         output_dir_path=output_dir_path,
         stub_test=stub_test,
+        num_v_probes=2,
     )

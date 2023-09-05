@@ -17,8 +17,10 @@ from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterf
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
 
 from jazayeri_lab_to_nwb.watters import (
-    WattersBehaviorInterface,
     WattersDatRecordingInterface,
+    WattersEyePositionInterface,
+    WattersPupilSizeInterface,
+    WattersTrialsInterface,
 )
 
 
@@ -30,7 +32,9 @@ class WattersNWBConverter(NWBConverter):
         SortingVP0=KiloSortSortingInterface,
         RecordingVP1=WattersDatRecordingInterface,
         SortingVP1=KiloSortSortingInterface,
-        # Behavior=WattersBehaviorInterface,
+        EyePosition=WattersEyePositionInterface,
+        PupilSize=WattersPupilSizeInterface,
+        Trials=WattersTrialsInterface,
     )
 
     def __init__(
