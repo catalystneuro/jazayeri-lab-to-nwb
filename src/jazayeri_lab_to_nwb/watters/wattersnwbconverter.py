@@ -49,6 +49,15 @@ class WattersNWBConverter(NWBConverter):
         super().__init__(source_data=source_data, verbose=verbose)
         self.sync_dir = sync_dir
 
+        unit_name_start = 0
+        for name, data_interface in self.data_interface_objects.items():
+            if isinstance(data_interface, BaseSortingExtractorInterface):
+                unit_ids = np.array(data_interface.sorting_extractor.unit_ids)
+                data_interface.sorting_extractor.set_property(
+                    key="unit_name", values=(unit_ids + unit_name_start).astype(str)
+                )
+                unit_name_start += np.max(unit_ids)
+
     def temporally_align_data_interfaces(self):
         if self.sync_dir is None:
             return
