@@ -78,9 +78,10 @@ class WattersNWBConverter(NWBConverter):
                 aligned_timestamps = bias + transform["intercept"] + transform["coef"] * (start_time + orig_timestamps)
                 self.data_interface_objects[f"RecordingVP{i}"].set_aligned_timestamps(aligned_timestamps)
                 # openephys sorting alignment
-                self.data_interface_objects[f"SortingVP{i}"].register_recording(
-                    self.data_interface_objects[f"RecordingVP{i}"]
-                )
+                if f"SortingVP{i}" in self.data_interface_objects:
+                    self.data_interface_objects[f"SortingVP{i}"].register_recording(
+                        self.data_interface_objects[f"RecordingVP{i}"]
+                    )
 
         # neuropixel alignment
         orig_timestamps = self.data_interface_objects["RecordingNP"].get_timestamps()
@@ -93,7 +94,8 @@ class WattersNWBConverter(NWBConverter):
         aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
         self.data_interface_objects["LFP"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel sorting alignment
-        self.data_interface_objects["SortingNP"].register_recording(self.data_interface_objects["RecordingNP"])
+        if "SortingNP" in self.data_interface_objects:
+            self.data_interface_objects["SortingNP"].register_recording(self.data_interface_objects["RecordingNP"])
 
         # align recording start to 0
         aligned_start_times = []
