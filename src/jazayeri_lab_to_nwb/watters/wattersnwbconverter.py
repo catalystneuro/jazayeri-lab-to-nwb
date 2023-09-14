@@ -8,7 +8,6 @@ from neuroconv import NWBConverter
 from neuroconv.utils import FolderPathType
 from neuroconv.datainterfaces import (
     SpikeGLXRecordingInterface,
-    SpikeGLXLFPInterface,
     KiloSortSortingInterface,
 )
 from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
@@ -32,6 +31,9 @@ class WattersNWBConverter(NWBConverter):
         SortingVP0=KiloSortSortingInterface,
         RecordingVP1=WattersDatRecordingInterface,
         SortingVP1=KiloSortSortingInterface,
+        RecordingNP=SpikeGLXRecordingInterface,
+        LFP=SpikeGLXRecordingInterface,
+        SortingNP=KiloSortSortingInterface,
         EyePosition=WattersEyePositionInterface,
         PupilSize=WattersPupilSizeInterface,
         Trials=WattersTrialsInterface,
@@ -70,6 +72,19 @@ class WattersNWBConverter(NWBConverter):
                 self.data_interface_objects[f"SortingVP{i}"].register_recording(
                     self.data_interface_objects[f"RecordingVP{i}"]
                 )
+
+        # neuropixel alignment
+        orig_timestamps = self.data_interface_objects["RecordingNP"].get_timestamps()
+        with open(sync_dir / "spikeglx" / "transform", "r") as f:
+            transform = json.load(f)
+        aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
+        self.data_interface_objects["RecordingNP"].set_aligned_timestamps(aligned_timestamps)
+        # neuropixel LFP alignment
+        orig_timestamps = self.data_interface_objects["LFP"].get_timestamps()
+        aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
+        self.data_interface_objects["LFP"].set_aligned_timestamps(aligned_timestamps)
+        # neuropixel sorting alignment
+        self.data_interface_objects["SortingNP"].register_recording(self.data_interface_objects["RecordingNP"])
 
         # align recording start to 0
         aligned_start_times = []
