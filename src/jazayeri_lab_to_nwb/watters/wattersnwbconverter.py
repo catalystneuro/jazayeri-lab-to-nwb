@@ -56,7 +56,7 @@ class WattersNWBConverter(NWBConverter):
                 data_interface.sorting_extractor.set_property(
                     key="unit_name", values=(unit_ids + unit_name_start).astype(str)
                 )
-                unit_name_start += np.max(unit_ids)
+                unit_name_start += np.max(unit_ids) + 1
 
     def temporally_align_data_interfaces(self):
         if self.sync_dir is None:
