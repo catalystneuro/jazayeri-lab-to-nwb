@@ -107,11 +107,14 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     processed_converter = WattersNWBConverter(
         source_data=processed_source_data, sync_dir=str(data_dir_path / "sync_pulses")
     )
-    raw_converter = WattersNWBConverter(source_data=raw_source_data, sync_dir=str(data_dir_path / "sync_pulses"))
 
     # Add datetime to conversion
     metadata = processed_converter.get_metadata()  # use processed b/c it has everything
-    date = datetime.datetime(year=2022, month=6, day=1, tzinfo=ZoneInfo("US/Eastern"))
+    try:
+        date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d%").astimezone(ZoneInfo("US/Eastern"))
+        print(f"auto detecting date as {date}")
+    except:
+        date = datetime.datetime(year=2022, month=6, day=1, tzinfo=ZoneInfo("US/Eastern"))
     metadata["NWBFile"]["session_start_time"] = date
     metadata["NWBFile"]["session_id"] = session_id
 
@@ -144,6 +147,8 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     processed_converter.run_conversion(
         metadata=metadata, nwbfile_path=processed_nwbfile_path, conversion_options=processed_conversion_options
     )
+
+    raw_converter = WattersNWBConverter(source_data=raw_source_data, sync_dir=str(data_dir_path / "sync_pulses"))
     raw_converter.run_conversion(
         metadata=metadata, nwbfile_path=raw_nwbfile_path, conversion_options=raw_conversion_options
     )
@@ -153,6 +158,7 @@ if __name__ == "__main__":
 
     # Parameters for conversion
     data_dir_path = Path("/shared/catalystneuro/JazLab/monkey0/2022-06-01/")
+    # data_dir_path = Path("/shared/catalystneuro/JazLab/monkey1/2022-06-05/")
     output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_perle_combined/").expanduser()
     stub_test = True
 

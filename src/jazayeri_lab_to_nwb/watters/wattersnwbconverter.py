@@ -15,6 +15,9 @@ from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseS
 from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
 
+from spikeinterface.core.waveform_tools import has_exceeding_spikes
+from spikeinterface.curation import remove_excess_spikes
+
 from jazayeri_lab_to_nwb.watters import (
     WattersDatRecordingInterface,
     WattersEyePositionInterface,
@@ -79,6 +82,17 @@ class WattersNWBConverter(NWBConverter):
                 self.data_interface_objects[f"RecordingVP{i}"].set_aligned_timestamps(aligned_timestamps)
                 # openephys sorting alignment
                 if f"SortingVP{i}" in self.data_interface_objects:
+                    if has_exceeding_spikes(
+                        recording=self.data_interface_objects[f"RecordingVP{i}"].recording_extractor,
+                        sorting=self.data_interface_objects[f"SortingVP{i}"].sorting_extractor,
+                    ):
+                        print(
+                            f"Spikes exceeding recording found in SortingVP{i}! Removing with `spikeinterface.curation.remove_excess_spikes()`"
+                        )
+                        self.data_interface_objects[f"SortingVP{i}"].sorting_extractor = remove_excess_spikes(
+                            recording=self.data_interface_objects[f"RecordingVP{i}"].recording_extractor,
+                            sorting=self.data_interface_objects[f"SortingVP{i}"].sorting_extractor,
+                        )
                     self.data_interface_objects[f"SortingVP{i}"].register_recording(
                         self.data_interface_objects[f"RecordingVP{i}"]
                     )
@@ -95,7 +109,18 @@ class WattersNWBConverter(NWBConverter):
         self.data_interface_objects["LFP"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel sorting alignment
         if "SortingNP" in self.data_interface_objects:
-            self.data_interface_objects["SortingNP"].register_recording(self.data_interface_objects["RecordingNP"])
+            if has_exceeding_spikes(
+                recording=self.data_interface_objects[f"RecordingNP"].recording_extractor,
+                sorting=self.data_interface_objects[f"SortingNP"].sorting_extractor,
+            ):
+                print(
+                    "Spikes exceeding recording found in SortingNP! Removing with `spikeinterface.curation.remove_excess_spikes()`"
+                )
+                self.data_interface_objects[f"SortingNP"].sorting_extractor = remove_excess_spikes(
+                    recording=self.data_interface_objects[f"RecordingNP"].recording_extractor,
+                    sorting=self.data_interface_objects[f"SortingNP"].sorting_extractor,
+                )
+            self.data_interface_objects[f"SortingNP"].register_recording(self.data_interface_objects[f"RecordingNP"])
 
         # align recording start to 0
         aligned_start_times = []
