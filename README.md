@@ -3,23 +3,6 @@ NWB conversion scripts for Jazayeri lab data to the [Neurodata Without Borders](
 
 
 ## Installation
-## Basic installation
-
-You can install the latest release of the package with pip:
-
-```
-pip install jazayeri-lab-to-nwb
-```
-
-We recommend that you install the package inside a [virtual environment](https://docs.python.org/3/tutorial/venv.html). A simple way of doing this is to use a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) from the `conda` package manager ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)). Detailed instructions on how to use conda environments can be found in their [documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
-
-### Running a specific conversion
-Once you have installed the package with pip, you can run any of the conversion scripts in a notebook or a python file:
-
-https://github.com/catalystneuro/jazayeri-lab-to-nwb//tree/main/src/watters/watters_conversion_script.py
-
-
-
 
 ## Installation from Github
 Another option is to install the package directly from Github. This option has the advantage that the source code can be modifed if you need to amend some of the code we originally provided to adapt to future experimental differences. To install the conversion from GitHub you will need to use `git` ([installation instructions](https://github.com/git-guides/install-git)). We also recommend the installation of `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) as it contains all the required machinery in a single and simple instal
@@ -45,17 +28,6 @@ pip install -e .
 
 Note:
 both of the methods above install the repository in [editable mode](https://pip.pypa.io/en/stable/cli/pip_install/#editable-installs).
-
-### Running a specific conversion
-To run a specific conversion, you might need to install first some conversion specific dependencies that are located in each conversion directory:
-```
-pip install -r src/jazayeri_lab_to_nwb/watters/watters_requirements.txt
-```
-
-You can run a specific conversion with the following command:
-```
-python src/jazayeri_lab_to_nwb/watters/watters_conversion_script.py
-```
 
 ## Repository structure
 Each conversion is organized in a directory of its own in the `src` directory:
@@ -93,3 +65,53 @@ Each conversion is organized in a directory of its own in the `src` directory:
 * `watters_notes.md`: notes and comments concerning this specific conversion.
 
 The directory might contain other files that are necessary for the conversion but those are the central ones.
+
+
+## Running a specific conversion
+To run a specific conversion, you might need to install first some conversion specific dependencies that are located in each conversion directory:
+```
+pip install -r src/jazayeri_lab_to_nwb/watters/watters_requirements.txt
+```
+
+You can run a specific conversion with the following command:
+```
+python src/jazayeri_lab_to_nwb/watters/watters_conversion_script.py
+```
+
+### Watters working memory task data
+The conversion function for this experiment, `session_to_nwb`, is found in `src/watters/watters_conversion_script.py`. The function takes three arguments: 
+* `data_dir_path` points to the root directory for the data for a given session.
+* `output_dir_path` points to where the converted data should be saved.
+* `stub_test` indicates whether only a small portion of the data should be saved (mainly used by us for testing purposes).
+
+The function can be imported in a separate script with and run, or you can run the file directly and specify the arguments in the `if name == "__main__"` block at the bottom.
+
+The function expects the raw data in `data_dir_path` to follow this structure:
+
+    data_dir_path/
+    ├── data_open_source
+    │   ├── behavior
+    │   │   └── eye.h.times.npy, etc.
+    │   ├── task
+    │       └── trials.start_times.json, etc.
+    │   └── probes.metadata.json
+    ├── raw_data
+    │   ├── spikeglx
+    │       └── */*/*.ap.bin, */*/*.lf.bin, etc.
+    │   ├── v_probe_0
+    │       └── raw_data.dat
+    │   └── v_probe_{n}
+    │       └── raw_data.dat
+    ├── spike_sorting_raw
+    │   ├── np
+    │   ├── vp_0
+    │   └── vp_{n}
+    ├── sync_pulses
+        ├── mworks
+        ├── open_ephys
+        └── spikeglx
+    ...
+
+The data will be saved in two files, one called `{session_id}_raw.nwb`, which contains the raw electrophysiology data from the Neuropixels and V-Probes, and one called `{session_id}_processed.nwb` with behavioral data, trial info, and sorted unit spiking.
+
+If you run into memory issues when writing the `{session_id}_raw.nwb` files, you may want to set `buffer_gb` to a value smaller than 1 (its default) in the `conversion_options` dicts for the recording interfaces, i.e. [here](https://github.com/catalystneuro/jazayeri-lab-to-nwb/blob/vprobe_dev/src/jazayeri_lab_to_nwb/watters/watters_convert_session.py#L49) and [here](https://github.com/catalystneuro/jazayeri-lab-to-nwb/blob/vprobe_dev/src/jazayeri_lab_to_nwb/watters/watters_convert_session.py#L71).
