@@ -35,7 +35,7 @@ class WattersNWBConverter(NWBConverter):
         RecordingVP1=WattersDatRecordingInterface,
         SortingVP1=KiloSortSortingInterface,
         RecordingNP=SpikeGLXRecordingInterface,
-        LFP=SpikeGLXRecordingInterface,
+        LF=SpikeGLXRecordingInterface,
         SortingNP=KiloSortSortingInterface,
         EyePosition=WattersEyePositionInterface,
         PupilSize=WattersPupilSizeInterface,
@@ -104,9 +104,9 @@ class WattersNWBConverter(NWBConverter):
         aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
         self.data_interface_objects["RecordingNP"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel LFP alignment
-        orig_timestamps = self.data_interface_objects["LFP"].get_timestamps()
+        orig_timestamps = self.data_interface_objects["LF"].get_timestamps()
         aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
-        self.data_interface_objects["LFP"].set_aligned_timestamps(aligned_timestamps)
+        self.data_interface_objects["LF"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel sorting alignment
         if "SortingNP" in self.data_interface_objects:
             if has_exceeding_spikes(

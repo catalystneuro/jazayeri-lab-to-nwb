@@ -79,7 +79,7 @@ python src/jazayeri_lab_to_nwb/watters/watters_conversion_script.py
 ```
 
 ### Watters working memory task data
-The conversion function for this experiment, `session_to_nwb`, is found in `src/watters/watters_conversion_script.py`. The function takes three arguments: 
+The conversion function for this experiment, `session_to_nwb`, is found in `src/watters/watters_conversion_script.py`. The function takes three arguments:
 * `data_dir_path` points to the root directory for the data for a given session.
 * `output_dir_path` points to where the converted data should be saved.
 * `stub_test` indicates whether only a small portion of the data should be saved (mainly used by us for testing purposes).
@@ -112,6 +112,8 @@ The function expects the raw data in `data_dir_path` to follow this structure:
         └── spikeglx
     ...
 
-The data will be saved in two files, one called `{session_id}_raw.nwb`, which contains the raw electrophysiology data from the Neuropixels and V-Probes, and one called `{session_id}_processed.nwb` with behavioral data, trial info, and sorted unit spiking.
+The conversion will try to automatically fetch metadata from the provided data directory. However, some information, such as the subject's name and age, must be specified by the user in the file `src/jazayeri_lab_to_nwb/watters/watters_metadata.yaml`. If any of the automatically fetched metadata is incorrect, it can also be overriden from this file.
+
+The converted data will be saved in two files, one called `{session_id}_raw.nwb`, which contains the raw electrophysiology data from the Neuropixels and V-Probes, and one called `{session_id}_processed.nwb` with behavioral data, trial info, and sorted unit spiking.
 
 If you run into memory issues when writing the `{session_id}_raw.nwb` files, you may want to set `buffer_gb` to a value smaller than 1 (its default) in the `conversion_options` dicts for the recording interfaces, i.e. [here](https://github.com/catalystneuro/jazayeri-lab-to-nwb/blob/vprobe_dev/src/jazayeri_lab_to_nwb/watters/watters_convert_session.py#L49) and [here](https://github.com/catalystneuro/jazayeri-lab-to-nwb/blob/vprobe_dev/src/jazayeri_lab_to_nwb/watters/watters_convert_session.py#L71).

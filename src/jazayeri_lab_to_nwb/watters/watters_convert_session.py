@@ -75,10 +75,10 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     lfp_files = list(glob.glob(str(data_dir_path / "raw_data" / "spikeglx" / "*" / "*" / "*.lf.bin")))
     assert len(lfp_files) > 0, f"No .lf.bin files found in {data_dir_path}"
     assert len(lfp_files) == 1, f"Multiple .lf.bin files found in {data_dir_path}"
-    raw_source_data.update(dict(LFP=dict(file_path=str(lfp_files[0]))))
-    processed_source_data.update(dict(LFP=dict(file_path=str(lfp_files[0]))))
-    raw_conversion_options.update(dict(LFP=dict(write_as="lfp", stub_test=stub_test)))
-    processed_conversion_options.update(dict(LFP=dict(stub_test=stub_test, write_electrical_series=False)))
+    raw_source_data.update(dict(LF=dict(file_path=str(lfp_files[0]))))
+    processed_source_data.update(dict(LF=dict(file_path=str(lfp_files[0]))))
+    raw_conversion_options.update(dict(LF=dict(stub_test=stub_test)))
+    processed_conversion_options.update(dict(LF=dict(stub_test=stub_test, write_electrical_series=False)))
 
     # Add Sorting
     processed_source_data.update(
@@ -111,8 +111,7 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     # Add datetime to conversion
     metadata = processed_converter.get_metadata()  # use processed b/c it has everything
     try:
-        date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d%").astimezone(ZoneInfo("US/Eastern"))
-        print(f"auto detecting date as {date}")
+        date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d").replace(tzinfo=ZoneInfo("US/Eastern"))
     except:
         date = datetime.datetime(year=2022, month=6, day=1, tzinfo=ZoneInfo("US/Eastern"))
     metadata["NWBFile"]["session_start_time"] = date
