@@ -5,6 +5,7 @@ import datetime
 import glob
 import json
 from zoneinfo import ZoneInfo
+from uuid import uuid4
 
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
@@ -110,11 +111,12 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
 
     # Add datetime to conversion
     metadata = processed_converter.get_metadata()  # use processed b/c it has everything
-    try:
-        date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d").replace(tzinfo=ZoneInfo("US/Eastern"))
-    except:
-        date = datetime.datetime(year=2022, month=6, day=1, tzinfo=ZoneInfo("US/Eastern"))
-    metadata["NWBFile"]["session_start_time"] = date
+    if "session_start_time" in metadata["NWBFile"]:
+        try:  # TODO fix
+            date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d").replace(tzinfo=ZoneInfo("US/Eastern"))
+        except:
+            date = datetime.datetime(year=2022, month=6, day=1, tzinfo=ZoneInfo("US/Eastern"))
+        metadata["NWBFile"]["session_start_time"] = date
     metadata["NWBFile"]["session_id"] = session_id
 
     # Subject name
@@ -147,6 +149,7 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
         metadata=metadata, nwbfile_path=processed_nwbfile_path, conversion_options=processed_conversion_options
     )
 
+    metadata["NWBFile"]["identifier"] = str(uuid4())
     raw_converter = WattersNWBConverter(source_data=raw_source_data, sync_dir=str(data_dir_path / "sync_pulses"))
     raw_converter.run_conversion(
         metadata=metadata, nwbfile_path=raw_nwbfile_path, conversion_options=raw_conversion_options
