@@ -111,7 +111,7 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
 
     # Add datetime to conversion
     metadata = processed_converter.get_metadata()  # use processed b/c it has everything
-    if "session_start_time" in metadata["NWBFile"]:
+    if "session_start_time" not in metadata["NWBFile"]:
         try:  # TODO fix
             date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d").replace(tzinfo=ZoneInfo("US/Eastern"))
         except:
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     data_dir_path = Path("/shared/catalystneuro/JazLab/monkey0/2022-06-01/")
     # data_dir_path = Path("/shared/catalystneuro/JazLab/monkey1/2022-06-05/")
     output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_perle_combined/").expanduser()
-    stub_test = True
+    stub_test = False
 
     session_to_nwb(
         data_dir_path=data_dir_path,
