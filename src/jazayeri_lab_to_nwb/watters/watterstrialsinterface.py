@@ -61,6 +61,12 @@ class WattersTrialsInterface(TimeIntervalsInterface):
         for i in range(n_trials):
             # get trial start time
             start_time = data_dict["task/trials.start_times.json"][i]
+            if np.isnan(start_time):
+                print(f"Start time for trial {i} is NaN. Assigning to the last trial's stop time.")
+                if i == 0:
+                    start_time = 0.0
+                else:
+                    start_time = processed_data[-1]["stop_time"]
 
             # map response object index to id
             response_object = data_dict["behavior/trials.response.object.json"][i]
