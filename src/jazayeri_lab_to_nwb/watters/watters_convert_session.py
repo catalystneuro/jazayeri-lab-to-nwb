@@ -112,9 +112,10 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     # Add datetime to conversion
     metadata = processed_converter.get_metadata()  # use processed b/c it has everything
     if "session_start_time" not in metadata["NWBFile"]:
-        try:  # TODO fix
+        try:
             date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d").replace(tzinfo=ZoneInfo("US/Eastern"))
         except:
+            print("Session start time not auto-detected. Setting to 2022-06-01...")
             date = datetime.datetime(year=2022, month=6, day=1, tzinfo=ZoneInfo("US/Eastern"))
         metadata["NWBFile"]["session_start_time"] = date
     metadata["NWBFile"]["session_id"] = session_id
