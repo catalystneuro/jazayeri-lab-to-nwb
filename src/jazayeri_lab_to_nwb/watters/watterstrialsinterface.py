@@ -2,6 +2,7 @@
 import json
 import numpy as np
 import pandas as pd
+import warnings
 from pathlib import Path
 from pynwb import NWBFile
 from typing import Optional
@@ -62,8 +63,11 @@ class WattersTrialsInterface(TimeIntervalsInterface):
             # get trial start time
             start_time = data_dict["task/trials.start_times.json"][i]
             if np.isnan(start_time):
-                print(f"Start time for trial {i} is NaN. Dropping this trial.")
-                continue
+                if i == 0:
+                    warnings.warn(f"Start time for first trial is NaN. Dropping this trial.")
+                    continue
+                else:
+                    raise ValueError(f"Start time for trial {i} is NaN.")
 
             # map response object index to id
             response_object = data_dict["behavior/trials.response.object.json"][i]

@@ -111,13 +111,6 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
 
     # Add datetime to conversion
     metadata = processed_converter.get_metadata()  # use processed b/c it has everything
-    if "session_start_time" not in metadata["NWBFile"]:
-        try:
-            date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d").replace(tzinfo=ZoneInfo("US/Eastern"))
-        except:
-            print("Session start time not auto-detected. Setting to 2022-06-01...")
-            date = datetime.datetime(year=2022, month=6, day=1, tzinfo=ZoneInfo("US/Eastern"))
-        metadata["NWBFile"]["session_start_time"] = date
     metadata["NWBFile"]["session_id"] = session_id
 
     # Subject name
@@ -145,6 +138,16 @@ def session_to_nwb(data_dir_path: Union[str, Path], output_dir_path: Union[str, 
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
+    # check if session_start_time was found/set
+    if "session_start_time" not in metadata["NWBFile"]:
+        try:
+            date = datetime.datetime.strptime(data_dir_path.name, "%Y-%m-%d").replace(tzinfo=ZoneInfo("US/Eastern"))
+        except:
+            raise AssertionError(
+                "Session start time was not auto-detected. Please provide it in `watters_metadata.yaml`"
+            )
+        metadata["NWBFile"]["session_start_time"] = date
+
     # Run conversion
     processed_converter.run_conversion(
         metadata=metadata, nwbfile_path=processed_nwbfile_path, conversion_options=processed_conversion_options
@@ -163,7 +166,7 @@ if __name__ == "__main__":
     data_dir_path = Path("/shared/catalystneuro/JazLab/monkey0/2022-06-01/")
     # data_dir_path = Path("/shared/catalystneuro/JazLab/monkey1/2022-06-05/")
     output_dir_path = Path("~/conversion_nwb/jazayeri-lab-to-nwb/watters_perle_combined/").expanduser()
-    stub_test = False
+    stub_test = True
 
     session_to_nwb(
         data_dir_path=data_dir_path,
