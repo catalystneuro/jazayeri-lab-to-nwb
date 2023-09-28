@@ -64,7 +64,7 @@ class WattersTrialsInterface(TimeIntervalsInterface):
             start_time = data_dict["task/trials.start_times.json"][i]
             if np.isnan(start_time):
                 if i == 0:
-                    warnings.warn(f"Start time for first trial is NaN. Dropping this trial.")
+                    warnings.warn("Start time for first trial is NaN. Dropping this trial.", stacklevel=2)
                     continue
                 else:
                     raise ValueError(f"Start time for trial {i} is NaN.")
