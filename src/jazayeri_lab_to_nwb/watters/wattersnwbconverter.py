@@ -1,5 +1,6 @@
 """Primary NWBConverter class for this dataset."""
 import json
+import logging
 import numpy as np
 from typing import Optional
 from pathlib import Path
@@ -18,12 +19,9 @@ from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsIn
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
-from jazayeri_lab_to_nwb.watters import (
-    WattersDatRecordingInterface,
-    WattersEyePositionInterface,
-    WattersPupilSizeInterface,
-    WattersTrialsInterface,
-)
+from wattersbehaviorinterface import WattersEyePositionInterface, WattersPupilSizeInterface
+from watterstrialsinterface import WattersTrialsInterface
+from wattersrecordinginterface import WattersDatRecordingInterface
 
 
 class WattersNWBConverter(NWBConverter):
@@ -62,6 +60,8 @@ class WattersNWBConverter(NWBConverter):
                 unit_name_start += np.max(unit_ids) + 1
 
     def temporally_align_data_interfaces(self):
+        logging.info('Temporally aligning data interfaces')
+        
         if self.sync_dir is None:
             return
         sync_dir = Path(self.sync_dir)
