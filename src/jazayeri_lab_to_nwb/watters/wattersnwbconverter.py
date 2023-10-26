@@ -1,5 +1,6 @@
 """Primary NWBConverter class for this dataset."""
 import json
+import logging
 import numpy as np
 from typing import Optional
 from pathlib import Path
@@ -62,6 +63,8 @@ class WattersNWBConverter(NWBConverter):
                 unit_name_start += np.max(unit_ids) + 1
 
     def temporally_align_data_interfaces(self):
+        logging.info("Temporally aligning data interfaces")
+
         if self.sync_dir is None:
             return
         sync_dir = Path(self.sync_dir)
