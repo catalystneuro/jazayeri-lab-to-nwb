@@ -18,7 +18,7 @@ from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsIn
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
-from jazayeri_lab_to_nwb.watters import (
+from . import (
     WattersDatRecordingInterface,
     WattersEyePositionInterface,
     WattersPupilSizeInterface,

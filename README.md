@@ -41,8 +41,7 @@ Each conversion is organized in a directory of its own in the `src` directory:
     ├── setup.py
     └── src
         ├── jazayeri_lab_to_nwb
-        │   ├── conversion_directory_1
-        │   └── watters
+        │   ├── watters
         │       ├── wattersbehaviorinterface.py
         │       ├── watters_convert_session.py
         │       ├── watters_metadata.yml
@@ -51,7 +50,8 @@ Each conversion is organized in a directory of its own in the `src` directory:
         │       ├── watters_notes.md
 
         │       └── __init__.py
-        │   ├── conversion_directory_b
+
+        │   └── another_conversion
 
         └── __init__.py
 
@@ -75,14 +75,15 @@ pip install -r src/jazayeri_lab_to_nwb/watters/watters_requirements.txt
 
 You can run a specific conversion with the following command:
 ```
-python src/jazayeri_lab_to_nwb/watters/watters_conversion_script.py
+python src/jazayeri_lab_to_nwb/watters/watters_convert_session.py
 ```
 
 ### Watters working memory task data
-The conversion function for this experiment, `session_to_nwb`, is found in `src/watters/watters_conversion_script.py`. The function takes three arguments:
+The conversion function for this experiment, `session_to_nwb`, is found in `src/watters/watters_convert_session.py`. The function takes three arguments:
 * `data_dir_path` points to the root directory for the data for a given session.
 * `output_dir_path` points to where the converted data should be saved.
 * `stub_test` indicates whether only a small portion of the data should be saved (mainly used by us for testing purposes).
+* `overwrite` indicates whether existing NWB files at the auto-generated output file paths should be overwritten.
 
 The function can be imported in a separate script with and run, or you can run the file directly and specify the arguments in the `if name == "__main__"` block at the bottom.
 
