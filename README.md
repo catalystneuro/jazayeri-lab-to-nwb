@@ -3,9 +3,7 @@ NWB conversion scripts for Jazayeri lab data to the [Neurodata Without Borders](
 
 
 ## Installation
-
-## Installation from Github
-Another option is to install the package directly from Github. This option has the advantage that the source code can be modifed if you need to amend some of the code we originally provided to adapt to future experimental differences. To install the conversion from GitHub you will need to use `git` ([installation instructions](https://github.com/git-guides/install-git)). We also recommend the installation of `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) as it contains all the required machinery in a single and simple instal
+The package can be installed from this GitHub repo, which has the advantage that the source code can be modifed if you need to amend some of the code we originally provided to adapt to future experimental differences. To install the conversion from GitHub you will need to use `git` ([installation instructions](https://github.com/git-guides/install-git)). The package also requires Python 3.9 or 3.10. We also recommend the installation of `conda` ([installation instructions](https://docs.conda.io/en/latest/miniconda.html)) as it contains all the required machinery in a single and simple instal
 
 From a terminal (note that conda should install one in your system) you can do the following:
 
@@ -18,7 +16,7 @@ conda activate jazayeri-lab-to-nwb-env
 
 This creates a [conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/environments.html) which isolates the conversion code from your system libraries.  We recommend that you run all your conversion related tasks and analysis from the created environment in order to minimize issues related to package dependencies.
 
-Alternatively, if you want to avoid conda altogether (for example if you use another virtual environment tool) you can install the repository with the following commands using only pip:
+Alternatively, if you have Python 3.9 or 3.10 on your machine and you want to avoid conda altogether (for example if you use another virtual environment tool) you can install the repository with the following commands using only pip:
 
 ```
 git clone https://github.com/catalystneuro/jazayeri-lab-to-nwb
@@ -41,8 +39,7 @@ Each conversion is organized in a directory of its own in the `src` directory:
     ├── setup.py
     └── src
         ├── jazayeri_lab_to_nwb
-        │   ├── conversion_directory_1
-        │   └── watters
+        │   ├── watters
         │       ├── wattersbehaviorinterface.py
         │       ├── watters_convert_session.py
         │       ├── watters_metadata.yml
@@ -51,7 +48,8 @@ Each conversion is organized in a directory of its own in the `src` directory:
         │       ├── watters_notes.md
 
         │       └── __init__.py
-        │   ├── conversion_directory_b
+
+        │   └── another_conversion
 
         └── __init__.py
 
@@ -75,14 +73,15 @@ pip install -r src/jazayeri_lab_to_nwb/watters/watters_requirements.txt
 
 You can run a specific conversion with the following command:
 ```
-python src/jazayeri_lab_to_nwb/watters/watters_conversion_script.py
+python src/jazayeri_lab_to_nwb/watters/watters_convert_session.py
 ```
 
 ### Watters working memory task data
-The conversion function for this experiment, `session_to_nwb`, is found in `src/watters/watters_conversion_script.py`. The function takes three arguments:
+The conversion function for this experiment, `session_to_nwb`, is found in `src/watters/watters_convert_session.py`. The function takes three arguments:
 * `data_dir_path` points to the root directory for the data for a given session.
 * `output_dir_path` points to where the converted data should be saved.
 * `stub_test` indicates whether only a small portion of the data should be saved (mainly used by us for testing purposes).
+* `overwrite` indicates whether existing NWB files at the auto-generated output file paths should be overwritten.
 
 The function can be imported in a separate script with and run, or you can run the file directly and specify the arguments in the `if name == "__main__"` block at the bottom.
 
