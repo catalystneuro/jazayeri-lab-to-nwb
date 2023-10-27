@@ -148,9 +148,9 @@ def session_to_nwb(
 
     # Subject name
     if "monkey0" in str(data_dir):
-        metadata["Subject"]["subject_id"] = "P"
+        metadata["Subject"]["subject_id"] = "Perle"
     elif "monkey1" in str(data_dir):
-        metadata["Subject"]["subject_id"] = "E"
+        metadata["Subject"]["subject_id"] = "Elgar"
 
     # EcePhys
     probe_metadata_file = data_dir / "data_open_source" / "probes.metadata.json"
