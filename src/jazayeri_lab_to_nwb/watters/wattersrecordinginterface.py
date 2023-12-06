@@ -27,23 +27,32 @@ def add_electrode_locations(
     if probe_metadata is None:
         return []
 
-    probe_coord_system = probe_metadata["coordinate_system"]
-    coord_names = probe_coord_system.split("[")[1].split("]")[0].split(",")
+    # Add electrodes relative positions, important for sorting algorithms
+    if "electrodes_locations" in probe_metadata:
+        locations_array = probe_metadata["electrodes_locations"]
+    else:
+        locations_array = [(0, i * 50) for i in range(64)]
+
+    # probe_coord_system = probe_metadata["coordinate_system"]
+    # coord_names = probe_coord_system.split("[")[1].split("]")[0].split(",")
     electrode_metadata = [
         {
-            "name": "x",
-            "description": f"{coord_names[0].strip()} coordinate. {probe_coord_system}",
+            "name": "rel_x",
+            "description": "relative x position of electrode",
+            # "description": f"{coord_names[0].strip()} coordinate. {probe_coord_system}",
         },
         {
-            "name": "y",
-            "description": f"{coord_names[1].strip()} coordinate. {probe_coord_system}",
+            "name": "rel_y",
+            "description": "relative y position of electrode",
+            # "description": f"{coord_names[1].strip()} coordinate. {probe_coord_system}",
         },
     ]
-    if len(coord_names) == 3:
+    if len(locations_array[0]) == 3:
         electrode_metadata.append(
             {
-                "name": "z",
-                "description": f"{coord_names[2].strip()} coordinate. {probe_coord_system}",
+                "name": "rel_z",
+                "description": "relative y position of electrode",
+                # "description": f"{coord_names[2].strip()} coordinate. {probe_coord_system}",
             },
         )
 
@@ -53,22 +62,21 @@ def add_electrode_locations(
         ids=channel_ids,
         values=[probe_name] * len(channel_ids),
     )
-    coordinates = probe_metadata["coordinates"]
     recording_extractor.set_property(
-        key="x",
-        values=[coordinates["first_channel"][0], coordinates["last_channel"][0]],
-        ids=channel_ids[[0, -1]],
+        key="rel_x",
+        values=[l[0] for l in locations_array],
+        ids=channel_ids,
     )
     recording_extractor.set_property(
-        key="y",
-        values=[coordinates["first_channel"][1], coordinates["last_channel"][1]],
-        ids=channel_ids[[0, -1]],
+        key="rel_y",
+        values=[l[1] for l in locations_array],
+        ids=channel_ids,
     )
-    if len(coord_names) == 3:
+    if len(locations_array[0]) == 3:
         recording_extractor.set_property(
-            key="z",
-            values=[coordinates["first_channel"][2], coordinates["last_channel"][2]],
-            ids=channel_ids[[0, -1]],
+            key="rel_z",
+            values=[l[2] for l in locations_array],
+            ids=channel_ids,
         )
 
     return electrode_metadata
