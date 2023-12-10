@@ -15,7 +15,7 @@ from spikeinterface import BaseRecording
 
 class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
 
-    ExtractorName = "BinaryRecording"
+    ExtractorName = "BinaryRecordingExtractor"
 
     def __init__(
         self,
@@ -27,8 +27,8 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
         t_start: float = 0.0,
         sampling_frequency: float = 30000.0,
         channel_ids: Optional[list] = None,
-        gain_to_uv: list = [1.0],
-        offset_to_uv: list = [0.0],
+        gain_to_uv: list = 1.0,
+        offset_to_uv: list = 0.0,
         probe_metadata_file: Optional[FilePathType] = None,
         probe_name: str = "vprobe",
         probe_key: Optional[str] = None,
@@ -65,11 +65,12 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
             probe.set_contacts(locations_array)
         else:
             # Generate V-probe geometry: 64 channels arranged vertically with 50 um spacing
-            probe = pi.generate_linear_probe(num_elec=64, ypitch=50)
+            probe = pi.generate_linear_probe(num_elec=channel_count, ypitch=50)
+        probe.set_device_channel_indices(np.arange(channel_count))
         probe.name = probe_name
 
         # set probe to interface recording
-        self.set_probe(probe)
+        self.set_probe(probe, group_mode="by_probe")
 
         # set group_name property to match electrode group name in metadata
         self.recording_extractor.set_property(
