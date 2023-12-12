@@ -1,5 +1,5 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
-
+import os
 import datetime
 import glob
 import json
@@ -9,6 +9,7 @@ from typing import Union
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
+from neuroconv.tools.data_transfers import automatic_dandi_upload
 from neuroconv.utils import load_dict_from_file, dict_deep_update
 
 from jazayeri_lab_to_nwb.watters import WattersNWBConverter
@@ -34,8 +35,39 @@ def session_to_nwb(
     data_dir: Union[str, Path],
     output_dir_path: Union[str, Path],
     stub_test: bool = False,
-    overwrite: bool = False,
+    overwrite: bool = True,
+    dandiset_id: Union[str, None] = None,
 ):
+    """
+    Convert a single session to an NWB file.
+
+    Parameters
+    ----------
+    data_dir : string or Path
+        Source data directory.
+    output_dir_path : string or Path
+        Output data directory.
+    stub_test : boolean
+        Whether or not to generate a preview file by limiting data write to a few MB.
+        Default is False.
+    overwrite : boolean
+        If the file exists already, True will delete and replace with a new file, False will append the contents.
+        Default is True.
+    dandiset_id : string, optional
+        If you want to upload the file to the DANDI archive, specify the six-digit ID here.
+        Requires the DANDI_API_KEY environment variable to be set.
+        To set this in your bash terminal in Linux or macOS, run
+            export DANDI_API_KEY=...
+        or in Windows
+            set DANDI_API_KEY=...
+        Default is None.
+    """
+    if dandiset_id is not None:
+        import dandi  # check importability
+        assert os.getenv("DANDI_API_KEY"), (
+            "Unable to find environment variable 'DANDI_API_KEY'. "
+            "Please retrieve your token from DANDI and set this environment variable."
+        )
 
     logging.info("")
     logging.info(f"data_dir = {data_dir}")
@@ -201,6 +233,7 @@ def session_to_nwb(
         conversion_options=raw_conversion_options,
         overwrite=overwrite,
     )
+    automatic_dandi_upload(dandiset_id=dandiset_id)
 
 
 if __name__ == "__main__":
@@ -216,4 +249,5 @@ if __name__ == "__main__":
         output_dir_path=output_dir_path,
         stub_test=stub_test,
         overwrite=overwrite,
+        # dandiset_id = "000620", 
     )
