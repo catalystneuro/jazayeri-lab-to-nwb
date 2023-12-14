@@ -11,7 +11,7 @@ from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsIn
 from neuroconv.utils import DeepDict, FolderPathType, FilePathType
 
 
-class WattersTrialsInterface(TimeIntervalsInterface):
+class TrialsInterface(TimeIntervalsInterface):
     def __init__(self, folder_path: FolderPathType, verbose: bool = True):
         super().__init__(file_path=folder_path, verbose=verbose)
 

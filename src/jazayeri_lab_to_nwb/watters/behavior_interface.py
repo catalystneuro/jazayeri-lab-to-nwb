@@ -26,8 +26,8 @@ class NumpyTemporalAlignmentMixin:
         self.timestamps = aligned_timestamps
 
 
-class WattersEyePositionInterface(NumpyTemporalAlignmentMixin, BaseTemporalAlignmentInterface):
-    """Eye position interface for Watters conversion"""
+class EyePositionInterface(NumpyTemporalAlignmentMixin, BaseTemporalAlignmentInterface):
+    """Eye position interface."""
 
     def __init__(self, folder_path: FolderPathType):
         # initialize interface
@@ -83,8 +83,8 @@ class WattersEyePositionInterface(NumpyTemporalAlignmentMixin, BaseTemporalAlign
         return nwbfile
 
 
-class WattersPupilSizeInterface(NumpyTemporalAlignmentMixin, BaseTemporalAlignmentInterface):
-    """Pupil size interface for Watters conversion"""
+class PupilSizeInterface(NumpyTemporalAlignmentMixin, BaseTemporalAlignmentInterface):
+    """Pupil size interface."""
 
     def __init__(self, folder_path: FolderPathType):
         # initialize interface with timestamps

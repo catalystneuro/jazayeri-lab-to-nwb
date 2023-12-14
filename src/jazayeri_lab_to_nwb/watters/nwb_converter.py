@@ -1,4 +1,5 @@
 """Primary NWBConverter class for this dataset."""
+
 import json
 import logging
 import numpy as np
@@ -19,37 +20,32 @@ from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsIn
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
-from . import (
-    WattersDatRecordingInterface,
-    WattersEyePositionInterface,
-    WattersPupilSizeInterface,
-    WattersTrialsInterface,
-)
+from behavior_interface import EyePositionInterface, PupilSizeInterface
+from trials_interface import TrialsInterface
+from recording_interface import DatRecordingInterface
 
 
-class WattersNWBConverter(NWBConverter):
-    """Primary conversion class for my extracellular electrophysiology dataset."""
+class NWBConverter(NWBConverter):
+    """Primary conversion class for extracellular electrophysiology dataset."""
 
     data_interface_classes = dict(
-        RecordingVP0=WattersDatRecordingInterface,
+        RecordingVP0=DatRecordingInterface,
         SortingVP0=KiloSortSortingInterface,
-        RecordingVP1=WattersDatRecordingInterface,
+        RecordingVP1=DatRecordingInterface,
         SortingVP1=KiloSortSortingInterface,
         RecordingNP=SpikeGLXRecordingInterface,
         LF=SpikeGLXRecordingInterface,
         SortingNP=KiloSortSortingInterface,
-        EyePosition=WattersEyePositionInterface,
-        PupilSize=WattersPupilSizeInterface,
-        Trials=WattersTrialsInterface,
+        EyePosition=EyePositionInterface,
+        PupilSize=PupilSizeInterface,
+        Trials=TrialsInterface,
     )
 
-    def __init__(
-        self,
-        source_data: dict[str, dict],
-        sync_dir: Optional[FolderPathType] = None,
-        verbose: bool = True,
-    ):
-        """Validate source_data against source_schema and initialize all data interfaces."""
+    def __init__(self,
+                 source_data: dict[str, dict],
+                 sync_dir: Optional[FolderPathType] = None,
+                 verbose: bool = True):
+        """Validate source_data and initialize all data interfaces."""
         super().__init__(source_data=source_data, verbose=verbose)
         self.sync_dir = sync_dir
 
@@ -58,20 +54,17 @@ class WattersNWBConverter(NWBConverter):
             if isinstance(data_interface, BaseSortingExtractorInterface):
                 unit_ids = np.array(data_interface.sorting_extractor.unit_ids)
                 data_interface.sorting_extractor.set_property(
-                    key="unit_name", values=(unit_ids + unit_name_start).astype(str)
+                    key='unit_name',
+                    values=(unit_ids + unit_name_start).astype(str),
                 )
                 unit_name_start += np.max(unit_ids) + 1
 
     def temporally_align_data_interfaces(self):
-        logging.info("Temporally aligning data interfaces")
-
+        logging.info('Temporally aligning data interfaces')
+        
         if self.sync_dir is None:
             return
         sync_dir = Path(self.sync_dir)
-
-        # constant bias
-        with open(sync_dir / "mworks" / "open_source_minus_processed", "r") as f:
-            bias = float(f.read().strip())
 
         # openephys alignment
         with open(sync_dir / "open_ephys" / "recording_start_time") as f:
@@ -81,7 +74,7 @@ class WattersNWBConverter(NWBConverter):
         for i in [0, 1]:
             if f"RecordingVP{i}" in self.data_interface_objects:
                 orig_timestamps = self.data_interface_objects[f"RecordingVP{i}"].get_timestamps()
-                aligned_timestamps = bias + transform["intercept"] + transform["coef"] * (start_time + orig_timestamps)
+                aligned_timestamps = transform["intercept"] + transform["coef"] * (start_time + orig_timestamps)
                 self.data_interface_objects[f"RecordingVP{i}"].set_aligned_timestamps(aligned_timestamps)
                 # openephys sorting alignment
                 if f"SortingVP{i}" in self.data_interface_objects:
@@ -104,11 +97,11 @@ class WattersNWBConverter(NWBConverter):
         orig_timestamps = self.data_interface_objects["RecordingNP"].get_timestamps()
         with open(sync_dir / "spikeglx" / "transform", "r") as f:
             transform = json.load(f)
-        aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
+        aligned_timestamps = transform["intercept"] + transform["coef"] * orig_timestamps
         self.data_interface_objects["RecordingNP"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel LFP alignment
         orig_timestamps = self.data_interface_objects["LF"].get_timestamps()
-        aligned_timestamps = bias + transform["intercept"] + transform["coef"] * orig_timestamps
+        aligned_timestamps = transform["intercept"] + transform["coef"] * orig_timestamps
         self.data_interface_objects["LF"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel sorting alignment
         if "SortingNP" in self.data_interface_objects:

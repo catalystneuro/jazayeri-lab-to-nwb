@@ -1,4 +1,5 @@
-"""Primary class for Watters Plexon probe data."""
+"""Primary class for Plexon probe data."""
+
 import os
 import json
 import numpy as np
@@ -74,7 +75,7 @@ def add_electrode_locations(
     return electrode_metadata
 
 
-class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
+class DatRecordingInterface(BaseRecordingExtractorInterface):
 
     ExtractorName = "NumpyRecording"
 
