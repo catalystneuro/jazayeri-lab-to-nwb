@@ -23,7 +23,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 # Data repository. Either 'globus' or 'openmind'
-_REPO = 'openmind'
+_REPO = 'globus'
 # Whether to run all the physiology data or only a stub
 _STUB_TEST = True
 # Whether to overwrite output nwb files
