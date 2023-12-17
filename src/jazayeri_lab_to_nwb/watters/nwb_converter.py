@@ -20,8 +20,9 @@ from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsIn
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
-from behavior_interface import EyePositionInterface, PupilSizeInterface
-from trials_interface import TrialsInterface
+import timeseries_interfaces
+import trials_interface
+import display_interface
 from recording_interface import DatRecordingInterface
 
 
@@ -36,9 +37,12 @@ class NWBConverter(NWBConverter):
         RecordingNP=SpikeGLXRecordingInterface,
         LF=SpikeGLXRecordingInterface,
         SortingNP=KiloSortSortingInterface,
-        EyePosition=EyePositionInterface,
-        PupilSize=PupilSizeInterface,
-        Trials=TrialsInterface,
+        EyePosition=timeseries_interfaces.EyePositionInterface,
+        PupilSize=timeseries_interfaces.PupilSizeInterface,
+        RewardLine=timeseries_interfaces.RewardLineInterface,
+        Audio=timeseries_interfaces.AudioInterface,
+        Trials=trials_interface.TrialsInterface,
+        Display=display_interface.DisplayInterface,
     )
 
     def __init__(self,
@@ -68,13 +72,13 @@ class NWBConverter(NWBConverter):
 
         # openephys alignment
         with open(sync_dir / "open_ephys" / "recording_start_time") as f:
-            start_time = float(f.read().strip())
+            open_ephys_start_time = float(f.read().strip())
         with open(sync_dir / "open_ephys" / "transform", "r") as f:
-            transform = json.load(f)
+            open_ephys_transform = json.load(f)
         for i in [0, 1]:
             if f"RecordingVP{i}" in self.data_interface_objects:
-                orig_timestamps = self.data_interface_objects[f"RecordingVP{i}"].get_timestamps()
-                aligned_timestamps = transform["intercept"] + transform["coef"] * (start_time + orig_timestamps)
+                orig_timestamps = self.data_interface_objects[f"RecordingVP{i}"].get_original_timestamps()
+                aligned_timestamps = open_ephys_transform["intercept"] + open_ephys_transform["coef"] * (open_ephys_start_time + orig_timestamps)
                 self.data_interface_objects[f"RecordingVP{i}"].set_aligned_timestamps(aligned_timestamps)
                 # openephys sorting alignment
                 if f"SortingVP{i}" in self.data_interface_objects:
@@ -94,14 +98,14 @@ class NWBConverter(NWBConverter):
                     )
 
         # neuropixel alignment
-        orig_timestamps = self.data_interface_objects["RecordingNP"].get_timestamps()
+        orig_timestamps = self.data_interface_objects["RecordingNP"].get_original_timestamps()
         with open(sync_dir / "spikeglx" / "transform", "r") as f:
-            transform = json.load(f)
-        aligned_timestamps = transform["intercept"] + transform["coef"] * orig_timestamps
+            spikeglx_transform = json.load(f)
+        aligned_timestamps = spikeglx_transform["intercept"] + spikeglx_transform["coef"] * orig_timestamps
         self.data_interface_objects["RecordingNP"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel LFP alignment
-        orig_timestamps = self.data_interface_objects["LF"].get_timestamps()
-        aligned_timestamps = transform["intercept"] + transform["coef"] * orig_timestamps
+        orig_timestamps = self.data_interface_objects["LF"].get_original_timestamps()
+        aligned_timestamps = spikeglx_transform["intercept"] + spikeglx_transform["coef"] * orig_timestamps
         self.data_interface_objects["LF"].set_aligned_timestamps(aligned_timestamps)
         # neuropixel sorting alignment
         if "SortingNP" in self.data_interface_objects:
@@ -117,21 +121,16 @@ class NWBConverter(NWBConverter):
                     sorting=self.data_interface_objects[f"SortingNP"].sorting_extractor,
                 )
             self.data_interface_objects[f"SortingNP"].register_recording(self.data_interface_objects[f"RecordingNP"])
-
+            
         # align recording start to 0
         aligned_start_times = []
         for name, data_interface in self.data_interface_objects.items():
-            if isinstance(data_interface, BaseTemporalAlignmentInterface):
-                start_time = data_interface.get_timestamps()[0]
-                aligned_start_times.append(start_time)
-            elif isinstance(data_interface, TimeIntervalsInterface):
-                start_time = data_interface.get_timestamps(column="start_time")[0]
-                aligned_start_times.append(start_time)
+            start_time = data_interface.get_timestamps()[0]
+            aligned_start_times.append(start_time)
         zero_time = -1.0 * min(aligned_start_times)
-        for name, data_interface in self.data_interface_objects.items():
-            if isinstance(data_interface, BaseSortingExtractorInterface):
-                # don't need to align b/c recording will be aligned separately
-                continue
-            elif hasattr(data_interface, "set_aligned_starting_time"):
-                start_time = data_interface.set_aligned_starting_time(aligned_starting_time=zero_time)
-                aligned_start_times.append(start_time)
+        # for name, data_interface in self.data_interface_objects.items():
+        #     if isinstance(data_interface, BaseSortingExtractorInterface):
+        #         # Do not need to align because recording will be aligned
+        #         continue
+        #     start_time = data_interface.set_aligned_starting_time(
+        #         aligned_starting_time=zero_time)

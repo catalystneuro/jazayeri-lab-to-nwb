@@ -22,15 +22,26 @@ from typing import Union
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
+# Data repository. Either 'globus' or 'openmind'
+_REPO = 'openmind'
 # Whether to run all the physiology data or only a stub
 _STUB_TEST = True
 # Whether to overwrite output nwb files
 _OVERWRITE = True
 # ID of the dandiset to upload to, or None to not upload
-_DANDISET_ID = None  # "000620"
+_DANDISET_ID = None  # '000620'
 
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
+
+_SUBJECT_TO_SEX = {
+    'Perle': 'F',
+    'Elgar': 'M',
+}
+_SUBJECT_TO_AGE = {
+    'Perle': 'P10Y',  # Born 6/11/2012
+    'Elgar': 'P10Y',  # Born 5/2/2012
+}
 
 
 def _get_single_file(directory, suffix=''):
@@ -174,7 +185,7 @@ def session_to_nwb(subject: str,
     
     # Get paths
     session_paths = get_session_paths.get_session_paths(
-        subject, session, stub_test=stub_test)
+        subject, session, stub_test=stub_test, repo=_REPO)
     logging.info(f'session_paths: {session_paths}')
 
     # Get paths for nwb files to write
@@ -193,7 +204,7 @@ def session_to_nwb(subject: str,
     processed_conversion_options = {}
 
     # Add V-Probe data
-    for probe_num in range(1):
+    for probe_num in range(2):
         _add_v_probe_data(
             raw_source_data=raw_source_data,
             raw_conversion_options=raw_conversion_options,
@@ -216,17 +227,27 @@ def session_to_nwb(subject: str,
 
     # Add behavior data
     logging.info('Adding behavior data')
-    behavior_path = str(session_paths.data_open_source / 'behavior')
+    behavior_path = str(session_paths.task_behavior_data)
     processed_source_data['EyePosition'] = dict(folder_path=behavior_path)
     processed_conversion_options['EyePosition'] = dict()
     processed_source_data['PupilSize'] = dict(folder_path=behavior_path)
     processed_conversion_options['PupilSize'] = dict()
+    processed_source_data['RewardLine'] = dict(folder_path=behavior_path)
+    processed_conversion_options['RewardLine'] = dict()
+    processed_source_data['Audio'] = dict(folder_path=behavior_path)
+    processed_conversion_options['Audio'] = dict()
     
-    # Add task data
-    logging.info('Adding task data')
+    # Add trials data
+    logging.info('Adding trials data')
     processed_source_data['Trials'] = dict(
-        folder_path=str(session_paths.data_open_source))
+        folder_path=str(session_paths.task_behavior_data))
     processed_conversion_options['Trials'] = dict()
+    
+    # Add display data
+    logging.info('Adding display data')
+    processed_source_data['Display'] = dict(
+        folder_path=str(session_paths.task_behavior_data))
+    processed_conversion_options['Display'] = dict()
 
     # Create processed data converter
     processed_converter = nwb_converter.NWBConverter(
@@ -238,6 +259,8 @@ def session_to_nwb(subject: str,
     metadata = processed_converter.get_metadata()
     metadata['NWBFile']['session_id'] = session_id
     metadata['Subject']['subject_id'] = subject
+    metadata['Subject']['sex'] = _SUBJECT_TO_SEX[subject]
+    metadata['Subject']['age'] = _SUBJECT_TO_AGE[subject]
 
     # EcePhys
     probe_metadata_file = (
@@ -300,7 +323,10 @@ def session_to_nwb(subject: str,
     # Upload to DANDI
     if dandiset_id is not None:
         logging.info(f'Uploading to dandiset id {dandiset_id}')
-        automatic_dandi_upload(dandiset_id=dandiset_id)
+        automatic_dandi_upload(
+            dandiset_id=dandiset_id,
+            nwb_folder_path=session_paths.output,
+        )
     
     
 if __name__ == '__main__':

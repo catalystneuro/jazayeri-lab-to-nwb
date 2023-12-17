@@ -2,15 +2,14 @@ NWBFile:
   # related_publications: # no pubs yet
   #   - https://doi.org/12345
   session_description:
-    Data from macaque performing working memory task. Subject is presented with multiple objects at different locations
-    on a screen. After a delay, the subject is then cued with one of the objects, now displayed at the center of the
-    screen. Subject should respond by saccading to the location of the cued object at its initial presentation.
+    Data from macaque performing multi-object working memory task. Subject is 
+    presented with multiple objects at different locations on a screen. After a 
+    delay, the subject is then cued with one of the objects, now displayed at 
+    the center of the screen. Subject should respond by saccading to the 
+    location of the cued object at its initial presentation.
   institution: MIT
   lab: Jazayeri
   experimenter:
     - Watters, Nicholas
 Subject:
   species: Macaca mulatta
-  # subject_id: Elgar # currently auto-detected from session path, but can be overridden here
-  age: P6Y  # in ISO 8601, such as "P1W2D"
-  sex: U  # One of M, F, U, or O
