@@ -1,14 +1,14 @@
 """Primary class for converting experiment-specific behavior."""
 import json
-import numpy as np
-import pandas as pd
 import warnings
 from pathlib import Path
-from pynwb import NWBFile
 from typing import Optional
 
+import numpy as np
+import pandas as pd
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
-from neuroconv.utils import DeepDict, FolderPathType, FilePathType
+from neuroconv.utils import DeepDict, FilePathType, FolderPathType
+from pynwb import NWBFile
 
 
 class WattersTrialsInterface(TimeIntervalsInterface):

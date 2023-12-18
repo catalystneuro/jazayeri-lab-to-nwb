@@ -1,15 +1,16 @@
 """Primary class for Watters Plexon probe data."""
-import os
 import json
-import numpy as np
-from pynwb import NWBFile
+import os
 from pathlib import Path
 from typing import Optional, Union
 
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-from neuroconv.utils import FilePathType
-
+import numpy as np
 import probeinterface as pi
+from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+    BaseRecordingExtractorInterface,
+)
+from neuroconv.utils import FilePathType
+from pynwb import NWBFile
 from spikeinterface import BaseRecording
 
 
@@ -77,7 +78,6 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
             key="group_name",
             values=[probe_name] * len(self.recording_extractor.channel_ids),
         )
-
 
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()

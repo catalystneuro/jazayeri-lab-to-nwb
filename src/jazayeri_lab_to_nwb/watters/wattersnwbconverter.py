@@ -1,21 +1,24 @@
 """Primary NWBConverter class for this dataset."""
 import json
 import logging
-import numpy as np
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
+import numpy as np
 from neuroconv import NWBConverter
-from neuroconv.utils import FolderPathType
-from neuroconv.datainterfaces import (
-    SpikeGLXRecordingInterface,
-    KiloSortSortingInterface,
-)
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
 from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
+from neuroconv.datainterfaces import (
+    KiloSortSortingInterface,
+    SpikeGLXRecordingInterface,
+)
+from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+    BaseRecordingExtractorInterface,
+)
+from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+    BaseSortingExtractorInterface,
+)
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
-
+from neuroconv.utils import FolderPathType
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
