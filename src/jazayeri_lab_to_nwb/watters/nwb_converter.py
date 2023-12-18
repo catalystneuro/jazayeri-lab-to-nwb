@@ -2,11 +2,11 @@
 
 import json
 import logging
-import numpy as np
 from pathlib import Path
 from typing import Optional
 
 import display_interface
+import numpy as np
 import timeseries_interfaces
 import trials_interface
 from neuroconv import NWBConverter
@@ -15,8 +15,12 @@ from neuroconv.datainterfaces import (
     KiloSortSortingInterface,
     SpikeGLXRecordingInterface,
 )
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
-from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
+from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+    BaseRecordingExtractorInterface,
+)
+from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+    BaseSortingExtractorInterface,
+)
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
 from neuroconv.utils import FolderPathType
 from recording_interface import DatRecordingInterface
@@ -43,10 +47,7 @@ class NWBConverter(NWBConverter):
         Display=display_interface.DisplayInterface,
     )
 
-    def __init__(self,
-                 source_data: dict[str, dict],
-                 sync_dir: Optional[FolderPathType] = None,
-                 verbose: bool = True):
+    def __init__(self, source_data: dict[str, dict], sync_dir: Optional[FolderPathType] = None, verbose: bool = True):
         """Validate source_data and initialize all data interfaces."""
         super().__init__(source_data=source_data, verbose=verbose)
         self.sync_dir = sync_dir
@@ -56,14 +57,14 @@ class NWBConverter(NWBConverter):
             if isinstance(data_interface, BaseSortingExtractorInterface):
                 unit_ids = np.array(data_interface.sorting_extractor.unit_ids)
                 data_interface.sorting_extractor.set_property(
-                    key='unit_name',
+                    key="unit_name",
                     values=(unit_ids + unit_name_start).astype(str),
                 )
                 unit_name_start += np.max(unit_ids) + 1
 
     def temporally_align_data_interfaces(self):
-        logging.info('Temporally aligning data interfaces')
-        
+        logging.info("Temporally aligning data interfaces")
+
         if self.sync_dir is None:
             return
         sync_dir = Path(self.sync_dir)
@@ -76,7 +77,9 @@ class NWBConverter(NWBConverter):
         for i in [0, 1]:
             if f"RecordingVP{i}" in self.data_interface_objects:
                 orig_timestamps = self.data_interface_objects[f"RecordingVP{i}"].get_original_timestamps()
-                aligned_timestamps = open_ephys_transform["intercept"] + open_ephys_transform["coef"] * (open_ephys_start_time + orig_timestamps)
+                aligned_timestamps = open_ephys_transform["intercept"] + open_ephys_transform["coef"] * (
+                    open_ephys_start_time + orig_timestamps
+                )
                 self.data_interface_objects[f"RecordingVP{i}"].set_aligned_timestamps(aligned_timestamps)
                 # openephys sorting alignment
                 if f"SortingVP{i}" in self.data_interface_objects:
@@ -119,7 +122,7 @@ class NWBConverter(NWBConverter):
                     sorting=self.data_interface_objects[f"SortingNP"].sorting_extractor,
                 )
             self.data_interface_objects[f"SortingNP"].register_recording(self.data_interface_objects[f"RecordingNP"])
-            
+
         # align recording start to 0
         aligned_start_times = []
         for name, data_interface in self.data_interface_objects.items():
@@ -130,5 +133,4 @@ class NWBConverter(NWBConverter):
             if isinstance(data_interface, BaseSortingExtractorInterface):
                 # Do not need to align because recording will be aligned
                 continue
-            start_time = data_interface.set_aligned_starting_time(
-                aligned_starting_time=zero_time)
+            start_time = data_interface.set_aligned_starting_time(aligned_starting_time=zero_time)

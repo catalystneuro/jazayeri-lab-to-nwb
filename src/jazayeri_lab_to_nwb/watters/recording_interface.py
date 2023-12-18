@@ -1,14 +1,16 @@
 """Primary class for recording data."""
 
-import os
 import json
-import numpy as np
-from pynwb import NWBFile
+import os
 from pathlib import Path
 from typing import Optional, Union
 
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
+import numpy as np
+from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+    BaseRecordingExtractorInterface,
+)
 from neuroconv.utils import FilePathType
+from pynwb import NWBFile
 from spikeinterface import BaseRecording
 
 
