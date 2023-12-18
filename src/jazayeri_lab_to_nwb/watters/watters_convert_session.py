@@ -80,7 +80,7 @@ def session_to_nwb(
         output_dir_path = output_dir_path / "nwb_stub"
     output_dir_path.mkdir(parents=True, exist_ok=True)
 
-    session_id = f"ses-{data_dir.name}"
+    session_id = data_dir.name
     raw_nwbfile_path = output_dir_path / f"{session_id}_raw.nwb"
     processed_nwbfile_path = output_dir_path / f"{session_id}_processed.nwb"
     logging.info(f"raw_nwbfile_path = {raw_nwbfile_path}")
