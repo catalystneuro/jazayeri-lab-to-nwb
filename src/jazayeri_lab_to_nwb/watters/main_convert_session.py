@@ -1,10 +1,24 @@
 """Entrypoint to convert an entire session of data to NWB.
 
+This converts a session to NWB format and writes the nwb files to
+    /om/user/nwatters/nwb_data_multi_prediction/{$SUBJECT}/{$SESSION}
+Two NWB files are created: 
+    $SUBJECT_$SESSION_raw.nwb --- Raw physiology
+    $SUBJECT_$SESSION_processed.nwb --- Task, behavior, and sorted physiology
+These files can be automatically uploaded to a DANDI dataset.
+    
 Usage:
     $ python main_convert_session.py $SUBJECT $SESSION
     where $SUBJECT is the subject name and $SESSION is the session date
     YYYY-MM-DD. For example:
     $ python main_convert_session.py Perle 2022-06-01
+    
+    Please read and consider changing the following variables:
+        _REPO
+        _STUB_TEST
+        _OVERWRITE
+        _DANDISET_ID
+    See comments below for descriptions of these variables.
 """
 
 import datetime
@@ -23,7 +37,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 # Data repository. Either 'globus' or 'openmind'
-_REPO = 'globus'
+_REPO = 'openmind'
 # Whether to run all the physiology data or only a stub
 _STUB_TEST = True
 # Whether to overwrite output nwb files

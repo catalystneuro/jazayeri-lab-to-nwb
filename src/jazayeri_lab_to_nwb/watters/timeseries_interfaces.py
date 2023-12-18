@@ -19,8 +19,8 @@ from neuroconv.utils import DeepDict, FolderPathType, FilePathType
 from neuroconv.tools.nwb_helpers import get_module
 
 
-class TemporalAlignmentMixin(BaseTemporalAlignmentInterface):
-    """Mixin implementing temporal alignment functions with timestamps."""
+class TimestampsFromArrayInterface(BaseTemporalAlignmentInterface):
+    """Interface implementing temporal alignment functions with timestamps."""
     
     def __init__(self, folder_path: FolderPathType):
         super().__init__(folder_path=folder_path)
@@ -39,7 +39,7 @@ class TemporalAlignmentMixin(BaseTemporalAlignmentInterface):
         return self._timestamps
 
 
-class EyePositionInterface(TemporalAlignmentMixin):
+class EyePositionInterface(TimestampsFromArrayInterface):
     """Eye position interface."""
 
     def __init__(self, folder_path: FolderPathType):
@@ -99,7 +99,7 @@ class EyePositionInterface(TemporalAlignmentMixin):
         return nwbfile
 
 
-class PupilSizeInterface(TemporalAlignmentMixin):
+class PupilSizeInterface(TimestampsFromArrayInterface):
     """Pupil size interface."""
 
     def __init__(self, folder_path: FolderPathType):
@@ -135,7 +135,7 @@ class PupilSizeInterface(TemporalAlignmentMixin):
         return nwbfile
 
 
-class RewardLineInterface(TemporalAlignmentMixin):
+class RewardLineInterface(TimestampsFromArrayInterface):
     """Reward line interface."""
 
     def __init__(self, folder_path: FolderPathType):
@@ -172,7 +172,7 @@ class RewardLineInterface(TemporalAlignmentMixin):
         return nwbfile
 
 
-class AudioInterface(TemporalAlignmentMixin):
+class AudioInterface(TimestampsFromArrayInterface):
     """Audio interface."""
 
     def __init__(self, folder_path: FolderPathType):
