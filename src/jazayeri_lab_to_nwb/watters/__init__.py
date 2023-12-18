@@ -1,4 +1,4 @@
-from .wattersbehaviorinterface import WattersEyePositionInterface, WattersPupilSizeInterface
-from .watterstrialsinterface import WattersTrialsInterface
-from .wattersrecordinginterface import WattersDatRecordingInterface
-from .wattersnwbconverter import WattersNWBConverter
+from .behavior_interface import EyePositionInterface, PupilSizeInterface
+from .trials_interface import TrialsInterface
+from .recording_interface import DatRecordingInterface
+from .nwb_converter import NWBConverter
