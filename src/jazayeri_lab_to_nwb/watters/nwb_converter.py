@@ -128,9 +128,9 @@ class NWBConverter(NWBConverter):
             start_time = data_interface.get_timestamps()[0]
             aligned_start_times.append(start_time)
         zero_time = -1.0 * min(aligned_start_times)
-        # for name, data_interface in self.data_interface_objects.items():
-        #     if isinstance(data_interface, BaseSortingExtractorInterface):
-        #         # Do not need to align because recording will be aligned
-        #         continue
-        #     start_time = data_interface.set_aligned_starting_time(
-        #         aligned_starting_time=zero_time)
+        for name, data_interface in self.data_interface_objects.items():
+            if isinstance(data_interface, BaseSortingExtractorInterface):
+                # Do not need to align because recording will be aligned
+                continue
+            start_time = data_interface.set_aligned_starting_time(
+                aligned_starting_time=zero_time)
