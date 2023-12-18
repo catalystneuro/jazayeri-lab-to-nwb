@@ -3,27 +3,25 @@
 import json
 import logging
 import numpy as np
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
+import display_interface
+import timeseries_interfaces
+import trials_interface
 from neuroconv import NWBConverter
-from neuroconv.utils import FolderPathType
+from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
 from neuroconv.datainterfaces import (
-    SpikeGLXRecordingInterface,
     KiloSortSortingInterface,
+    SpikeGLXRecordingInterface,
 )
 from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
 from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
-from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
-
+from neuroconv.utils import FolderPathType
+from recording_interface import DatRecordingInterface
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
-
-import timeseries_interfaces
-import trials_interface
-import display_interface
-from recording_interface import DatRecordingInterface
 
 
 class NWBConverter(NWBConverter):

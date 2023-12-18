@@ -22,19 +22,20 @@ Usage:
 """
 
 import datetime
-import get_session_paths
 import glob
 import json
 import logging
-from neuroconv.tools.data_transfers import automatic_dandi_upload
-from neuroconv.utils import load_dict_from_file, dict_deep_update
-import nwb_converter
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Union
 from uuid import uuid4
 from zoneinfo import ZoneInfo
+
+import get_session_paths
+import nwb_converter
+from neuroconv.tools.data_transfers import automatic_dandi_upload
+from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 # Data repository. Either 'globus' or 'openmind'
 _REPO = 'openmind'

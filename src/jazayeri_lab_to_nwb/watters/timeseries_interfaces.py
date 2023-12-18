@@ -8,15 +8,15 @@ pertaining to display updates, see ../frames_interface.py.
 
 import abc
 import json
-import numpy as np
 from pathlib import Path
+
+import numpy as np
+from hdmf.backends.hdf5 import H5DataIO
+from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
+from neuroconv.tools.nwb_helpers import get_module
+from neuroconv.utils import DeepDict, FilePathType, FolderPathType
 from pynwb import NWBFile, TimeSeries
 from pynwb.behavior import SpatialSeries
-from hdmf.backends.hdf5 import H5DataIO
-
-from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
-from neuroconv.utils import DeepDict, FolderPathType, FilePathType
-from neuroconv.tools.nwb_helpers import get_module
 
 
 class TimestampsFromArrayInterface(BaseTemporalAlignmentInterface):
