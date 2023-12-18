@@ -199,7 +199,7 @@ class AudioInterface(TemporalAlignmentMixin):
         # Get processing module
         module_description = 'Contains audio and reward data from experiment.'
         processing_module = get_module(
-            nwbfile=nwbfile, name='misc', description=module_description)
+            nwbfile=nwbfile, name='behavior', description=module_description)
 
         # Add data to module
         processing_module.add_data_interface(audio)
