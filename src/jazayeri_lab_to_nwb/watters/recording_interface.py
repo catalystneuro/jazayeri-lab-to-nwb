@@ -1,7 +1,6 @@
 """Primary class for recording data."""
 import json
 from typing import Optional
-from typing import Optional
 
 import numpy as np
 import probeinterface
