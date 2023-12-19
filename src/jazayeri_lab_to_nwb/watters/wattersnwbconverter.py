@@ -11,23 +11,18 @@ from neuroconv.datainterfaces import (
     KiloSortSortingInterface,
     SpikeGLXRecordingInterface,
 )
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
-    BaseRecordingExtractorInterface,
-)
-from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
-    BaseSortingExtractorInterface,
-)
+from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
 from neuroconv.utils import FolderPathType
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
-from . import (
-    WattersDatRecordingInterface,
+from .wattersbehaviorinterface import (
     WattersEyePositionInterface,
     WattersPupilSizeInterface,
-    WattersTrialsInterface,
 )
+from .wattersrecordinginterface import WattersDatRecordingInterface
+from .watterstrialsinterface import WattersTrialsInterface
 
 
 class WattersNWBConverter(NWBConverter):
