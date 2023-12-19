@@ -190,13 +190,22 @@ def session_to_nwb(
     logging.info(f"dandiset_id = {dandiset_id}")
 
     # Get paths
-    session_paths = get_session_paths.get_session_paths(subject, session, stub_test=stub_test, repo=_REPO)
+    session_paths = get_session_paths.get_session_paths(subject, session, repo=_REPO)
     logging.info(f"session_paths: {session_paths}")
 
     # Get paths for nwb files to write
     session_paths.output.mkdir(parents=True, exist_ok=True)
-    raw_nwb_path = session_paths.output / f"{session}_raw.nwb"
-    processed_nwb_path = session_paths.output / f"{session}_processed.nwb"
+    subject_id = f"sub-{subject}"
+    if stub_test:
+        session_id = f"ses-{session}_stub"
+    else:
+        session_id = f"ses-{session}"
+    raw_nwb_path = (
+        session_paths.output / f"{subject_id}_{session_id}_ecephys.nwb"
+    )
+    processed_nwb_path = (
+        session_paths.output / f"{subject_id}_{session_id}_behavior+ecephys.nwb"
+    )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
     logging.info("")
@@ -259,8 +268,8 @@ def session_to_nwb(
 
     # Add datetime and subject name to processed converter
     metadata = processed_converter.get_metadata()
-    metadata["NWBFile"]["session_id"] = session
-    metadata["Subject"]["subject_id"] = subject
+    metadata["NWBFile"]["session_id"] = session_id
+    metadata["Subject"]["subject_id"] = subject_id
     metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
 

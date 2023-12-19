@@ -21,14 +21,12 @@ SessionPaths = collections.namedtuple(
 )
 
 
-def _get_session_paths_openmind(subject, session, stub_test=False):
+def _get_session_paths_openmind(subject, session):
     """Get paths to all components of the data on openmind."""
     subject_id = SUBJECT_NAME_TO_ID[subject]
 
     # Path to write output nwb files to
-    output_path = f"/om/user/nwatters/nwb_data_multi_prediction/{subject}/{session}"
-    if stub_test:
-        output_path = f"{output_path}/stub"
+    output_path = f"/om/user/nwatters/nwb_data_multi_prediction/sub-{subject}"
 
     # Path to the raw data. This is used for reading raw physiology data.
     raw_data_path = f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/" f"{session}/raw_data"
@@ -64,15 +62,13 @@ def _get_session_paths_openmind(subject, session, stub_test=False):
     return session_paths
 
 
-def _get_session_paths_globus(subject, session, stub_test=False):
+def _get_session_paths_globus(subject, session):
     """Get paths to all components of the data in the globus repo."""
     subject_id = SUBJECT_NAME_TO_ID[subject]
     base_data_dir = f"/shared/catalystneuro/JazLab/{subject_id}/{session}/"
 
     # Path to write output nwb files to
-    output_path = f"~/conversion_nwb/jazayeri-lab-to-nwb/{subject}/{session}"
-    if stub_test:
-        output_path = f"{output_path}/stub"
+    output_path = f"~/conversion_nwb/jazayeri-lab-to-nwb"
 
     # Path to the raw data. This is used for reading raw physiology data.
     raw_data_path = f"{base_data_dir}/raw_data"
@@ -102,15 +98,15 @@ def _get_session_paths_globus(subject, session, stub_test=False):
     return session_paths
 
 
-def get_session_paths(subject, session, stub_test=False, repo="openmind"):
+def get_session_paths(subject, session, repo="openmind"):
     """Get paths to all components of the data.
 
     Returns:
         SessionPaths namedtuple.
     """
     if repo == "openmind":
-        return _get_session_paths_openmind(subject=subject, session=session, stub_test=stub_test)
+        return _get_session_paths_openmind(subject=subject, session=session)
     elif repo == "globus":
-        return _get_session_paths_globus(subject=subject, session=session, stub_test=stub_test)
+        return _get_session_paths_globus(subject=subject, session=session)
     else:
         raise ValueError(f"Invalid repo {repo}")
