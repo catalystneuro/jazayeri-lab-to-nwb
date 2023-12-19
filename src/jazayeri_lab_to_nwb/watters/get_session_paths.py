@@ -26,7 +26,7 @@ def _get_session_paths_openmind(subject, session):
     subject_id = SUBJECT_NAME_TO_ID[subject]
 
     # Path to write output nwb files to
-    output_path = f"/om/user/nwatters/nwb_data_multi_prediction"
+    output_path = f"/om/user/nwatters/nwb_data_multi_prediction/staging/sub-{subject}"
 
     # Path to the raw data. This is used for reading raw physiology data.
     raw_data_path = f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/" f"{session}/raw_data"

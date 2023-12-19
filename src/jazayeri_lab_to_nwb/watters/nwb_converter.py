@@ -17,15 +17,15 @@ from neuroconv.utils import FolderPathType
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
-from .display_interface import DisplayInterface
-from .recording_interface import DatRecordingInterface
-from .timeseries_interface import (
+from display_interface import DisplayInterface
+from recording_interface import DatRecordingInterface
+from timeseries_interface import (
     AudioInterface,
     EyePositionInterface,
     PupilSizeInterface,
     RewardLineInterface,
 )
-from .trials_interface import TrialsInterface
+from trials_interface import TrialsInterface
 
 
 class NWBConverter(NWBConverter):

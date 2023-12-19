@@ -38,7 +38,7 @@ from neuroconv.tools.data_transfers import automatic_dandi_upload
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 # Data repository. Either 'globus' or 'openmind'
-_REPO = "globus"
+_REPO = "openmind"
 # Whether to run all the physiology data or only a stub
 _STUB_TEST = True
 # Whether to overwrite output nwb files
@@ -199,8 +199,12 @@ def session_to_nwb(
         session_id = f"{session}-stub"
     else:
         session_id = f"{session}"
-    raw_nwb_path = session_paths.output / f"{subject}_{session_id}_raw.nwb"
-    processed_nwb_path = session_paths.output / f"{subject}_{session_id}_processed.nwb"
+    raw_nwb_path = (
+        session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
+    )
+    processed_nwb_path = (
+        session_paths.output / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+    )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
     logging.info("")
