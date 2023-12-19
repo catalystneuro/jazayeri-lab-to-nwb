@@ -1,5 +1,5 @@
-neuroconv==0.4.4
-spikeinterface==0.98.2
+neuroconv==0.4.7
+spikeinterface==0.99.1
 nwbwidgets
 nwbinspector
 pre-commit

@@ -1,16 +1,16 @@
 """Primary script to run to convert an entire session for of data using the NWBConverter."""
-import os
 import datetime
 import glob
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 from neuroconv.tools.data_transfers import automatic_dandi_upload
-from neuroconv.utils import load_dict_from_file, dict_deep_update
+from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 from jazayeri_lab_to_nwb.watters import WattersNWBConverter
 
@@ -64,6 +64,7 @@ def session_to_nwb(
     """
     if dandiset_id is not None:
         import dandi  # check importability
+
         assert os.getenv("DANDI_API_KEY"), (
             "Unable to find environment variable 'DANDI_API_KEY'. "
             "Please retrieve your token from DANDI and set this environment variable."
@@ -249,5 +250,5 @@ if __name__ == "__main__":
         output_dir_path=output_dir_path,
         stub_test=stub_test,
         overwrite=overwrite,
-        # dandiset_id = "000620", 
+        # dandiset_id = "000620",
     )
