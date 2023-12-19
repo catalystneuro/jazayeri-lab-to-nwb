@@ -1,31 +1,24 @@
 """Primary NWBConverter class for this dataset."""
-
 import json
 import logging
 from pathlib import Path
 from typing import Optional
 
-import display_interface
 import numpy as np
-import timeseries_interfaces
-import trials_interface
 from neuroconv import NWBConverter
-from neuroconv.basetemporalalignmentinterface import BaseTemporalAlignmentInterface
 from neuroconv.datainterfaces import (
     KiloSortSortingInterface,
     SpikeGLXRecordingInterface,
 )
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
-    BaseRecordingExtractorInterface,
-)
-from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
-    BaseSortingExtractorInterface,
-)
-from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
+from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
 from neuroconv.utils import FolderPathType
-from recording_interface import DatRecordingInterface
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
+
+from .recording_interface import DatRecordingInterface
+from .display_interface import DisplayInterface
+from .trials_interface import TrialsInterface
+from .timeseries_interface import EyePositionInterface, PupilSizeInterface, RewardLineInterface, AudioInterface
 
 
 class NWBConverter(NWBConverter):
@@ -39,12 +32,12 @@ class NWBConverter(NWBConverter):
         RecordingNP=SpikeGLXRecordingInterface,
         LF=SpikeGLXRecordingInterface,
         SortingNP=KiloSortSortingInterface,
-        EyePosition=timeseries_interfaces.EyePositionInterface,
-        PupilSize=timeseries_interfaces.PupilSizeInterface,
-        RewardLine=timeseries_interfaces.RewardLineInterface,
-        Audio=timeseries_interfaces.AudioInterface,
-        Trials=trials_interface.TrialsInterface,
-        Display=display_interface.DisplayInterface,
+        EyePosition=EyePositionInterface,
+        PupilSize=PupilSizeInterface,
+        RewardLine=RewardLineInterface,
+        Audio=AudioInterface,
+        Trials=TrialsInterface,
+        Display=DisplayInterface,
     )
 
     def __init__(self, source_data: dict[str, dict], sync_dir: Optional[FolderPathType] = None, verbose: bool = True):
@@ -88,7 +81,8 @@ class NWBConverter(NWBConverter):
                         sorting=self.data_interface_objects[f"SortingVP{i}"].sorting_extractor,
                     ):
                         print(
-                            f"Spikes exceeding recording found in SortingVP{i}! Removing with `spikeinterface.curation.remove_excess_spikes()`"
+                            f"Spikes exceeding recording found in SortingVP{i}! "
+                            "Removing with `spikeinterface.curation.remove_excess_spikes()`"
                         )
                         self.data_interface_objects[f"SortingVP{i}"].sorting_extractor = remove_excess_spikes(
                             recording=self.data_interface_objects[f"RecordingVP{i}"].recording_extractor,
@@ -111,17 +105,18 @@ class NWBConverter(NWBConverter):
         # neuropixel sorting alignment
         if "SortingNP" in self.data_interface_objects:
             if has_exceeding_spikes(
-                recording=self.data_interface_objects[f"RecordingNP"].recording_extractor,
-                sorting=self.data_interface_objects[f"SortingNP"].sorting_extractor,
+                recording=self.data_interface_objects["RecordingNP"].recording_extractor,
+                sorting=self.data_interface_objects["SortingNP"].sorting_extractor,
             ):
                 print(
-                    "Spikes exceeding recording found in SortingNP! Removing with `spikeinterface.curation.remove_excess_spikes()`"
+                    "Spikes exceeding recording found in SortingNP! "
+                    "Removing with `spikeinterface.curation.remove_excess_spikes()`"
                 )
-                self.data_interface_objects[f"SortingNP"].sorting_extractor = remove_excess_spikes(
-                    recording=self.data_interface_objects[f"RecordingNP"].recording_extractor,
-                    sorting=self.data_interface_objects[f"SortingNP"].sorting_extractor,
+                self.data_interface_objects["SortingNP"].sorting_extractor = remove_excess_spikes(
+                    recording=self.data_interface_objects["RecordingNP"].recording_extractor,
+                    sorting=self.data_interface_objects["SortingNP"].sorting_extractor,
                 )
-            self.data_interface_objects[f"SortingNP"].register_recording(self.data_interface_objects[f"RecordingNP"])
+            self.data_interface_objects["SortingNP"].register_recording(self.data_interface_objects["RecordingNP"])
 
         # align recording start to 0
         aligned_start_times = []
