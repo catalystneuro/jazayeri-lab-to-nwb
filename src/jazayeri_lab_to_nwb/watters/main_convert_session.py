@@ -195,16 +195,15 @@ def session_to_nwb(
 
     # Get paths for nwb files to write
     session_paths.output.mkdir(parents=True, exist_ok=True)
-    subject_id = f"sub-{subject}"
     if stub_test:
-        session_id = f"ses-{session}_stub"
+        session_id = f"{session}-stub"
     else:
-        session_id = f"ses-{session}"
+        session_id = f"{session}"
     raw_nwb_path = (
-        session_paths.output / f"{subject_id}_{session_id}_ecephys.nwb"
+        session_paths.output / f"{subject}_{session_id}_raw.nwb"
     )
     processed_nwb_path = (
-        session_paths.output / f"{subject_id}_{session_id}_behavior+ecephys.nwb"
+        session_paths.output / f"{subject}_{session_id}_processed.nwb"
     )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
@@ -269,7 +268,7 @@ def session_to_nwb(
     # Add datetime and subject name to processed converter
     metadata = processed_converter.get_metadata()
     metadata["NWBFile"]["session_id"] = session_id
-    metadata["Subject"]["subject_id"] = subject_id
+    metadata["Subject"]["subject_id"] = subject
     metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
 

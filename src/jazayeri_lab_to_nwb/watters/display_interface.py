@@ -1,5 +1,4 @@
 """Class for converting data about display frames."""
-
 import itertools
 import json
 from pathlib import Path
@@ -8,7 +7,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
-from neuroconv.utils import DeepDict, FilePathType, FolderPathType
+from neuroconv.utils import FolderPathType
 from pynwb import NWBFile
 
 

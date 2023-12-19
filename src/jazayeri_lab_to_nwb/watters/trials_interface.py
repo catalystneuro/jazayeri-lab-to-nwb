@@ -1,7 +1,5 @@
 """Class for converting trial-structured data."""
-
 import json
-import warnings
 from pathlib import Path
 from typing import Optional
 

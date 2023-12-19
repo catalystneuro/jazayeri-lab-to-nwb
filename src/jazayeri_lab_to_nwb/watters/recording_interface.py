@@ -1,18 +1,18 @@
 """Primary class for recording data."""
-
 import json
+from typing import Optional
 from typing import Optional
 
 import numpy as np
-import probeinterface as pi
+import probeinterface
 from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
     BaseRecordingExtractorInterface,
 )
 from neuroconv.utils import FilePathType
+from spikeinterface import BaseRecording
 
 
 class DatRecordingInterface(BaseRecordingExtractorInterface):
-
     ExtractorName = "BinaryRecordingExtractor"
 
     def __init__(
@@ -42,10 +42,10 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
             "dtype": dtype,
         }
         super().__init__(verbose=verbose, es_key=es_key, **source_data)
-        
+
         # this is used for metadata naming
         self.probe_name = probe_name
-        
+
         # add probe information
         probe_metadata = None
         if probe_metadata_file is not None and probe_key is not None:
@@ -59,11 +59,11 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
             # Grab electrode position from metadata
             locations_array = np.array(probe_metadata["electrodes_locations"])
             ndim = locations_array.shape[1]
-            probe = pi.Probe(ndim=ndim)
-            probe.set_contacts(locations_array)
+            probe = probeinterface.Probe(ndim=ndim)
+            probeinterface.set_contacts(locations_array)
         else:
             # Generate V-probe geometry: 64 channels arranged vertically with 50 um spacing
-            probe = pi.generate_linear_probe(num_elec=channel_count, ypitch=50)
+            probe = probeinterface.generate_linear_probe(num_elec=channel_count, ypitch=50)
         probe.set_device_channel_indices(np.arange(channel_count))
         probe.name = probe_name
 
@@ -75,7 +75,7 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
             key="group_name",
             values=[probe_name] * len(self.recording_extractor.channel_ids),
         )
-        
+
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()
         metadata["Ecephys"]["Device"] = [
@@ -94,5 +94,5 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
             )
         ]
         metadata["Ecephys"]["ElectrodeGroup"] = electrode_groups
-        
+
         return metadata
