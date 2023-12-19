@@ -1,21 +1,17 @@
-"""Primary class for Watters Plexon probe data."""
+"""Primary class for recording data."""
 import json
-import os
-from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
-import probeinterface as pi
+import probeinterface
 from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
     BaseRecordingExtractorInterface,
 )
 from neuroconv.utils import FilePathType
-from pynwb import NWBFile
 from spikeinterface import BaseRecording
 
 
-class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
-
+class DatRecordingInterface(BaseRecordingExtractorInterface):
     ExtractorName = "BinaryRecordingExtractor"
 
     def __init__(
@@ -62,11 +58,11 @@ class WattersDatRecordingInterface(BaseRecordingExtractorInterface):
             # Grab electrode position from metadata
             locations_array = np.array(probe_metadata["electrodes_locations"])
             ndim = locations_array.shape[1]
-            probe = pi.Probe(ndim=ndim)
-            probe.set_contacts(locations_array)
+            probe = probeinterface.Probe(ndim=ndim)
+            probeinterface.set_contacts(locations_array)
         else:
             # Generate V-probe geometry: 64 channels arranged vertically with 50 um spacing
-            probe = pi.generate_linear_probe(num_elec=channel_count, ypitch=50)
+            probe = probeinterface.generate_linear_probe(num_elec=channel_count, ypitch=50)
         probe.set_device_channel_indices(np.arange(channel_count))
         probe.name = probe_name
 
