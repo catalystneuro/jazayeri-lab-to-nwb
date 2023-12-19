@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import numpy as np
+from display_interface import DisplayInterface
 from neuroconv import NWBConverter
 from neuroconv.datainterfaces import (
     KiloSortSortingInterface,
@@ -14,18 +15,16 @@ from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
     BaseSortingExtractorInterface,
 )
 from neuroconv.utils import FolderPathType
+from recording_interface import DatRecordingInterface
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
-
-from .display_interface import DisplayInterface
-from .recording_interface import DatRecordingInterface
-from .timeseries_interface import (
+from timeseries_interface import (
     AudioInterface,
     EyePositionInterface,
     PupilSizeInterface,
     RewardLineInterface,
 )
-from .trials_interface import TrialsInterface
+from trials_interface import TrialsInterface
 
 
 class NWBConverter(NWBConverter):
