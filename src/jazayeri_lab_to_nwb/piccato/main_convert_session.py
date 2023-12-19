@@ -122,15 +122,11 @@ def _add_spikeglx_data(
     logging.info("Adding SpikeGLX data")
 
     # Raw data
-    spikeglx_dir = [x for x in (session_paths.raw_data / "spikeglx").iterdir() if "settling" not in str(x)]
-    if len(spikeglx_dir) == 0:
-        logging.info("Found no SpikeGLX data")
-    elif len(spikeglx_dir) == 1:
-        spikeglx_dir = spikeglx_dir[0]
-    else:
-        raise ValueError(f"Found multiple spikeglx directories {spikeglx_dir}")
-    ap_file = _get_single_file(spikeglx_dir, suffix="/*.ap.bin")
-    lfp_file = _get_single_file(spikeglx_dir, suffix="/*.lf.bin")
+    spikeglx_dir = Path(_get_single_file(
+        session_paths.raw_data/"spikeglx",
+        suffix='imec0'))
+    ap_file = _get_single_file(spikeglx_dir, suffix="*.ap.bin")
+    lfp_file = _get_single_file(spikeglx_dir, suffix="*.lf.bin")
     raw_source_data["RecordingNP"] = dict(file_path=ap_file)
     raw_source_data["LF"] = dict(file_path=lfp_file)
     processed_source_data["RecordingNP"] = dict(file_path=ap_file)
@@ -141,13 +137,15 @@ def _add_spikeglx_data(
     processed_conversion_options["LF"] = dict(stub_test=stub_test)
 
     # Processed data
-    sorting_path = session_paths.spike_sorting_raw / "np_0" / "ks_3_output_v2"
+    sorting_path = (session_paths.spike_sorting_raw /
+                    "spikeglx/kilosort2_5/sorter_output"
+                    )
     processed_source_data["SortingNP"] = dict(
         folder_path=str(sorting_path),
         keep_good_only=False,
     )
-    processed_conversion_options["SortingNP"] = dict(stub_test=stub_test, write_as="processing")
-
+    processed_conversion_options["SortingNP"] = dict(stub_test=stub_test,
+                                                     write_as="processing")
 
 def session_to_nwb(
     subject: str,
@@ -207,11 +205,18 @@ def session_to_nwb(
         session_id = f"{session}-stub"
     else:
         session_id = f"{session}"
-    raw_nwb_path = session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
-    processed_nwb_path = session_paths.output / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+    raw_nwb_path = (
+        session_paths.output /
+        f"sub-{subject}_ses-{session_id}_ecephys.nwb"
+    )
+    processed_nwb_path = (
+        session_paths.output /
+        f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+    )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
     logging.info("")
+
 
     # Initialize empty data dictionaries
     raw_source_data = {}
@@ -244,7 +249,7 @@ def session_to_nwb(
     # Add behavior data
     logging.info("Adding behavior data")
     behavior_path = str(session_paths.task_behavior_data)
-    processed_source_data["EyePosition"] = dict(folder_path=behavior_path)
+    processed_source_data["EyePosition"] = dict(folder_path=behavior_path)    
     processed_conversion_options["EyePosition"] = dict()
     processed_source_data["PupilSize"] = dict(folder_path=behavior_path)
     processed_conversion_options["PupilSize"] = dict()
@@ -255,12 +260,14 @@ def session_to_nwb(
 
     # Add trials data
     logging.info("Adding trials data")
-    processed_source_data["Trials"] = dict(folder_path=str(session_paths.task_behavior_data))
+    processed_source_data["Trials"] = dict(
+        folder_path=str(session_paths.task_behavior_data))
     processed_conversion_options["Trials"] = dict()
 
     # Add display data
     logging.info("Adding display data")
-    processed_source_data["Display"] = dict(folder_path=str(session_paths.task_behavior_data))
+    processed_source_data["Display"] = dict(
+        folder_path=str(session_paths.task_behavior_data))
     processed_conversion_options["Display"] = dict()
 
     # Create processed data converter
@@ -269,6 +276,7 @@ def session_to_nwb(
         sync_dir=session_paths.sync_pulses,
     )
 
+    return
     # Add datetime and subject name to processed converter
     metadata = processed_converter.get_metadata()
     metadata["NWBFile"]["session_id"] = session_id

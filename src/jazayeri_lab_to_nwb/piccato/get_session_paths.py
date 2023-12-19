@@ -7,6 +7,8 @@ SUBJECT_NAME_TO_ID = {
     "elgar": "elgar",
 }
 
+OM_PATH = '/om2/user/apiccato/phys_preprocessing_open_source/phys_data'
+
 SessionPaths = collections.namedtuple(
     "SessionPaths",
     [
@@ -25,17 +27,16 @@ def _get_session_paths_openmind(subject, session):
     # subject_id = SUBJECT_NAME_TO_ID[subject]
 
     # Path to write output nwb files to
-    output_path = f"/om2/user/apiccato/nwb_data/staging/sub-{subject}"
+    output_path = pathlib.Path(
+        f"/om2/user/apiccato/nwb_data/staging/sub-{subject}"
+    )
 
     # Path to the raw data. This is used for reading raw physiology data.
-    raw_data_path = pathlib.Path(
-        "/om4/group/jazlab/apiccato/",
-        "phys_preprocessing_open_source/phys_data/",
-        f"{session}/raw_data/{subject}/")
+    raw_data_path = pathlib.Path(f"{OM_PATH}/{subject}/{session}/raw_data/")
 
     # Path to task and behavior data.
     task_behavior_data_path = pathlib.Path(
-        "/om4/group/jazlab/apiccato/phys_preprocessing_open_source/",
+        OM_PATH,
         f"{subject}/{session}"
     )
 
@@ -47,13 +48,13 @@ def _get_session_paths_openmind(subject, session):
     # Path to sync pulses. This is used for reading timescale transformations
     # between physiology and mworks data streams.
     sync_pulses_path = pathlib.Path(
-        "/om4/group/jazlab/phys_preprocessing_open_source",
+        OM_PATH,
         f"{subject}/{session}/sync_signals"
     )
 
     # Path to spike sorting. This is used for reading spike sorted data.
     spike_sorting_raw_path = pathlib.Path(
-        "/om4/group/jazlab/apiccato/phys_preprocessing_open_source/"
+        OM_PATH,
         f"{subject}/{session}/spike_sorting"
     )
 
