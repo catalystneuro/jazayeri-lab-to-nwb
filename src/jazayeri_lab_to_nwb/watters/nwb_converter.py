@@ -10,15 +10,22 @@ from neuroconv.datainterfaces import (
     KiloSortSortingInterface,
     SpikeGLXRecordingInterface,
 )
-from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import BaseSortingExtractorInterface
+from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
+    BaseSortingExtractorInterface,
+)
 from neuroconv.utils import FolderPathType
 from spikeinterface.core.waveform_tools import has_exceeding_spikes
 from spikeinterface.curation import remove_excess_spikes
 
-from .recording_interface import DatRecordingInterface
 from .display_interface import DisplayInterface
+from .recording_interface import DatRecordingInterface
+from .timeseries_interface import (
+    AudioInterface,
+    EyePositionInterface,
+    PupilSizeInterface,
+    RewardLineInterface,
+)
 from .trials_interface import TrialsInterface
-from .timeseries_interface import EyePositionInterface, PupilSizeInterface, RewardLineInterface, AudioInterface
 
 
 class NWBConverter(NWBConverter):

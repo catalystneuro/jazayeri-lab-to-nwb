@@ -2,9 +2,11 @@
 import json
 from typing import Optional
 
-import probeinterface
 import numpy as np
-from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import BaseRecordingExtractorInterface
+import probeinterface
+from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
+    BaseRecordingExtractorInterface,
+)
 from neuroconv.utils import FilePathType
 from spikeinterface import BaseRecording
 
