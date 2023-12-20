@@ -48,7 +48,7 @@ class NWBConverter(NWBConverter):
         self.sync_dir = sync_dir
 
         unit_name_start = 0
-        for name, data_interface in self.data_interface_objects.items():
+        for data_interface in self.data_interface_objects.values():
             if isinstance(data_interface, BaseSortingExtractorInterface):
                 unit_ids = np.array(data_interface.sorting_extractor.unit_ids)
                 data_interface.sorting_extractor.set_property(
@@ -69,9 +69,6 @@ class NWBConverter(NWBConverter):
             if "Recording" not in name:
                 continue
             probe_name = name.split("Recording")[1]
-            sorting_interface = self.data_interface_objects[
-                f"Sorting{probe_name}"
-            ]
 
             # Load timescale transform
             if "VP" in probe_name:
@@ -101,18 +98,24 @@ class NWBConverter(NWBConverter):
                 )
                 lf_interface.set_aligned_timestamps(aligned_timestamps)
 
-            # Sanity check no sorted spikes are outside recording range
-            exceeded_spikes = waveform_tools.has_exceeding_spikes(
-                recording=recording_interface.recording_extractor,
-                sorting=sorting_interface.sorting_extractor,
-            )
-            if exceeded_spikes:
-                raise ValueError(
-                    f"Spikes exceeding recording found in Sorting{probe_name}!"
+            # If sorting exists, register recording to it
+            if f"Sorting{probe_name}" in self.data_interface_classes:
+                sorting_interface = self.data_interface_objects[
+                    f"Sorting{probe_name}"
+                ]
+                
+                # Sanity check no sorted spikes are outside recording range
+                exceeded_spikes = waveform_tools.has_exceeding_spikes(
+                    recording=recording_interface.recording_extractor,
+                    sorting=sorting_interface.sorting_extractor,
                 )
-
-            # Register recording
-            sorting_interface.register_recording(recording_interface)
+                if exceeded_spikes:
+                    raise ValueError(
+                        f"Spikes exceeding recording found in Sorting{probe_name}!"
+                    )
+                    
+                # Register recording
+                sorting_interface.register_recording(recording_interface)
 
         # Align so that 0 is the first of all timestamps
         aligned_start_times = []
