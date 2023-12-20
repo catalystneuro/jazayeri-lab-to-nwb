@@ -99,11 +99,11 @@ class NWBConverter(NWBConverter):
                 lf_interface.set_aligned_timestamps(aligned_timestamps)
 
             # If sorting exists, register recording to it
-            if f"Sorting{probe_name}" in self.data_interface_classes:
+            if f"Sorting{probe_name}" in self.data_interface_objects:
                 sorting_interface = self.data_interface_objects[
                     f"Sorting{probe_name}"
                 ]
-                
+
                 # Sanity check no sorted spikes are outside recording range
                 exceeded_spikes = waveform_tools.has_exceeding_spikes(
                     recording=recording_interface.recording_extractor,
@@ -113,7 +113,7 @@ class NWBConverter(NWBConverter):
                     raise ValueError(
                         f"Spikes exceeding recording found in Sorting{probe_name}!"
                     )
-                    
+
                 # Register recording
                 sorting_interface.register_recording(recording_interface)
 

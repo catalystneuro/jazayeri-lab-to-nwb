@@ -21,7 +21,6 @@ extend-exclude = '''
 '''
 
 [tool.isort]
-line-length = 79
 profile = "black"
 reverse_relative = true
 known_first_party = ["jazayeri_lab_to_nwb"]
