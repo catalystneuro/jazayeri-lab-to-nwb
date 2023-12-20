@@ -1,11 +1,14 @@
 """Class for converting trial-structured data."""
+
 import json
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 import pandas as pd
-from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
+from neuroconv.datainterfaces.text.timeintervalsinterface import (
+    TimeIntervalsInterface,
+)
 from neuroconv.utils import FolderPathType
 from pynwb import NWBFile
 
@@ -73,12 +76,16 @@ class TrialsInterface(TimeIntervalsInterface):
     def _read_file(self, file_path: FolderPathType):
         # Create dataframe with data for each trial
         trials = json.load(open(Path(file_path) / "trials.json", "r"))
-        trials = {k_mapped: [d[k] for d in trials] for k, k_mapped in TrialsInterface.KEY_MAP.items()}
+        trials = {
+            k_mapped: [d[k] for d in trials]
+            for k, k_mapped in TrialsInterface.KEY_MAP.items()
+        }
 
         # Field closed_loop_response_position may have None values, so replace
         # those with NaN to make hdf5 conversion work
         trials["closed_loop_response_position"] = [
-            [np.nan, np.nan] if x is None else x for x in trials["closed_loop_response_position"]
+            [np.nan, np.nan] if x is None else x
+            for x in trials["closed_loop_response_position"]
         ]
 
         # Serialize fields with variable-length lists for hdf5 conversion
@@ -92,7 +99,12 @@ class TrialsInterface(TimeIntervalsInterface):
 
         return pd.DataFrame(trials)
 
-    def add_to_nwbfile(self, nwbfile: NWBFile, metadata: Optional[dict] = None, tag: str = "trials"):
+    def add_to_nwbfile(
+        self,
+        nwbfile: NWBFile,
+        metadata: Optional[dict] = None,
+        tag: str = "trials",
+    ):
         return super(TrialsInterface, self).add_to_nwbfile(
             nwbfile=nwbfile,
             metadata=metadata,
@@ -103,8 +115,14 @@ class TrialsInterface(TimeIntervalsInterface):
     @property
     def column_descriptions(self):
         column_descriptions = {
-            "background_indices": ("For each trial, the indices of the background noise pattern " "patch."),
-            "broke_fixation": ("For each trial, whether the subject broke fixation and the " "trial was aborted"),
+            "background_indices": (
+                "For each trial, the indices of the background noise pattern "
+                "patch."
+            ),
+            "broke_fixation": (
+                "For each trial, whether the subject broke fixation and the "
+                "trial was aborted"
+            ),
             "stimulus_object_identities": (
                 "For each trial, a serialized list with one element for each "
                 'object. Each element is the identity symbol (e.g. "a", "b", '
@@ -141,13 +159,21 @@ class TrialsInterface(TimeIntervalsInterface):
                 "reward delivery."
             ),
             "start_time": "Start time of each trial.",
-            "phase_fixation_time": ("Time of fixation phase onset for each trial."),
-            "phase_stimulus_time": ("Time of stimulus phase onset for each trial."),
+            "phase_fixation_time": (
+                "Time of fixation phase onset for each trial."
+            ),
+            "phase_stimulus_time": (
+                "Time of stimulus phase onset for each trial."
+            ),
             "phase_delay_time": "Time of delay phase onset for each trial.",
             "phase_cue_time": "Time of cue phase onset for each trial.",
-            "phase_response_time": ("Time of response phase onset for each trial."),
+            "phase_response_time": (
+                "Time of response phase onset for each trial."
+            ),
             "phase_reveal_time": "Time of reveal phase onset for each trial.",
-            "phase_iti_time": ("Time of inter-trial interval onset for each trial."),
+            "phase_iti_time": (
+                "Time of inter-trial interval onset for each trial."
+            ),
             "reward_time": "Time of reward delivery onset for each trial.",
             "reward_duration": "Reward duration for each trial",
             "response_position": (

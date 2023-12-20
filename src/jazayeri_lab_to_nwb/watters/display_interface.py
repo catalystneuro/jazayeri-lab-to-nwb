@@ -1,4 +1,5 @@
 """Class for converting data about display frames."""
+
 import itertools
 import json
 from pathlib import Path
@@ -6,7 +7,9 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
-from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
+from neuroconv.datainterfaces.text.timeintervalsinterface import (
+    TimeIntervalsInterface,
+)
 from neuroconv.utils import FolderPathType
 from pynwb import NWBFile
 
@@ -40,7 +43,9 @@ class DisplayInterface(TimeIntervalsInterface):
         return metadata
 
     def get_timestamps(self) -> np.ndarray:
-        return super(DisplayInterface, self).get_timestamps(column="start_time")
+        return super(DisplayInterface, self).get_timestamps(
+            column="start_time"
+        )
 
     def set_aligned_starting_time(self, aligned_starting_time: float) -> None:
         self.dataframe.start_time += aligned_starting_time
@@ -49,15 +54,23 @@ class DisplayInterface(TimeIntervalsInterface):
         # Create dataframe with data for each frame
         trials = json.load(open(Path(file_path) / "trials.json", "r"))
         frames = {
-            k_mapped: list(itertools.chain(*[d[k] for d in trials])) for k, k_mapped in DisplayInterface.KEY_MAP.items()
+            k_mapped: list(itertools.chain(*[d[k] for d in trials]))
+            for k, k_mapped in DisplayInterface.KEY_MAP.items()
         }
 
         # Serialize object_positions data for hdf5 conversion to work
-        frames["object_positions"] = [json.dumps(x) for x in frames["object_positions"]]
+        frames["object_positions"] = [
+            json.dumps(x) for x in frames["object_positions"]
+        ]
 
         return pd.DataFrame(frames)
 
-    def add_to_nwbfile(self, nwbfile: NWBFile, metadata: Optional[dict] = None, tag: str = "display"):
+    def add_to_nwbfile(
+        self,
+        nwbfile: NWBFile,
+        metadata: Optional[dict] = None,
+        tag: str = "display",
+    ):
         return super(DisplayInterface, self).add_to_nwbfile(
             nwbfile=nwbfile,
             metadata=metadata,

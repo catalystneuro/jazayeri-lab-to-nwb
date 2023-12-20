@@ -1,4 +1,4 @@
-neuroconv==0.4.7
+neuroconv==0.4.6
 spikeinterface==0.99.1
 nwbwidgets==0.11.3
 nwbinspector==0.4.31

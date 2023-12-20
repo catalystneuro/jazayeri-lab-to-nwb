@@ -1,5 +1,5 @@
 """Primary class for recording data."""
-import json
+
 from typing import Optional
 
 import numpy as np
@@ -8,7 +8,6 @@ from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
     BaseRecordingExtractorInterface,
 )
 from neuroconv.utils import FilePathType
-from spikeinterface import BaseRecording
 
 
 class DatRecordingInterface(BaseRecordingExtractorInterface):
@@ -30,6 +29,8 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
         probe_name: str = "vprobe",
         probe_key: Optional[str] = None,
     ):
+        del probe_metadata_file
+        del probe_key
         source_data = {
             "file_paths": [file_path],
             "sampling_frequency": sampling_frequency,
@@ -45,15 +46,11 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
         # this is used for metadata naming
         self.probe_name = probe_name
 
-        # add probe information
-        with open(probe_metadata_file, "r") as f:
-            all_probe_metadata = json.load(f)
-        for entry in all_probe_metadata:
-            if entry["label"] == probe_key:
-                probe_metadata = entry
-
-        # Generate V-probe geometry: 64 channels arranged vertically with 50 um spacing
-        probe = probeinterface.generate_linear_probe(num_elec=channel_count, ypitch=50)
+        # Generate V-probe geometry: 64 channels arranged vertically with 50 um
+        # spacing
+        probe = probeinterface.generate_linear_probe(
+            num_elec=channel_count, ypitch=50
+        )
         probe.set_device_channel_indices(np.arange(channel_count))
         probe.name = probe_name
 
@@ -75,10 +72,11 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
                 manufacturer="Plexon",
             )
         ]
+        description = f"a group representing electrodes on {self.probe_name}"
         electrode_groups = [
             dict(
                 name=self.probe_name,
-                description=f"a group representing electrodes on {self.probe_name}",
+                description=description,
                 location="unknown",
                 device=self.probe_name,
             )
