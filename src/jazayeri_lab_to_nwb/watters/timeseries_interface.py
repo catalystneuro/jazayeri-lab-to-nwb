@@ -71,6 +71,8 @@ class EyePositionInterface(TimestampsFromArrayInterface):
         self._eye_pos = np.stack([eye_h_values, eye_v_values], axis=1)
 
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata: dict):
+        del metadata
+        
         # Make SpatialSeries
         eye_position = SpatialSeries(
             name="eye_position",
@@ -83,7 +85,7 @@ class EyePositionInterface(TimestampsFromArrayInterface):
         )
 
         # Get processing module
-        module_description = "Contains behavioral data from experiment."
+        module_description = "Contains behavior, audio, and reward data from experiment."
         processing_module = get_module(nwbfile=nwbfile, name="behavior", description=module_description)
 
         # Add data to module
@@ -107,6 +109,8 @@ class PupilSizeInterface(TimestampsFromArrayInterface):
         self._pupil_size = np.array(pupil_size_data["values"])
 
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata: dict):
+        del metadata
+
         # Make TimeSeries
         pupil_size = TimeSeries(
             name="pupil_size",
@@ -118,7 +122,7 @@ class PupilSizeInterface(TimestampsFromArrayInterface):
         )
 
         # Get processing module
-        module_description = "Contains behavioral data from experiment."
+        module_description = "Contains behavior, audio, and reward data from experiment."
         processing_module = get_module(nwbfile=nwbfile, name="behavior", description=module_description)
 
         # Add data to module
@@ -142,6 +146,8 @@ class RewardLineInterface(TimestampsFromArrayInterface):
         self._reward_line = reward_line_data["values"]
 
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata: dict):
+        del metadata
+
         # Make LabeledEvents
         reward_line = LabeledEvents(
             name="reward_line",
@@ -152,7 +158,7 @@ class RewardLineInterface(TimestampsFromArrayInterface):
         )
 
         # Get processing module
-        module_description = "Contains audio and reward data from experiment."
+        module_description = "Contains behavior, audio, and reward data from experiment."
         processing_module = get_module(nwbfile=nwbfile, name="behavior", description=module_description)
 
         # Add data to module
@@ -181,6 +187,8 @@ class AudioInterface(TimestampsFromArrayInterface):
         self._sound_codes = [sound_to_code[x] for x in audio]
 
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata: dict):
+        del metadata
+        
         # Make LabeledEvents
         audio = LabeledEvents(
             name="audio",
@@ -191,7 +199,7 @@ class AudioInterface(TimestampsFromArrayInterface):
         )
 
         # Get processing module
-        module_description = "Contains audio and reward data from experiment."
+        module_description = "Contains behavior, audio, and reward data from experiment."
         processing_module = get_module(nwbfile=nwbfile, name="behavior", description=module_description)
 
         # Add data to module
