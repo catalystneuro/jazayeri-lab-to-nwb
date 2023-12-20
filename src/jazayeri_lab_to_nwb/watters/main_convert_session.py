@@ -291,12 +291,10 @@ def session_to_nwb(
 
     # Check if session_start_time was found/set
     if "session_start_time" not in metadata["NWBFile"]:
-        try:
-            date = datetime.datetime.strptime(session, "%Y-%m-%d")
-            date = date.replace(tzinfo=ZoneInfo("US/Eastern"))
-        except:
-            raise ValueError("Session start time was not auto-detected. Please provide it " "in `metadata.yaml`")
-        metadata["NWBFile"]["session_start_time"] = date
+        raise ValueError("Session start time was not auto-detected. Please provide it " "in `metadata.yaml`")
+    session_start_time = metadata["NWBFile"]["session_start_time"]
+    metadata["NWBFile"]["session_start_time"] = session_start_time.replace(
+        tzinfo=ZoneInfo("US/Eastern"))
 
     # Run conversion
     logging.info("Running processed conversion")
