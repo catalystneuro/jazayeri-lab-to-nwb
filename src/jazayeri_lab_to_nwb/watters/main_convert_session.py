@@ -21,7 +21,6 @@ Usage:
     See comments below for descriptions of these variables.
 """
 
-import datetime
 import glob
 import json
 import logging
@@ -89,7 +88,9 @@ def _add_v_probe_data(
 
     # Raw data
     recording_file = _get_single_file(probe_data_dir, suffix=".dat")
-    metadata_path = str(session_paths.data_open_source / "probes.metadata.json")
+    metadata_path = str(
+        session_paths.data_open_source / "probes.metadata.json"
+    )
     raw_source_data[f"RecordingVP{probe_num}"] = dict(
         file_path=recording_file,
         probe_metadata_file=metadata_path,
@@ -97,17 +98,28 @@ def _add_v_probe_data(
         probe_name=f"vprobe{probe_num}",
         es_key=f"ElectricalSeriesVP{probe_num}",
     )
-    raw_conversion_options[f"RecordingVP{probe_num}"] = dict(stub_test=stub_test)
+    raw_conversion_options[f"RecordingVP{probe_num}"] = dict(
+        stub_test=stub_test
+    )
 
     # Processed data
-    sorting_path = session_paths.spike_sorting_raw / f"v_probe_{probe_num}" / "ks_3_output_pre_v6_curated"
-    processed_source_data[f"RecordingVP{probe_num}"] = raw_source_data[f"RecordingVP{probe_num}"]
-    processed_source_data[f"SortingVP{probe_num}"] = dict(
-        folder_path=str(sorting_path),
-        keep_good_only=False,
+    sorting_path = (
+        session_paths.spike_sorting_raw
+        / f"v_probe_{probe_num}"
+        / "ks_3_output_pre_v6_curated"
     )
-    processed_conversion_options[f"RecordingVP{probe_num}"] = dict(stub_test=stub_test, write_electrical_series=False)
-    processed_conversion_options[f"SortingVP{probe_num}"] = dict(stub_test=stub_test, write_as="processing")
+    processed_source_data[f"RecordingVP{probe_num}"] = raw_source_data[
+        f"RecordingVP{probe_num}"
+    ]
+    processed_source_data[f"SortingVP{probe_num}"] = dict(
+        folder_path=str(sorting_path), keep_good_only=False
+    )
+    processed_conversion_options[f"RecordingVP{probe_num}"] = dict(
+        stub_test=stub_test, write_electrical_series=False
+    )
+    processed_conversion_options[f"SortingVP{probe_num}"] = dict(
+        stub_test=stub_test, write_as="processing"
+    )
 
 
 def _add_spikeglx_data(
@@ -122,7 +134,11 @@ def _add_spikeglx_data(
     logging.info("Adding SpikeGLX data")
 
     # Raw data
-    spikeglx_dir = [x for x in (session_paths.raw_data / "spikeglx").iterdir() if "settling" not in str(x)]
+    spikeglx_dir = [
+        x
+        for x in (session_paths.raw_data / "spikeglx").iterdir()
+        if "settling" not in str(x)
+    ]
     if len(spikeglx_dir) == 0:
         logging.info("Found no SpikeGLX data")
     elif len(spikeglx_dir) == 1:
@@ -146,11 +162,17 @@ def _add_spikeglx_data(
         folder_path=str(sorting_path),
         keep_good_only=False,
     )
-    processed_conversion_options["SortingNP"] = dict(stub_test=stub_test, write_as="processing")
+    processed_conversion_options["SortingNP"] = dict(
+        stub_test=stub_test, write_as="processing"
+    )
 
 
 def session_to_nwb(
-    subject: str, session: str, stub_test: bool = False, overwrite: bool = True, dandiset_id: Union[str, None] = None
+    subject: str,
+    session: str,
+    stub_test: bool = False,
+    overwrite: bool = True,
+    dandiset_id: Union[str, None] = None,
 ):
     """
     Convert a single session to an NWB file.
@@ -190,7 +212,9 @@ def session_to_nwb(
     logging.info(f"dandiset_id = {dandiset_id}")
 
     # Get paths
-    session_paths = get_session_paths.get_session_paths(subject, session, repo=_REPO)
+    session_paths = get_session_paths.get_session_paths(
+        subject, session, repo=_REPO
+    )
     logging.info(f"session_paths: {session_paths}")
 
     # Get paths for nwb files to write
@@ -199,8 +223,13 @@ def session_to_nwb(
         session_id = f"{session}-stub"
     else:
         session_id = f"{session}"
-    raw_nwb_path = session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
-    processed_nwb_path = session_paths.output / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+    raw_nwb_path = (
+        session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
+    )
+    processed_nwb_path = (
+        session_paths.output
+        / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+    )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
     logging.info("")
@@ -247,12 +276,16 @@ def session_to_nwb(
 
     # Add trials data
     logging.info("Adding trials data")
-    processed_source_data["Trials"] = dict(folder_path=str(session_paths.task_behavior_data))
+    processed_source_data["Trials"] = dict(
+        folder_path=str(session_paths.task_behavior_data)
+    )
     processed_conversion_options["Trials"] = dict()
 
     # Add display data
     logging.info("Adding display data")
-    processed_source_data["Display"] = dict(folder_path=str(session_paths.task_behavior_data))
+    processed_source_data["Display"] = dict(
+        folder_path=str(session_paths.task_behavior_data)
+    )
     processed_conversion_options["Display"] = dict()
 
     # Create processed data converter
@@ -269,10 +302,14 @@ def session_to_nwb(
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
 
     # EcePhys
-    probe_metadata_file = session_paths.data_open_source / "probes.metadata.json"
+    probe_metadata_file = (
+        session_paths.data_open_source / "probes.metadata.json"
+    )
     with open(probe_metadata_file, "r") as f:
         probe_metadata = json.load(f)
-    neuropixel_metadata = [x for x in probe_metadata if x["probe_type"] == "Neuropixels"][0]
+    neuropixel_metadata = [
+        x for x in probe_metadata if x["probe_type"] == "Neuropixels"
+    ][0]
     for entry in metadata["Ecephys"]["ElectrodeGroup"]:
         if entry["device"] == "Neuropixel-Imec":
             # TODO: uncomment when fixed in pynwb
@@ -291,10 +328,10 @@ def session_to_nwb(
 
     # Check if session_start_time was found/set
     if "session_start_time" not in metadata["NWBFile"]:
-        raise ValueError("Session start time was not auto-detected. Please provide it " "in `metadata.yaml`")
-    session_start_time = metadata["NWBFile"]["session_start_time"]
-    metadata["NWBFile"]["session_start_time"] = session_start_time.replace(
-        tzinfo=ZoneInfo("US/Eastern"))
+        raise ValueError(
+            "Session start time was not auto-detected. Please provide it "
+            "in `metadata.yaml`"
+        )
 
     # Run conversion
     logging.info("Running processed conversion")

@@ -26,28 +26,39 @@ def _get_session_paths_openmind(subject, session):
     subject_id = SUBJECT_NAME_TO_ID[subject]
 
     # Path to write output nwb files to
-    output_path = f"/om/user/nwatters/nwb_data_multi_prediction/staging/sub-{subject}"
+    output_path = (
+        f"/om/user/nwatters/nwb_data_multi_prediction/staging/sub-{subject}"
+    )
 
     # Path to the raw data. This is used for reading raw physiology data.
-    raw_data_path = f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/" f"{session}/raw_data"
+    raw_data_path = (
+        f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/"
+        f"{session}/raw_data"
+    )
 
     # Path to task and behavior data.
     task_behavior_data_path = (
-        "/om4/group/jazlab/nwatters/multi_prediction/datasets/data_nwb_trials/" f"{subject}/{session}"
+        "/om4/group/jazlab/nwatters/multi_prediction/datasets/data_nwb_trials/"
+        f"{subject}/{session}"
     )
 
     # Path to open-source data. This is used for reading behavior and task data.
     data_open_source_path = (
-        "/om4/group/jazlab/nwatters/multi_prediction/datasets/data_open_source/" f"Subjects/{subject_id}/{session}/001"
+        "/om4/group/jazlab/nwatters/multi_prediction/datasets/data_open_source/"
+        f"Subjects/{subject_id}/{session}/001"
     )
 
     # Path to sync pulses. This is used for reading timescale transformations
     # between physiology and mworks data streams.
-    sync_pulses_path = "/om4/group/jazlab/nwatters/multi_prediction/data_processed/" f"{subject}/{session}/sync_pulses"
+    sync_pulses_path = (
+        "/om4/group/jazlab/nwatters/multi_prediction/data_processed/"
+        f"{subject}/{session}/sync_pulses"
+    )
 
     # Path to spike sorting. This is used for reading spike sorted data.
     spike_sorting_raw_path = (
-        f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/" f"{session}/spike_sorting"
+        f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/"
+        f"{session}/spike_sorting"
     )
 
     session_paths = SessionPaths(
