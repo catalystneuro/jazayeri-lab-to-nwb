@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import Optional
 
 import display_interface
+import neuroconv
 import numpy as np
 import timeseries_interface
 import trials_interface
-from neuroconv import NWBConverter, datainterfaces
 from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
     BaseSortingExtractorInterface,
 )
@@ -18,17 +18,17 @@ from recording_interface import DatRecordingInterface
 from spikeinterface.core import waveform_tools
 
 
-class NWBConverter(NWBConverter):
+class NWBConverter(neuroconv.NWBConverter):
     """Primary conversion class for extracellular electrophysiology dataset."""
 
     data_interface_classes = dict(
         RecordingVP0=DatRecordingInterface,
-        SortingVP0=datainterfaces.KiloSortSortingInterface,
+        SortingVP0=neuroconv.datainterfaces.KiloSortSortingInterface,
         RecordingVP1=DatRecordingInterface,
-        SortingVP1=datainterfaces.KiloSortSortingInterface,
-        RecordingNP=datainterfaces.SpikeGLXRecordingInterface,
-        LF=datainterfaces.SpikeGLXRecordingInterface,
-        SortingNP=datainterfaces.KiloSortSortingInterface,
+        SortingVP1=neuroconv.datainterfaces.KiloSortSortingInterface,
+        RecordingNP=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
+        LF=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
+        SortingNP=neuroconv.datainterfaces.KiloSortSortingInterface,
         EyePosition=timeseries_interface.EyePositionInterface,
         PupilSize=timeseries_interface.PupilSizeInterface,
         RewardLine=timeseries_interface.RewardLineInterface,
@@ -82,6 +82,8 @@ class NWBConverter(NWBConverter):
                 transform_path = sync_dir / "spikeglx" / "transform"
                 transform = json.load(open(transform_path, "r"))
                 lf_interface = self.data_interface_objects["LF"]
+            else:
+                raise ValueError("Invalid probe_name {probe_name}")
             intercept = transform["intercept"]
             coef = transform["coef"]
 
@@ -111,7 +113,8 @@ class NWBConverter(NWBConverter):
                 )
                 if exceeded_spikes:
                     raise ValueError(
-                        f"Spikes exceeding recording found in Sorting{probe_name}!"
+                        "Spikes exceeding recording found in "
+                        f"Sorting{probe_name}"
                     )
 
                 # Register recording
