@@ -1,11 +1,11 @@
 """Entrypoint to convert an entire session of data to NWB.
 
 This converts a session to NWB format and writes the nwb files to
-    /om/user/nwatters/nwb_data_multi_prediction/{$SUBJECT}/{$SESSION}
+    /om/user/nwatters/nwb_data_multi_prediction/staging/sub-$SUBJECT/
 Two NWB files are created:
-    $SUBJECT_$SESSION_raw.nwb --- Raw physiology
-    $SUBJECT_$SESSION_processed.nwb --- Task, behavior, and sorted physiology
-These files can be automatically uploaded to a DANDI dataset.
+    sub-$SUBJECT_ses-$SESSION_ecephys.nwb --- Raw physiology
+    sub-$SUBJECT_ses-$SESSION_behavior+ecephys.nwb --- Task, behavior, and
+        sorted physiology
 
 Usage:
     $ python main_convert_session.py $SUBJECT $SESSION
@@ -17,23 +17,18 @@ Usage:
         _REPO
         _STUB_TEST
         _OVERWRITE
-        _DANDISET_ID
     See comments below for descriptions of these variables.
 """
 
 import glob
 import json
 import logging
-import os
 import sys
 from pathlib import Path
-from typing import Union
 from uuid import uuid4
-from zoneinfo import ZoneInfo
 
 import get_session_paths
 import nwb_converter
-from neuroconv.tools.data_transfers import automatic_dandi_upload
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 # Data repository. Either 'globus' or 'openmind'
@@ -42,8 +37,6 @@ _REPO = "openmind"
 _STUB_TEST = True
 # Whether to overwrite output nwb files
 _OVERWRITE = True
-# ID of the dandiset to upload to, or None to not upload
-_DANDISET_ID = None  # '000620'
 
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
@@ -54,7 +47,7 @@ _SUBJECT_TO_SEX = {
 }
 _SUBJECT_TO_AGE = {
     "Perle": "P10Y",  # Born 6/11/2012
-    "Elgar": "P10Y",  # Born 5/2/2012
+    "Elgar": "P11Y",  # Born 5/2/2012
 }
 
 
@@ -141,6 +134,7 @@ def _add_spikeglx_data(
     ]
     if len(spikeglx_dir) == 0:
         logging.info("Found no SpikeGLX data")
+        return
     elif len(spikeglx_dir) == 1:
         spikeglx_dir = spikeglx_dir[0]
     else:
@@ -167,12 +161,75 @@ def _add_spikeglx_data(
     )
 
 
+def _update_metadata(metadata, subject, session_id, session_paths):
+    """Update metadata."""
+
+    # Add subject_id, session_id, sex, and age
+    metadata["NWBFile"]["session_id"] = session_id
+    metadata["Subject"]["subject_id"] = subject
+    metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
+    metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
+
+    # Add probe locations
+    probe_metadata_file = (
+        session_paths.data_open_source / "probes.metadata.json"
+    )
+    probe_metadata = json.load(open(probe_metadata_file, "r"))
+    for entry in metadata["Ecephys"]["ElectrodeGroup"]:
+        if entry["device"] == "Neuropixel-Imec":
+            neuropixel_metadata = [
+                x for x in probe_metadata if x["probe_type"] == "Neuropixels"
+            ][0]
+            coordinate_system = neuropixel_metadata["coordinate_system"]
+            coordinates = neuropixel_metadata["coordinates"]
+            depth_from_surface = neuropixel_metadata["depth_from_surface"]
+            entry["description"] = (
+                f"{entry['description']}\n"
+                f"{coordinate_system}\n"
+                f"coordinates = {coordinates}\n"
+                f"depth_from_surface = {depth_from_surface}"
+            )
+            entry["position"] = [
+                coordinates[0],
+                coordinates[1],
+                depth_from_surface,
+            ]
+        elif "vprobe" in entry["device"]:
+            probe_index = int(entry["device"].split("vprobe")[1])
+            v_probe_metadata = [
+                x for x in probe_metadata if x["probe_type"] == "V-Probe 64"
+            ][probe_index]
+            first_channel = v_probe_metadata["coordinates"]["first_channel"]
+            last_channel = v_probe_metadata["coordinates"]["last_channel"]
+            coordinate_system = v_probe_metadata["coordinate_system"]
+            entry["description"] = (
+                f"{entry['description']}\n"
+                f"{coordinate_system}\n"
+                f"first_channel = {first_channel}\n"
+                f"last_channel = {last_channel}"
+            )
+            entry["position"] = first_channel
+
+    # Update default metadata with the editable in the corresponding yaml file
+    editable_metadata_path = Path(__file__).parent / "metadata.yaml"
+    editable_metadata = load_dict_from_file(editable_metadata_path)
+    metadata = dict_deep_update(metadata, editable_metadata)
+
+    # Ensure session_start_time exists in metadata
+    if "session_start_time" not in metadata["NWBFile"]:
+        raise ValueError(
+            "Session start time was not auto-detected. Please provide it "
+            "in `metadata.yaml`"
+        )
+
+    return metadata
+
+
 def session_to_nwb(
     subject: str,
     session: str,
     stub_test: bool = False,
     overwrite: bool = True,
-    dandiset_id: Union[str, None] = None,
 ):
     """
     Convert a single session to an NWB file.
@@ -189,27 +246,10 @@ def session_to_nwb(
     overwrite : boolean
         If the file exists already, True will delete and replace with a new file, False will append the contents.
         Default is True.
-    dandiset_id : string, optional
-        If you want to upload the file to the DANDI archive, specify the six-digit ID here.
-        Requires the DANDI_API_KEY environment variable to be set.
-        To set this in your bash terminal in Linux or macOS, run
-            export DANDI_API_KEY=...
-        or in Windows
-            set DANDI_API_KEY=...
-        Default is None.
     """
-    if dandiset_id is not None:
-        import dandi  # check importability
-
-        assert os.getenv("DANDI_API_KEY"), (
-            "Unable to find environment variable 'DANDI_API_KEY'. "
-            "Please retrieve your token from DANDI and set this environment "
-            "variable."
-        )
 
     logging.info(f"stub_test = {stub_test}")
     logging.info(f"overwrite = {overwrite}")
-    logging.info(f"dandiset_id = {dandiset_id}")
 
     # Get paths
     session_paths = get_session_paths.get_session_paths(
@@ -288,50 +328,19 @@ def session_to_nwb(
     )
     processed_conversion_options["Display"] = dict()
 
-    # Create processed data converter
+    # Create data converters
     processed_converter = nwb_converter.NWBConverter(
         source_data=processed_source_data,
         sync_dir=session_paths.sync_pulses,
     )
-
-    # Add datetime and subject name to processed converter
-    metadata = processed_converter.get_metadata()
-    metadata["NWBFile"]["session_id"] = session_id
-    metadata["Subject"]["subject_id"] = subject
-    metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
-    metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
-
-    # EcePhys
-    probe_metadata_file = (
-        session_paths.data_open_source / "probes.metadata.json"
+    raw_converter = nwb_converter.NWBConverter(
+        source_data=raw_source_data,
+        sync_dir=str(session_paths.sync_pulses),
     )
-    with open(probe_metadata_file, "r") as f:
-        probe_metadata = json.load(f)
-    neuropixel_metadata = [
-        x for x in probe_metadata if x["probe_type"] == "Neuropixels"
-    ][0]
-    for entry in metadata["Ecephys"]["ElectrodeGroup"]:
-        if entry["device"] == "Neuropixel-Imec":
-            # TODO: uncomment when fixed in pynwb
-            # entry.update(dict(position=[(
-            #     neuropixel_metadata['coordinates'][0],
-            #     neuropixel_metadata['coordinates'][1],
-            #     neuropixel_metadata['depth_from_surface'],
-            # )]
-            logging.info("\n\n")
-            logging.warning("   PROBE COORDINATES NOT IMPLEMENTED\n\n")
 
-    # Update default metadata with the editable in the corresponding yaml file
-    editable_metadata_path = Path(__file__).parent / "metadata.yaml"
-    editable_metadata = load_dict_from_file(editable_metadata_path)
-    metadata = dict_deep_update(metadata, editable_metadata)
-
-    # Check if session_start_time was found/set
-    if "session_start_time" not in metadata["NWBFile"]:
-        raise ValueError(
-            "Session start time was not auto-detected. Please provide it "
-            "in `metadata.yaml`"
-        )
+    # Update metadata
+    metadata = processed_converter.get_metadata()
+    metadata = _update_metadata(metadata, subject, session_id, session_paths)
 
     # Run conversion
     logging.info("Running processed conversion")
@@ -344,24 +353,12 @@ def session_to_nwb(
 
     logging.info("Running raw data conversion")
     metadata["NWBFile"]["identifier"] = str(uuid4())
-    raw_converter = nwb_converter.NWBConverter(
-        source_data=raw_source_data,
-        sync_dir=str(session_paths.sync_pulses),
-    )
     raw_converter.run_conversion(
         metadata=metadata,
         nwbfile_path=raw_nwb_path,
         conversion_options=raw_conversion_options,
         overwrite=overwrite,
     )
-
-    # Upload to DANDI
-    if dandiset_id is not None:
-        logging.info(f"Uploading to dandiset id {dandiset_id}")
-        automatic_dandi_upload(
-            dandiset_id=dandiset_id,
-            nwb_folder_path=session_paths.output,
-        )
 
 
 if __name__ == "__main__":
@@ -374,6 +371,5 @@ if __name__ == "__main__":
         session=session,
         stub_test=_STUB_TEST,
         overwrite=_OVERWRITE,
-        dandiset_id=_DANDISET_ID,
     )
     logging.info(f"\nFinished conversion for {subject}/{session}\n")

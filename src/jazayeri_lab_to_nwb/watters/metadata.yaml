@@ -11,5 +11,6 @@ NWBFile:
   lab: Jazayeri
   experimenter:
     - Watters, Nicholas
+    - Gabel, John
 Subject:
   species: Macaca mulatta

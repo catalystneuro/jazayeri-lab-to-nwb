@@ -180,13 +180,16 @@ class TrialsInterface(TimeIntervalsInterface):
                 "Response position for each trial. This differs from "
                 "closed_loop_response_position in that this is calculated "
                 "post-hoc from high-resolution eye tracking data, hence is "
-                "more accurate."
+                "more accurate. Note that unlike "
+                "closed_loop_response_position, this may be inconsistent with "
+                "reward delivery."
             ),
             "response_time": (
                 "Response time for each trial. This differs from "
                 "closed_loop_response_time in that this is calculated post-hoc "
                 "from high-resolution eye tracking data, hence is more "
-                "accurate."
+                "accurate. Note that unlike closed_loop_response_time, this "
+                "may be inconsistent with reward delivery."
             ),
         }
 

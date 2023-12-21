@@ -1,4 +1,4 @@
-"""Primary class for recording data."""
+"""Primary class for recording V-Probe data from .dat files."""
 
 from typing import Optional
 
@@ -72,7 +72,7 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
                 manufacturer="Plexon",
             )
         ]
-        description = f"a group representing electrodes on {self.probe_name}"
+        description = f"A group representing electrodes on {self.probe_name}"
         electrode_groups = [
             dict(
                 name=self.probe_name,
