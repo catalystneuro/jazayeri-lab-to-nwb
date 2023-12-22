@@ -15,7 +15,56 @@ from neuroconv.datainterfaces.ecephys.basesortingextractorinterface import (
 )
 from neuroconv.utils import FolderPathType
 from recording_interface import DatRecordingInterface
-from spikeinterface.core import waveform_tools
+from spikeinterface import curation
+
+
+def _trim_excess_spikes(
+    recording_interface, sorting_interface, max_excess_samples=300
+):
+    """Trim sorting object spikes that exceed the recording number of samples.
+
+    Args:
+        recording: BaseRecording instance. The recording object.
+        sorting: BaseSorting instance. The sorting object.
+        max_excess_samples: Int. If a spike exists more than this number of
+            samples beyond the end of the recording, an error is raised. This is
+            in units of samples, which is typically 30000Hz.
+
+    Returns:
+        bool True if exceeding spikes, False otherwise.
+    """
+    recording_extractor = recording_interface.recording_extractor
+    sorting_extractor = sorting_interface.sorting_extractor
+    spike_vector = sorting_extractor.to_spike_vector()
+    has_exceeding_spikes = False
+    for segment_index in range(recording_extractor.get_num_segments()):
+        start_seg_ind, end_seg_ind = np.searchsorted(
+            spike_vector["segment_index"], [segment_index, segment_index + 1]
+        )
+        spike_vector_seg = spike_vector[start_seg_ind:end_seg_ind]
+        if len(spike_vector_seg) > 0:
+            last_spike_vector_sample = spike_vector_seg["sample_index"][-1]
+            last_recording_sample = recording_extractor.get_num_samples(
+                segment_index=segment_index
+            )
+            excess = last_spike_vector_sample - last_recording_sample + 1
+            if excess > max_excess_samples:
+                raise ValueError(
+                    f"Spikes detected at least {excess} samples after the end "
+                    "of the recording."
+                )
+            elif excess > 0:
+                has_exceeding_spikes = True
+
+    if has_exceeding_spikes:
+        # Sometimes kilosort can detect spike that happen very
+        # slightly after the recording stopped
+        sorting_interface.sorting_extractor = curation.remove_excess_spikes(
+            recording=recording_extractor,
+            sorting=sorting_extractor,
+        )
+
+    return
 
 
 class NWBConverter(neuroconv.NWBConverter):
@@ -106,16 +155,12 @@ class NWBConverter(neuroconv.NWBConverter):
                     f"Sorting{probe_name}"
                 ]
 
-                # Sanity check no sorted spikes are outside recording range
-                exceeded_spikes = waveform_tools.has_exceeding_spikes(
-                    recording=recording_interface.recording_extractor,
-                    sorting=sorting_interface.sorting_extractor,
+                # Trim sorted spikes that occur after recording ends from
+                # kilosort artifacts
+                _trim_excess_spikes(
+                    recording_interface=recording_interface,
+                    sorting_interface=sorting_interface,
                 )
-                if exceeded_spikes:
-                    raise ValueError(
-                        "Spikes exceeding recording found in "
-                        f"Sorting{probe_name}"
-                    )
 
                 # Register recording
                 sorting_interface.register_recording(recording_interface)
