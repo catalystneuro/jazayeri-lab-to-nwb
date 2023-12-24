@@ -147,8 +147,12 @@ def _add_spikeglx_data(
     processed_source_data["LF"] = dict(file_path=lfp_file)
     raw_conversion_options["RecordingNP"] = dict(stub_test=stub_test)
     raw_conversion_options["LF"] = dict(stub_test=stub_test)
-    processed_conversion_options["RecordingNP"] = dict(stub_test=stub_test)
-    processed_conversion_options["LF"] = dict(stub_test=stub_test)
+    processed_conversion_options["RecordingNP"] = dict(
+        stub_test=stub_test, write_electrical_series=False
+    )
+    processed_conversion_options["LF"] = dict(
+        stub_test=stub_test, write_electrical_series=False
+    )
 
     # Processed data
     sorting_path = session_paths.spike_sorting_raw / "np_0" / "ks_3_output_v2"
