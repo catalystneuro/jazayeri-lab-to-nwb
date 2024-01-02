@@ -14,8 +14,7 @@ SessionPaths = collections.namedtuple(
     [
         "output",
         "raw_data",
-        # "data_open_source",
-        "task_behavior_data",
+        "behavior_task_data",
         "sync_pulses",
         "spike_sorting_raw",
     ],
@@ -35,34 +34,25 @@ def _get_session_paths_openmind(subject, session):
     raw_data_path = pathlib.Path(f"{OM_PATH}/{subject}/{session}/raw_data/")
 
     # Path to task and behavior data.
-    task_behavior_data_path = pathlib.Path(
-        OM_PATH,
-        f"{subject}/{session}"
+    behavior_task_data_path = pathlib.Path(
+        f"{OM_PATH}/{subject}/{session}/behavior_task"
     )
-
-    # # Path to open-source data. This is used for reading behavior and task data.
-    # data_open_source_path = (
-    #     "/om4/group/jazlab/nwatters/multi_prediction/datasets/data_open_source/" f"Subjects/{subject_id}/{session}/001"
-    # )
 
     # Path to sync pulses. This is used for reading timescale transformations
     # between physiology and mworks data streams.
     sync_pulses_path = pathlib.Path(
-        OM_PATH,
-        f"{subject}/{session}/sync_signals"
+        f"{OM_PATH}/{subject}/{session}/sync_signals"
     )
 
     # Path to spike sorting. This is used for reading spike sorted data.
     spike_sorting_raw_path = pathlib.Path(
-        OM_PATH,
-        f"{subject}/{session}/spike_sorting"
+        f"{OM_PATH}/{subject}/{session}/spike_sorting"
     )
 
     session_paths = SessionPaths(
         output=output_path,
         raw_data=raw_data_path,
-        # data_open_source=pathlib.Path(data_open_source_path),
-        task_behavior_data=task_behavior_data_path,
+        behavior_task_data=pathlib.Path(behavior_task_data_path),
         sync_pulses=sync_pulses_path,
         spike_sorting_raw=spike_sorting_raw_path,
     )
@@ -99,7 +89,8 @@ def _get_session_paths_globus(subject, session):
         output=pathlib.Path(output_path),
         raw_data=pathlib.Path(raw_data_path),
         data_open_source=pathlib.Path(data_open_source_path),
-        task_behavior_data=pathlib.Path(task_behavior_data_path),
+        behavior_data=pathlib.Path(task_behavior_data_path),
+        task_data=pathlib.Path(task_behavior_data_path),
         sync_pulses=pathlib.Path(sync_pulses_path),
         spike_sorting_raw=pathlib.Path(spike_sorting_raw_path),
     )

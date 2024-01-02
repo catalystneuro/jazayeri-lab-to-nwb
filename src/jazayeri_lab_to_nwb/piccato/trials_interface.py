@@ -22,12 +22,11 @@ class TrialsInterface(TimeIntervalsInterface):
         "broke_fixation": "broke_fixation",
         "stimulus_object_identities": "stimulus_object_identities",
         "stimulus_object_positions": "stimulus_object_positions",
-        "stimulus_object_velocities": "stimulus_object_velocities",
         "stimulus_object_target": "stimulus_object_target",
-        "delay_object_blanks": "delay_object_blanks",
         "closed_loop_response_position": "closed_loop_response_position",
         "closed_loop_response_time": "closed_loop_response_time",
         "time_start": "start_time",
+        # 'trial_type': 'trial_type',
         "time_phase_fixation": "phase_fixation_time",
         "time_phase_stimulus": "phase_stimulus_time",
         "time_phase_delay": "phase_delay_time",
@@ -73,26 +72,30 @@ class TrialsInterface(TimeIntervalsInterface):
     def _read_file(self, file_path: FolderPathType):
         # Create dataframe with data for each trial
         trials = json.load(open(Path(file_path) / "trials.json", "r"))
-        trials = {k_mapped: [d[k] for d in trials] for k, k_mapped in TrialsInterface.KEY_MAP.items()}
+        trials = {k_mapped: [d[k] for d in trials]
+                  for k, k_mapped in TrialsInterface.KEY_MAP.items()}
 
         # Field closed_loop_response_position may have None values, so replace
         # those with NaN to make hdf5 conversion work
         trials["closed_loop_response_position"] = [
-            [np.nan, np.nan] if x is None else x for x in trials["closed_loop_response_position"]
+            [np.nan, np.nan] if x is None else x
+            for x in trials["closed_loop_response_position"]
         ]
 
         # Serialize fields with variable-length lists for hdf5 conversion
         for k in [
             "stimulus_object_identities",
             "stimulus_object_positions",
-            "stimulus_object_velocities",
             "stimulus_object_target",
         ]:
             trials[k] = [json.dumps(x) for x in trials[k]]
 
         return pd.DataFrame(trials)
 
-    def add_to_nwbfile(self, nwbfile: NWBFile, metadata: Optional[dict] = None, tag: str = "trials"):
+    def add_to_nwbfile(self,
+                       nwbfile: NWBFile,
+                       metadata: Optional[dict] = None,
+                       tag: str = "trials"):
         return super(TrialsInterface, self).add_to_nwbfile(
             nwbfile=nwbfile,
             metadata=metadata,
@@ -103,32 +106,25 @@ class TrialsInterface(TimeIntervalsInterface):
     @property
     def column_descriptions(self):
         column_descriptions = {
-            "background_indices": ("For each trial, the indices of the background noise pattern " "patch."),
-            "broke_fixation": ("For each trial, whether the subject broke fixation and the " "trial was aborted"),
+            "background_indices": ("For each trial, the indices of the "
+                                   "background noise pattern patch."),
+            "broke_fixation": ("For each trial, whether the subject broke "
+                               "fixation and the trial was aborted"),
             "stimulus_object_identities": (
                 "For each trial, a serialized list with one element for each "
                 'object. Each element is the identity symbol (e.g. "a", "b", '
                 '"c", ...) of the corresponding object.'
             ),
+            "trial_type": ("For each trial, whether condition is LTM or STM"),
             "stimulus_object_positions": (
                 "For each trial, a serialized list with one element for each "
                 "object. Each element is the initial (x, y) position of the "
                 "corresponding object, in coordinates of arena width."
             ),
-            "stimulus_object_velocities": (
-                "For each trial, a serialized list with one element for each "
-                "object. Each element is the initial (dx/dt, dy/dt) velocity "
-                "of the corresponding object, in units of arena width per "
-                "display update."
-            ),
             "stimulus_object_target": (
                 "For each trial, a serialized list with one element for each "
                 "object. Each element is a boolean indicating whether the "
                 "corresponding object is ultimately the cued target."
-            ),
-            "delay_object_blanks": (
-                "For each trial, a boolean indicating whether the objects were "
-                "rendered as blank discs during the delay phase."
             ),
             "closed_loop_response_position": (
                 "For each trial, the position of the response saccade used by "
@@ -141,13 +137,21 @@ class TrialsInterface(TimeIntervalsInterface):
                 "reward delivery."
             ),
             "start_time": "Start time of each trial.",
-            "phase_fixation_time": ("Time of fixation phase onset for each trial."),
-            "phase_stimulus_time": ("Time of stimulus phase onset for each trial."),
+            "phase_fixation_time": (
+                "Time of fixation phase onset for each trial."
+            ),
+            "phase_stimulus_time": (
+                "Time of stimulus phase onset for each trial."
+            ),
             "phase_delay_time": "Time of delay phase onset for each trial.",
             "phase_cue_time": "Time of cue phase onset for each trial.",
-            "phase_response_time": ("Time of response phase onset for each trial."),
+            "phase_response_time": (
+                "Time of response phase onset for each trial."
+            ),
             "phase_reveal_time": "Time of reveal phase onset for each trial.",
-            "phase_iti_time": ("Time of inter-trial interval onset for each trial."),
+            "phase_iti_time": (
+                "Time of inter-trial interval onset for each trial."
+            ),
             "reward_time": "Time of reward delivery onset for each trial.",
             "reward_duration": "Reward duration for each trial",
             "response_position": (

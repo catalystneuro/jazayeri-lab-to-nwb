@@ -147,6 +147,7 @@ def _add_spikeglx_data(
     processed_conversion_options["SortingNP"] = dict(stub_test=stub_test,
                                                      write_as="processing")
 
+
 def session_to_nwb(
     subject: str,
     session: str,
@@ -217,7 +218,6 @@ def session_to_nwb(
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
     logging.info("")
 
-
     # Initialize empty data dictionaries
     raw_source_data = {}
     raw_conversion_options = {}
@@ -248,26 +248,26 @@ def session_to_nwb(
 
     # Add behavior data
     logging.info("Adding behavior data")
-    behavior_path = str(session_paths.task_behavior_data)
-    processed_source_data["EyePosition"] = dict(folder_path=behavior_path)    
+    behavior_task_path = str(session_paths.behavior_task_data)
+    processed_source_data["EyePosition"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["EyePosition"] = dict()
-    processed_source_data["PupilSize"] = dict(folder_path=behavior_path)
+    processed_source_data["PupilSize"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["PupilSize"] = dict()
-    processed_source_data["RewardLine"] = dict(folder_path=behavior_path)
+    processed_source_data["RewardLine"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["RewardLine"] = dict()
-    processed_source_data["Audio"] = dict(folder_path=behavior_path)
+    processed_source_data["Audio"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["Audio"] = dict()
 
     # Add trials data
     logging.info("Adding trials data")
     processed_source_data["Trials"] = dict(
-        folder_path=str(session_paths.task_behavior_data))
+        folder_path=str(session_paths.behavior_task_data))
     processed_conversion_options["Trials"] = dict()
 
     # Add display data
     logging.info("Adding display data")
     processed_source_data["Display"] = dict(
-        folder_path=str(session_paths.task_behavior_data))
+        folder_path=str(session_paths.behavior_task_data))
     processed_conversion_options["Display"] = dict()
 
     # Create processed data converter
