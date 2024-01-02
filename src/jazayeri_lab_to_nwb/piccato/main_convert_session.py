@@ -50,10 +50,10 @@ _DANDISET_ID = None  # '000620'
 logging.getLogger().setLevel(logging.INFO)
 
 _SUBJECT_TO_SEX = {
-    "Elgar": "M",
+    "elgar": "M",
 }
 _SUBJECT_TO_AGE = {
-    "Elgar": "P10Y",  # Born 5/2/2012
+    "elgar": "P10Y",  # Born 5/2/2012
 }
 
 
@@ -276,7 +276,6 @@ def session_to_nwb(
         sync_dir=session_paths.sync_pulses,
     )
 
-    return
     # Add datetime and subject name to processed converter
     metadata = processed_converter.get_metadata()
     metadata["NWBFile"]["session_id"] = session_id
@@ -285,9 +284,11 @@ def session_to_nwb(
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
 
     # EcePhys
-    probe_metadata_file = session_paths.data_open_source / "probes.metadata.json"
+    probe_metadata_file = (session_paths.data_open_source /
+                           "probes.metadata.json")
     with open(probe_metadata_file, "r") as f:
         probe_metadata = json.load(f)
+    return
     neuropixel_metadata = [x for x in probe_metadata if x["probe_type"] == "Neuropixels"][0]
     for entry in metadata["Ecephys"]["ElectrodeGroup"]:
         if entry["device"] == "Neuropixel-Imec":

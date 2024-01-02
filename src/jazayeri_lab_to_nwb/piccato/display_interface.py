@@ -55,9 +55,6 @@ class DisplayInterface(TimeIntervalsInterface):
             for k, k_mapped in DisplayInterface.KEY_MAP.items()
         }
 
-        for k in frames.keys():
-            print(k, len(frames[k]))
-        import pdb; pdb.set_trace()
         return pd.DataFrame(frames)
 
     def add_to_nwbfile(self, nwbfile: NWBFile,
