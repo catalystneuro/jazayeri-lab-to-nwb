@@ -106,8 +106,76 @@ def _add_v_probe_data(
         folder_path=str(sorting_path),
         keep_good_only=False,
     )
-    processed_conversion_options[f"RecordingVP{probe_num}"] = dict(stub_test=stub_test, write_electrical_series=False)
-    processed_conversion_options[f"SortingVP{probe_num}"] = dict(stub_test=stub_test, write_as="processing")
+    processed_conversion_options[f"RecordingVP{probe_num}"] = dict(
+        stub_test=stub_test, 
+        write_electrical_series=False)
+    processed_conversion_options[f"SortingVP{probe_num}"] = dict(
+        stub_test=stub_test, 
+        write_as="processing")
+
+
+def _update_metadata(metadata, subject, session_id, session_paths):
+    """Update metadata."""
+
+    # Add subject_id, session_id, sex, and age
+    metadata["NWBFile"]["session_id"] = session_id
+    metadata["Subject"]["subject_id"] = subject
+    metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
+    metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
+
+    # Add probe locations
+    probe_metadata_file = (
+        session_paths.data_open_source / "probes.metadata.json"
+    )
+    probe_metadata = json.load(open(probe_metadata_file, "r"))
+    for entry in metadata["Ecephys"]["ElectrodeGroup"]:
+        if entry["device"] == "Neuropixel-Imec":
+            neuropixel_metadata = [
+                x for x in probe_metadata if x["probe_type"] == "Neuropixels"
+            ][0]
+            coordinate_system = neuropixel_metadata["coordinate_system"]
+            coordinates = neuropixel_metadata["coordinates"]
+            depth_from_surface = neuropixel_metadata["depth_from_surface"]
+            entry["description"] = (
+                f"{entry['description']}\n"
+                f"{coordinate_system}\n"
+                f"coordinates = {coordinates}\n"
+                f"depth_from_surface = {depth_from_surface}"
+            )
+            entry["position"] = [
+                coordinates[0],
+                coordinates[1],
+                depth_from_surface,
+            ]
+        elif "vprobe" in entry["device"]:
+            probe_index = int(entry["device"].split("vprobe")[1])
+            v_probe_metadata = [
+                x for x in probe_metadata if x["probe_type"] == "V-Probe 64"
+            ][probe_index]
+            first_channel = v_probe_metadata["coordinates"]["first_channel"]
+            last_channel = v_probe_metadata["coordinates"]["last_channel"]
+            coordinate_system = v_probe_metadata["coordinate_system"]
+            entry["description"] = (
+                f"{entry['description']}\n"
+                f"{coordinate_system}\n"
+                f"first_channel = {first_channel}\n"
+                f"last_channel = {last_channel}"
+            )
+            entry["position"] = first_channel
+
+    # Update default metadata with the editable in the corresponding yaml file
+    editable_metadata_path = Path(__file__).parent / "metadata.yaml"
+    editable_metadata = load_dict_from_file(editable_metadata_path)
+    metadata = dict_deep_update(metadata, editable_metadata)
+
+    # Ensure session_start_time exists in metadata
+    if "session_start_time" not in metadata["NWBFile"]:
+        raise ValueError(
+            "Session start time was not auto-detected. Please provide it "
+            "in `metadata.yaml`"
+        )
+
+    return metadata
 
 
 def _add_spikeglx_data(
@@ -133,8 +201,10 @@ def _add_spikeglx_data(
     processed_source_data["LF"] = dict(file_path=lfp_file)
     raw_conversion_options["RecordingNP"] = dict(stub_test=stub_test)
     raw_conversion_options["LF"] = dict(stub_test=stub_test)
-    processed_conversion_options["RecordingNP"] = dict(stub_test=stub_test)
-    processed_conversion_options["LF"] = dict(stub_test=stub_test)
+    processed_conversion_options["RecordingNP"] = dict(
+        stub_test=stub_test, write_electrical_series=False)
+    processed_conversion_options["LF"] = dict(
+        stub_test=stub_test, write_electrical_series=False)
 
     # Processed data
     sorting_path = (session_paths.spike_sorting_raw /
@@ -278,44 +348,7 @@ def session_to_nwb(
 
     # Add datetime and subject name to processed converter
     metadata = processed_converter.get_metadata()
-    metadata["NWBFile"]["session_id"] = session_id
-    metadata["Subject"]["subject_id"] = subject
-    metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
-    metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
-
-    # EcePhys
-    probe_metadata_file = (session_paths.session_data /
-                           "probes.metadata.json")
-    with open(probe_metadata_file, "r") as f:
-        probe_metadata = json.load(f)
-
-    neuropixel_metadata = [x for x in probe_metadata 
-        if x["probe_type"] == "Neuropixel"][0]
-
-    for entry in metadata["Ecephys"]["ElectrodeGroup"]:
-        if entry["device"] == "Neuropixel-Imec":
-            # TODO: uncomment when fixed in pynwb
-            # entry.update(dict(position=[(
-            #     neuropixel_metadata['coordinates'][0],
-            #     neuropixel_metadata['coordinates'][1],
-            #     neuropixel_metadata['depth_from_surface'],
-            # )]
-            logging.info("\n\n")
-            logging.warning("   PROBE COORDINATES NOT IMPLEMENTED\n\n")
-
-    # Update default metadata with the editable in the corresponding yaml file
-    editable_metadata_path = Path(__file__).parent / "metadata.yaml"
-    editable_metadata = load_dict_from_file(editable_metadata_path)
-    metadata = dict_deep_update(metadata, editable_metadata)
-
-    # Check if session_start_time was found/set
-    if "session_start_time" not in metadata["NWBFile"]:
-        try:
-            date = datetime.datetime.strptime(session, "%Y-%m-%d")
-            date = date.replace(tzinfo=ZoneInfo("US/Eastern"))
-        except:
-            raise ValueError("Session start time was not auto-detected. Please provide it " "in `metadata.yaml`")
-        metadata["NWBFile"]["session_start_time"] = date
+    metadata = _update_metadata(metadata, subject, session_id, session_paths)
 
     # Run conversion
     logging.info("Running processed conversion")
