@@ -284,17 +284,17 @@ def session_to_nwb(
     processed_source_data = {}
     processed_conversion_options = {}
 
-    # # Add V-Probe data
-    # for probe_num in range(2):
-    #     _add_v_probe_data(
-    #         raw_source_data=raw_source_data,
-    #         raw_conversion_options=raw_conversion_options,
-    #         processed_source_data=processed_source_data,
-    #         processed_conversion_options=processed_conversion_options,
-    #         session_paths=session_paths,
-    #         probe_num=probe_num,
-    #         stub_test=stub_test,
-    #     )
+    # Add V-Probe data
+    for probe_num in range(2):
+        _add_v_probe_data(
+            raw_source_data=raw_source_data,
+            raw_conversion_options=raw_conversion_options,
+            processed_source_data=processed_source_data,
+            processed_conversion_options=processed_conversion_options,
+            session_paths=session_paths,
+            probe_num=probe_num,
+            stub_test=stub_test,
+        )
 
     # Add SpikeGLX data
     _add_spikeglx_data(

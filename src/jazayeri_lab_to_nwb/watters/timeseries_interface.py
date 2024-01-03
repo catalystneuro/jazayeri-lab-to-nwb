@@ -1,7 +1,7 @@
 """Primary classes for timeseries variables.
 
 The classes here handle variables like eye position, reward line, and audio
-stimuli that are not necessarily tied to the trial structure of display updates
+stimuli that are not necessarily tied to the trial structure of display updates.
 For trial structured variables, see ../trials_interface.py. For variables
 pertaining to display updates, see ../frames_interface.py.
 """
