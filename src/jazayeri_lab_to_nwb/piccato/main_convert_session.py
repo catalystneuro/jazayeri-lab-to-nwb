@@ -44,7 +44,7 @@ _STUB_TEST = True
 # Whether to overwrite output nwb files
 _OVERWRITE = True
 # ID of the dandiset to upload to, or None to not upload
-_DANDISET_ID = None  # '000620'
+_DANDISET_ID = None # '000767'
 
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
@@ -95,22 +95,26 @@ def _add_v_probe_data(
         probe_name=f"vprobe{probe_num}",
         es_key=f"ElectricalSeriesVP{probe_num}",
     )
-    raw_conversion_options[f"RecordingVP{probe_num}"] = dict(stub_test=stub_test)
+    raw_conversion_options[f"RecordingVP{probe_num}"] = dict(
+        stub_test=stub_test
+    )
 
     # Processed data
     sorting_path = (session_paths.spike_sorting_raw /
                     f"v_probe_{probe_num}" /
                     "ks_3_output_pre_v6_curated")
-    processed_source_data[f"RecordingVP{probe_num}"] = raw_source_data[f"RecordingVP{probe_num}"]
+    processed_source_data[f"RecordingVP{probe_num}"] = raw_source_data[
+        f"RecordingVP{probe_num}"
+    ]
     processed_source_data[f"SortingVP{probe_num}"] = dict(
         folder_path=str(sorting_path),
         keep_good_only=False,
     )
     processed_conversion_options[f"RecordingVP{probe_num}"] = dict(
-        stub_test=stub_test, 
+        stub_test=stub_test,
         write_electrical_series=False)
     processed_conversion_options[f"SortingVP{probe_num}"] = dict(
-        stub_test=stub_test, 
+        stub_test=stub_test,
         write_as="processing")
 
 
@@ -125,28 +129,29 @@ def _update_metadata(metadata, subject, session_id, session_paths):
 
     # Add probe locations
     probe_metadata_file = (
-        session_paths.data_open_source / "probes.metadata.json"
+        session_paths.session_data / "probes.metadata.json"
     )
     probe_metadata = json.load(open(probe_metadata_file, "r"))
     for entry in metadata["Ecephys"]["ElectrodeGroup"]:
         if entry["device"] == "Neuropixel-Imec":
-            neuropixel_metadata = [
-                x for x in probe_metadata if x["probe_type"] == "Neuropixels"
-            ][0]
-            coordinate_system = neuropixel_metadata["coordinate_system"]
-            coordinates = neuropixel_metadata["coordinates"]
-            depth_from_surface = neuropixel_metadata["depth_from_surface"]
-            entry["description"] = (
-                f"{entry['description']}\n"
-                f"{coordinate_system}\n"
-                f"coordinates = {coordinates}\n"
-                f"depth_from_surface = {depth_from_surface}"
-            )
-            entry["position"] = [
-                coordinates[0],
-                coordinates[1],
-                depth_from_surface,
-            ]
+            pass
+            # neuropixel_metadata = [
+            #     x for x in probe_metadata if x["probe_type"] == "Neuropixel"
+            # ][0]
+            # coordinate_system = neuropixel_metadata["coordinate_system"]
+            # coordinates = neuropixel_metadata["coordinates"]
+            # depth_from_surface = neuropixel_metadata["depth_from_surface"]
+            # entry["description"] = (
+            #     f"{entry['description']}\n"
+            #     f"{coordinate_system}\n"
+            #     f"coordinates = {coordinates}\n"
+            #     f"depth_from_surface = {depth_from_surface}"
+            # )
+            # entry["position"] = [
+            #     coordinates[0],
+            #     coordinates[1],
+            #     depth_from_surface,
+            # ]
         elif "vprobe" in entry["device"]:
             probe_index = int(entry["device"].split("vprobe")[1])
             v_probe_metadata = [
@@ -340,13 +345,17 @@ def session_to_nwb(
         folder_path=str(session_paths.behavior_task_data))
     processed_conversion_options["Display"] = dict()
 
-    # Create processed data converter
+    # Create data converters
     processed_converter = nwb_converter.NWBConverter(
         source_data=processed_source_data,
         sync_dir=session_paths.sync_pulses,
     )
+    raw_converter = nwb_converter.NWBConverter(
+        source_data=raw_source_data,
+        sync_dir=str(session_paths.sync_pulses),
+    )
 
-    # Add datetime and subject name to processed converter
+    # Update metadata
     metadata = processed_converter.get_metadata()
     metadata = _update_metadata(metadata, subject, session_id, session_paths)
 
@@ -361,10 +370,6 @@ def session_to_nwb(
 
     logging.info("Running raw data conversion")
     metadata["NWBFile"]["identifier"] = str(uuid4())
-    raw_converter = nwb_converter.NWBConverter(
-        source_data=raw_source_data,
-        sync_dir=str(session_paths.sync_pulses),
-    )
     raw_converter.run_conversion(
         metadata=metadata,
         nwbfile_path=raw_nwb_path,
