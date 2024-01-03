@@ -21,7 +21,7 @@ Usage:
     See comments below for descriptions of these variables.
 """
 
-import datetime
+
 import glob
 import json
 import logging
@@ -30,7 +30,6 @@ import sys
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
-from zoneinfo import ZoneInfo
 
 import get_session_paths
 import nwb_converter
@@ -44,7 +43,7 @@ _STUB_TEST = True
 # Whether to overwrite output nwb files
 _OVERWRITE = True
 # ID of the dandiset to upload to, or None to not upload
-_DANDISET_ID = None # '000767'
+_DANDISET_ID = None  # '000767'
 
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
