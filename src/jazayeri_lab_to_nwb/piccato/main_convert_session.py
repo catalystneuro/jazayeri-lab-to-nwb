@@ -284,12 +284,14 @@ def session_to_nwb(
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
 
     # EcePhys
-    probe_metadata_file = (session_paths.data_open_source /
+    probe_metadata_file = (session_paths.session_data /
                            "probes.metadata.json")
     with open(probe_metadata_file, "r") as f:
         probe_metadata = json.load(f)
-    return
-    neuropixel_metadata = [x for x in probe_metadata if x["probe_type"] == "Neuropixels"][0]
+
+    neuropixel_metadata = [x for x in probe_metadata 
+        if x["probe_type"] == "Neuropixel"][0]
+
     for entry in metadata["Ecephys"]["ElectrodeGroup"]:
         if entry["device"] == "Neuropixel-Imec":
             # TODO: uncomment when fixed in pynwb

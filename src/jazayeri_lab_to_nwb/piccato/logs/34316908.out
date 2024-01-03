@@ -1,0 +1,47 @@
+INFO:root:
+Starting conversion for elgar/2023-11-30
+
+INFO:root:stub_test = True
+INFO:root:overwrite = True
+INFO:root:dandiset_id = None
+INFO:root:session_paths: SessionPaths(output=PosixPath('/om2/user/apiccato/nwb_data/staging/sub-elgar'), raw_data=PosixPath('/om2/user/apiccato/phys_preprocessing_open_source/phys_data/elgar/2023-11-30/raw_data'), behavior_task_data=PosixPath('/om2/user/apiccato/phys_preprocessing_open_source/phys_data/elgar/2023-11-30/behavior_task'), session_data=PosixPath('/om2/user/apiccato/phys_preprocessing_open_source/phys_data/elgar/2023-11-30'), sync_pulses=PosixPath('/om2/user/apiccato/phys_preprocessing_open_source/phys_data/elgar/2023-11-30/sync_signals'), spike_sorting_raw=PosixPath('/om2/user/apiccato/phys_preprocessing_open_source/phys_data/elgar/2023-11-30/spike_sorting'))
+INFO:root:raw_nwb_path = /om2/user/apiccato/nwb_data/staging/sub-elgar/sub-elgar_ses-2023-11-30-stub_ecephys.nwb
+INFO:root:processed_nwb_path = /om2/user/apiccato/nwb_data/staging/sub-elgar/sub-elgar_ses-2023-11-30-stub_behavior+ecephys.nwb
+INFO:root:
+INFO:root:Adding SpikeGLX data
+INFO:root:Adding behavior data
+INFO:root:Adding trials data
+INFO:root:Adding display data
+INFO:root:
+
+
+WARNING:root:   PROBE COORDINATES NOT IMPLEMENTED
+
+
+INFO:root:Running processed conversion
+INFO:root:Temporally aligning data interfaces
+/om2/user/apiccato/anaconda/envs/jazayeri_lab_to_nwb_env/lib/python3.10/site-packages/spikeinterface/core/baserecording.py:413: UserWarning: Setting times with Recording.set_times() is not recommended because times are not always propagated to across preprocessingUse use this carefully!
+  warn(
+/om2/user/apiccato/anaconda/envs/jazayeri_lab_to_nwb_env/lib/python3.10/site-packages/pynwb/file.py:471: UserWarning: Date is missing timezone information. Updating to local timezone.
+  args_to_set['session_start_time'] = _add_missing_timezone(session_start_time)
+/om2/user/apiccato/anaconda/envs/jazayeri_lab_to_nwb_env/lib/python3.10/site-packages/neuroconv/tools/nwb_helpers/_metadata_and_file_helpers.py:22: UserWarning: Custom description given to get_module does not match existing module description! Ignoring custom description.
+  warn(
+/om2/user/apiccato/anaconda/envs/jazayeri_lab_to_nwb_env/lib/python3.10/site-packages/neuroconv/tools/nwb_helpers/_metadata_and_file_helpers.py:22: UserWarning: Custom description given to get_module does not match existing module description! Ignoring custom description.
+  warn(
+INFO:root:Running raw data conversion
+INFO:root:Temporally aligning data interfaces
+/om2/user/apiccato/anaconda/envs/jazayeri_lab_to_nwb_env/lib/python3.10/site-packages/spikeinterface/core/baserecording.py:413: UserWarning: Setting times with Recording.set_times() is not recommended because times are not always propagated to across preprocessingUse use this carefully!
+  warn(
+/om2/user/apiccato/anaconda/envs/jazayeri_lab_to_nwb_env/lib/python3.10/site-packages/pynwb/file.py:471: UserWarning: Date is missing timezone information. Updating to local timezone.
+  args_to_set['session_start_time'] = _add_missing_timezone(session_start_time)
+INFO:root:
+Finished conversion for elgar/2023-11-30
+
+Source data is valid!
+Metadata is valid!
+conversion_options is valid!
+NWB file saved at /om2/user/apiccato/nwb_data/staging/sub-elgar/sub-elgar_ses-2023-11-30-stub_behavior+ecephys.nwb!
+Source data is valid!
+Metadata is valid!
+conversion_options is valid!
+NWB file saved at /om2/user/apiccato/nwb_data/staging/sub-elgar/sub-elgar_ses-2023-11-30-stub_ecephys.nwb!

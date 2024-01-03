@@ -15,6 +15,7 @@ SessionPaths = collections.namedtuple(
         "output",
         "raw_data",
         "behavior_task_data",
+        "session_data",
         "sync_pulses",
         "spike_sorting_raw",
     ],
@@ -49,9 +50,14 @@ def _get_session_paths_openmind(subject, session):
         f"{OM_PATH}/{subject}/{session}/spike_sorting"
     )
 
+    session_path = pathlib.Path(
+        f"{OM_PATH}/{subject}/{session}/"
+    )
+
     session_paths = SessionPaths(
         output=output_path,
         raw_data=raw_data_path,
+        session_data=session_path,
         behavior_task_data=pathlib.Path(behavior_task_data_path),
         sync_pulses=sync_pulses_path,
         spike_sorting_raw=spike_sorting_raw_path,
