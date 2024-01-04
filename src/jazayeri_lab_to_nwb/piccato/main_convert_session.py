@@ -30,6 +30,7 @@ import sys
 from pathlib import Path
 from typing import Union
 from uuid import uuid4
+import numpy as np
 
 import get_session_paths
 import nwb_converter
@@ -128,44 +129,27 @@ def _update_metadata(metadata, subject, session_id, session_paths):
 
     # Add probe locations
     probe_metadata_file = (
-        session_paths.session_data / "probes.metadata.json"
+        session_paths.session_data / "phys_metadata.json"
     )
     probe_metadata = json.load(open(probe_metadata_file, "r"))
     for entry in metadata["Ecephys"]["ElectrodeGroup"]:
         if entry["device"] == "Neuropixel-Imec":
-            pass
-            # neuropixel_metadata = [
-            #     x for x in probe_metadata if x["probe_type"] == "Neuropixel"
-            # ][0]
-            # coordinate_system = neuropixel_metadata["coordinate_system"]
-            # coordinates = neuropixel_metadata["coordinates"]
-            # depth_from_surface = neuropixel_metadata["depth_from_surface"]
-            # entry["description"] = (
-            #     f"{entry['description']}\n"
-            #     f"{coordinate_system}\n"
-            #     f"coordinates = {coordinates}\n"
-            #     f"depth_from_surface = {depth_from_surface}"
-            # )
-            # entry["position"] = [
-            #     coordinates[0],
-            #     coordinates[1],
-            #     depth_from_surface,
-            # ]
-        elif "vprobe" in entry["device"]:
-            probe_index = int(entry["device"].split("vprobe")[1])
-            v_probe_metadata = [
-                x for x in probe_metadata if x["probe_type"] == "V-Probe 64"
-            ][probe_index]
-            first_channel = v_probe_metadata["coordinates"]["first_channel"]
-            last_channel = v_probe_metadata["coordinates"]["last_channel"]
-            coordinate_system = v_probe_metadata["coordinate_system"]
+            neuropixel_metadata = probe_metadata
+            coordinate_system = neuropixel_metadata["coordinate_system"]
+            coordinates = np.round(neuropixel_metadata["coordinates"][:2],
+                                   decimals=2)
+            depth_from_surface = neuropixel_metadata["depth"]
             entry["description"] = (
                 f"{entry['description']}\n"
                 f"{coordinate_system}\n"
-                f"first_channel = {first_channel}\n"
-                f"last_channel = {last_channel}"
+                f"coordinates = {coordinates}\n"
+                f"depth_from_surface = {depth_from_surface}"
             )
-            entry["position"] = first_channel
+            entry["position"] = [
+                coordinates[0],
+                coordinates[1],
+                depth_from_surface,
+            ]
 
     # Update default metadata with the editable in the corresponding yaml file
     editable_metadata_path = Path(__file__).parent / "metadata.yaml"

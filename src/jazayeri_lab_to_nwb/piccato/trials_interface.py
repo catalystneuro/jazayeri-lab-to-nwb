@@ -26,7 +26,8 @@ class TrialsInterface(TimeIntervalsInterface):
         "closed_loop_response_position": "closed_loop_response_position",
         "closed_loop_response_time": "closed_loop_response_time",
         "time_start": "start_time",
-        # 'trial_type': 'trial_type',
+        "trial_type": "trial_type",
+        "stimulus_set": "stimulus_set",
         "time_phase_fixation": "phase_fixation_time",
         "time_phase_stimulus": "phase_stimulus_time",
         "time_phase_delay": "phase_delay_time",
@@ -116,6 +117,9 @@ class TrialsInterface(TimeIntervalsInterface):
                 '"c", ...) of the corresponding object.'
             ),
             "trial_type": ("For each trial, whether condition is LTM or STM"),
+            "stimulus_set": ("For each trial, string identity symbol of the "
+                             "set of objects. String consists of sorted list "
+                             "of object identity symbols"),
             "stimulus_object_positions": (
                 "For each trial, a serialized list with one element for each "
                 "object. Each element is the initial (x, y) position of the "
