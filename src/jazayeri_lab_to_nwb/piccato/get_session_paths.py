@@ -8,7 +8,7 @@ SUBJECT_NAME_TO_ID = {
 }
 
 OM_PATH = '/om2/user/apiccato/phys_preprocessing_open_source/phys_data'
-
+DANDISET_ID = '000767'
 SessionPaths = collections.namedtuple(
     "SessionPaths",
     [
@@ -28,7 +28,7 @@ def _get_session_paths_openmind(subject, session):
 
     # Path to write output nwb files to
     output_path = pathlib.Path(
-        f"/om2/user/apiccato/nwb_data/staging/sub-{subject}"
+        f"/om2/user/apiccato/nwb_data/staging/{DANDISET_ID}/sub-{subject}"
     )
 
     # Path to the raw data. This is used for reading raw physiology data.

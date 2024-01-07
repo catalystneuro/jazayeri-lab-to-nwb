@@ -2,14 +2,17 @@ NWBFile:
   # related_publications: # no pubs yet
   #   - https://doi.org/12345
   session_description:
-    Data from macaque performing multi-object working memory task. Subject is
-    presented with multiple objects at different locations on a screen. After a
-    delay, the subject is then cued with one of the objects, now displayed at
-    the center of the screen. Subject should respond by saccading to the
-    location of the cued object at its initial presentation.
+    Data from macaque performing a working and long-term memory task. A
+    session switches in a block-like fashion between a long- and a short-term 
+    memory task. In the short-term memory task, the subject is presented with 
+    three objects placed in random locations in the periphery. The subject must 
+    respond by retrieving and saccading to the location of a cued object after 
+    a short delay. In the long-term memory task, the objects are not presented 
+    in their corresponding locations. Instead, the subject must respond 
+    according to a set of learned long-term object-location associations. 
   institution: MIT
   lab: Jazayeri
   experimenter:
-    - Watters, Nicholas
+    - Piccato, Aida
 Subject:
   species: Macaca mulatta

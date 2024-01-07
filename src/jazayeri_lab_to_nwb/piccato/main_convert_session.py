@@ -34,17 +34,16 @@ import numpy as np
 
 import get_session_paths
 import nwb_converter
-from neuroconv.tools.data_transfers import automatic_dandi_upload
+
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 # Data repository. Either 'globus' or 'openmind'
 _REPO = "openmind"
 # Whether to run all the physiology data or only a stub
-_STUB_TEST = True
+_STUB_TEST = False
 # Whether to overwrite output nwb files
 _OVERWRITE = True
-# ID of the dandiset to upload to, or None to not upload
-_DANDISET_ID = None  # '000767'
+
 
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
@@ -70,59 +69,11 @@ def _get_single_file(directory, suffix=""):
     return files[0]
 
 
-def _add_v_probe_data(
-    raw_source_data,
-    raw_conversion_options,
-    processed_source_data,
-    processed_conversion_options,
-    session_paths,
-    probe_num,
-    stub_test,
-):
-    """Add V-Probe session data."""
-    probe_data_dir = session_paths.raw_data / f"v_probe_{probe_num}"
-    if not probe_data_dir.exists():
-        return
-    logging.info(f"Adding V-probe {probe_num} session data")
-
-    # Raw data
-    recording_file = _get_single_file(probe_data_dir, suffix=".dat")
-    metadata_path = str(session_paths.data_open_source / "probes.metadata.json")
-    raw_source_data[f"RecordingVP{probe_num}"] = dict(
-        file_path=recording_file,
-        probe_metadata_file=metadata_path,
-        probe_key=f"probe{(probe_num + 1):02d}",
-        probe_name=f"vprobe{probe_num}",
-        es_key=f"ElectricalSeriesVP{probe_num}",
-    )
-    raw_conversion_options[f"RecordingVP{probe_num}"] = dict(
-        stub_test=stub_test
-    )
-
-    # Processed data
-    sorting_path = (session_paths.spike_sorting_raw /
-                    f"v_probe_{probe_num}" /
-                    "ks_3_output_pre_v6_curated")
-    processed_source_data[f"RecordingVP{probe_num}"] = raw_source_data[
-        f"RecordingVP{probe_num}"
-    ]
-    processed_source_data[f"SortingVP{probe_num}"] = dict(
-        folder_path=str(sorting_path),
-        keep_good_only=False,
-    )
-    processed_conversion_options[f"RecordingVP{probe_num}"] = dict(
-        stub_test=stub_test,
-        write_electrical_series=False)
-    processed_conversion_options[f"SortingVP{probe_num}"] = dict(
-        stub_test=stub_test,
-        write_as="processing")
-
-
 def _update_metadata(metadata, subject, session_id, session_paths):
     """Update metadata."""
 
     # Add subject_id, session_id, sex, and age
-    metadata["NWBFile"]["session_id"] = session_id
+    metadata["NWBFile"]["session_id"] = str(session_id)
     metadata["Subject"]["subject_id"] = subject
     metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
@@ -198,12 +149,13 @@ def _add_spikeglx_data(
     sorting_path = (session_paths.spike_sorting_raw /
                     "spikeglx/kilosort2_5/sorter_output"
                     )
-    processed_source_data["SortingNP"] = dict(
-        folder_path=str(sorting_path),
-        keep_good_only=False,
-    )
-    processed_conversion_options["SortingNP"] = dict(stub_test=stub_test,
-                                                     write_as="processing")
+    if os.path.exists(sorting_path):
+        processed_source_data["SortingNP"] = dict(
+            folder_path=str(sorting_path),
+            keep_good_only=False,
+        )
+        processed_conversion_options["SortingNP"] = dict(stub_test=stub_test,
+                                                         write_as="processing")
 
 
 def session_to_nwb(
@@ -211,7 +163,6 @@ def session_to_nwb(
     session: str,
     stub_test: bool = False,
     overwrite: bool = True,
-    dandiset_id: Union[str, None] = None
 ):
     """
     Convert a single session to an NWB file.
@@ -230,27 +181,9 @@ def session_to_nwb(
         If the file exists already, True will delete and replace with a new
         file, False will append the contents.
         Default is True.
-    dandiset_id : string, optional
-        If you want to upload the file to the DANDI archive, specify the
-        six-digit ID here. Requires the DANDI_API_KEY environment variable to
-        be set. To set this in your bash terminal in Linux or macOS, run
-            export DANDI_API_KEY=...
-        or in Windows
-            set DANDI_API_KEY=...
-        Default is None.
     """
-    if dandiset_id is not None:
-        import dandi  # check importability
-
-        assert os.getenv("DANDI_API_KEY"), (
-            "Unable to find environment variable 'DANDI_API_KEY'. "
-            "Please retrieve your token from DANDI and set this environment "
-            "variable."
-        )
-
     logging.info(f"stub_test = {stub_test}")
     logging.info(f"overwrite = {overwrite}")
-    logging.info(f"dandiset_id = {dandiset_id}")
 
     # Get paths
     session_paths = get_session_paths.get_session_paths(subject,
@@ -281,18 +214,6 @@ def session_to_nwb(
     raw_conversion_options = {}
     processed_source_data = {}
     processed_conversion_options = {}
-
-    # Add V-Probe data
-    for probe_num in range(2):
-        _add_v_probe_data(
-            raw_source_data=raw_source_data,
-            raw_conversion_options=raw_conversion_options,
-            processed_source_data=processed_source_data,
-            processed_conversion_options=processed_conversion_options,
-            session_paths=session_paths,
-            probe_num=probe_num,
-            stub_test=stub_test,
-        )
 
     # Add SpikeGLX data
     _add_spikeglx_data(
@@ -340,7 +261,10 @@ def session_to_nwb(
 
     # Update metadata
     metadata = processed_converter.get_metadata()
-    metadata = _update_metadata(metadata, subject, session_id, session_paths)
+    metadata = _update_metadata(metadata=metadata, 
+                                subject=subject, 
+                                session_id=session_id, 
+                                session_paths=session_paths)
 
     # Run conversion
     logging.info("Running processed conversion")
@@ -360,14 +284,6 @@ def session_to_nwb(
         overwrite=overwrite,
     )
 
-    # Upload to DANDI
-    if dandiset_id is not None:
-        logging.info(f"Uploading to dandiset id {dandiset_id}")
-        automatic_dandi_upload(
-            dandiset_id=dandiset_id,
-            nwb_folder_path=session_paths.output,
-        )
-
 
 if __name__ == "__main__":
     """Run session conversion."""
@@ -379,6 +295,5 @@ if __name__ == "__main__":
         session=session,
         stub_test=_STUB_TEST,
         overwrite=_OVERWRITE,
-        dandiset_id=_DANDISET_ID,
     )
     logging.info(f"\nFinished conversion for {subject}/{session}\n")
