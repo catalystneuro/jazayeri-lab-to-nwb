@@ -28,7 +28,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Union
 from uuid import uuid4
 import numpy as np
 
@@ -261,9 +260,9 @@ def session_to_nwb(
 
     # Update metadata
     metadata = processed_converter.get_metadata()
-    metadata = _update_metadata(metadata=metadata, 
-                                subject=subject, 
-                                session_id=session_id, 
+    metadata = _update_metadata(metadata=metadata,
+                                subject=subject,
+                                session_id=session_id,
                                 session_paths=session_paths)
 
     # Run conversion

@@ -1,11 +1,14 @@
 """Class for converting trial-structured data."""
+
 import json
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 import pandas as pd
-from neuroconv.datainterfaces.text.timeintervalsinterface import TimeIntervalsInterface
+from neuroconv.datainterfaces.text.timeintervalsinterface import (
+    TimeIntervalsInterface,
+)
 from neuroconv.utils import FolderPathType
 from pynwb import NWBFile
 
@@ -73,8 +76,10 @@ class TrialsInterface(TimeIntervalsInterface):
     def _read_file(self, file_path: FolderPathType):
         # Create dataframe with data for each trial
         trials = json.load(open(Path(file_path) / "trials.json", "r"))
-        trials = {k_mapped: [d[k] for d in trials]
-                  for k, k_mapped in TrialsInterface.KEY_MAP.items()}
+        trials = {
+            k_mapped: [d[k] for d in trials]
+            for k, k_mapped in TrialsInterface.KEY_MAP.items()
+        }
 
         # Field closed_loop_response_position may have None values, so replace
         # those with NaN to make hdf5 conversion work
@@ -93,10 +98,12 @@ class TrialsInterface(TimeIntervalsInterface):
 
         return pd.DataFrame(trials)
 
-    def add_to_nwbfile(self,
-                       nwbfile: NWBFile,
-                       metadata: Optional[dict] = None,
-                       tag: str = "trials"):
+    def add_to_nwbfile(
+        self,
+        nwbfile: NWBFile,
+        metadata: Optional[dict] = None,
+        tag: str = "trials",
+    ):
         return super(TrialsInterface, self).add_to_nwbfile(
             nwbfile=nwbfile,
             metadata=metadata,
@@ -107,10 +114,14 @@ class TrialsInterface(TimeIntervalsInterface):
     @property
     def column_descriptions(self):
         column_descriptions = {
-            "background_indices": ("For each trial, the indices of the "
-                                   "background noise pattern patch."),
-            "broke_fixation": ("For each trial, whether the subject broke "
-                               "fixation and the trial was aborted"),
+            "background_indices": (
+                "For each trial, the indices of the background noise pattern "
+                "patch."
+            ),
+            "broke_fixation": (
+                "For each trial, whether the subject broke fixation and the "
+                "trial was aborted"
+            ),
             "stimulus_object_identities": (
                 "For each trial, a serialized list with one element for each "
                 'object. Each element is the identity symbol (e.g. "a", "b", '
@@ -162,13 +173,16 @@ class TrialsInterface(TimeIntervalsInterface):
                 "Response position for each trial. This differs from "
                 "closed_loop_response_position in that this is calculated "
                 "post-hoc from high-resolution eye tracking data, hence is "
-                "more accurate."
+                "more accurate. Note that unlike "
+                "closed_loop_response_position, this may be inconsistent with "
+                "reward delivery."
             ),
             "response_time": (
                 "Response time for each trial. This differs from "
                 "closed_loop_response_time in that this is calculated post-hoc "
                 "from high-resolution eye tracking data, hence is more "
-                "accurate."
+                "accurate. Note that unlike closed_loop_response_time, this "
+                "may be inconsistent with reward delivery."
             ),
         }
 

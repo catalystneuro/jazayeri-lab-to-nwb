@@ -1,4 +1,5 @@
 """Class for converting data about display frames."""
+
 import itertools
 import json
 from pathlib import Path
@@ -7,7 +8,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 from neuroconv.datainterfaces.text.timeintervalsinterface import (
-    TimeIntervalsInterface
+    TimeIntervalsInterface,
 )
 from neuroconv.utils import FolderPathType
 from pynwb import NWBFile
@@ -47,7 +48,6 @@ class DisplayInterface(TimeIntervalsInterface):
         self.dataframe.start_time += aligned_starting_time
 
     def _read_file(self, file_path: FolderPathType):
-
         # Create dataframe with data for each frame
         trials = json.load(open(Path(file_path) / "trials.json", "r"))
         frames = {
@@ -57,8 +57,12 @@ class DisplayInterface(TimeIntervalsInterface):
 
         return pd.DataFrame(frames)
 
-    def add_to_nwbfile(self, nwbfile: NWBFile,
-                       metadata: Optional[dict] = None, tag: str = "display"):
+    def add_to_nwbfile(
+        self,
+        nwbfile: NWBFile,
+        metadata: Optional[dict] = None,
+        tag: str = "display",
+    ):
         return super(DisplayInterface, self).add_to_nwbfile(
             nwbfile=nwbfile,
             metadata=metadata,
