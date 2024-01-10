@@ -8,6 +8,9 @@
 #SBATCH --mail-user=apiccato@mit.edu
 #SBATCH --partition=jazayeri
 
+# Script to convert a session to NWB format. Takes in two arguments from user:
+# name of subject and session date. 
+
 
 SUBJECT=$1  # Argument passed in by user. Should be in subject/date format
 echo "SUBJECT: $SUBJECT"

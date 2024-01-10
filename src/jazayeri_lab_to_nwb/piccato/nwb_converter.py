@@ -27,8 +27,8 @@ def _trim_excess_spikes(
         recording: BaseRecording instance. The recording object.
         sorting: BaseSorting instance. The sorting object.
         max_excess_samples: Int. If a spike exists more than this number of
-            samples beyond the end of the recording, an error is raised. This is
-            in units of samples, which is typically 30000Hz.
+            samples beyond the end of the recording, an error is raised. This 
+            is in units of samples, which is typically 30000Hz.
 
     Returns:
         bool True if exceeding spikes, False otherwise.

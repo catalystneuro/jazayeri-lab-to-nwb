@@ -29,8 +29,7 @@ def _get_processing_module(nwbfile: NWBFile):
     )
 
 
-class TimestampsFromArrayInterface(
-    BaseTemporalAlignmentInterface):
+class TimestampsFromArrayInterface(BaseTemporalAlignmentInterface):
     """Interface implementing temporal alignment functions with timestamps."""
 
     def __init__(self, folder_path: FolderPathType):

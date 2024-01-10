@@ -17,7 +17,6 @@ Usage:
         _REPO
         _STUB_TEST
         _OVERWRITE
-        _DANDISET_ID
     See comments below for descriptions of these variables.
 """
 
