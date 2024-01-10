@@ -54,7 +54,10 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
                 if entry["label"] == probe_key:
                     probe_metadata = entry
 
-        if probe_metadata is not None and "electrodes_locations" in probe_metadata:
+        if (
+            probe_metadata is not None
+            and "electrodes_locations" in probe_metadata
+        ):
             # Grab electrode position from metadata
             locations_array = np.array(probe_metadata["electrodes_locations"])
             ndim = locations_array.shape[1]
@@ -62,7 +65,9 @@ class DatRecordingInterface(BaseRecordingExtractorInterface):
             probeinterface.set_contacts(locations_array)
         else:
             # Generate V-probe geometry: 64 channels arranged vertically with 50 um spacing
-            probe = probeinterface.generate_linear_probe(num_elec=channel_count, ypitch=50)
+            probe = probeinterface.generate_linear_probe(
+                num_elec=channel_count, ypitch=50
+            )
         probe.set_device_channel_indices(np.arange(channel_count))
         probe.name = probe_name
 

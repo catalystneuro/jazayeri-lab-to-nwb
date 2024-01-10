@@ -28,11 +28,10 @@ import os
 import sys
 from pathlib import Path
 from uuid import uuid4
-import numpy as np
 
 import get_session_paths
+import numpy as np
 import nwb_converter
-
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 # Data repository. Either 'globus' or 'openmind'
@@ -77,16 +76,15 @@ def _update_metadata(metadata, subject, session_id, session_paths):
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
 
     # Add probe locations
-    probe_metadata_file = (
-        session_paths.session_data / "phys_metadata.json"
-    )
+    probe_metadata_file = session_paths.session_data / "phys_metadata.json"
     probe_metadata = json.load(open(probe_metadata_file, "r"))
     for entry in metadata["Ecephys"]["ElectrodeGroup"]:
         if entry["device"] == "Neuropixel-Imec":
             neuropixel_metadata = probe_metadata
             coordinate_system = neuropixel_metadata["coordinate_system"]
-            coordinates = np.round(neuropixel_metadata["coordinates"][:2],
-                                   decimals=2)
+            coordinates = np.round(
+                neuropixel_metadata["coordinates"][:2], decimals=2
+            )
             depth_from_surface = neuropixel_metadata["depth"]
             entry["description"] = (
                 f"{entry['description']}\n"
@@ -127,9 +125,9 @@ def _add_spikeglx_data(
     logging.info("Adding SpikeGLX data")
 
     # Raw data
-    spikeglx_dir = Path(_get_single_file(
-        session_paths.raw_data/"spikeglx",
-        suffix='imec0'))
+    spikeglx_dir = Path(
+        _get_single_file(session_paths.raw_data / "spikeglx", suffix="imec0")
+    )
     ap_file = _get_single_file(spikeglx_dir, suffix="*.ap.bin")
     lfp_file = _get_single_file(spikeglx_dir, suffix="*.lf.bin")
     raw_source_data["RecordingNP"] = dict(file_path=ap_file)
@@ -139,22 +137,26 @@ def _add_spikeglx_data(
     raw_conversion_options["RecordingNP"] = dict(stub_test=stub_test)
     raw_conversion_options["LF"] = dict(stub_test=stub_test)
     processed_conversion_options["RecordingNP"] = dict(
-        stub_test=stub_test, write_electrical_series=False)
+        stub_test=stub_test, write_electrical_series=False
+    )
     processed_conversion_options["LF"] = dict(
-        stub_test=stub_test, write_electrical_series=False)
+        stub_test=stub_test, write_electrical_series=False
+    )
 
     # Processed data
-    sorting_path = (session_paths.spike_sorting_raw /
-                    "spikeglx/kilosort2_5_0/sorter_output"
-                    )
+    sorting_path = (
+        session_paths.spike_sorting_raw
+        / "spikeglx/kilosort2_5_0/sorter_output"
+    )
     if os.path.exists(sorting_path):
         logging.info("Adding spike sorted data")
         processed_source_data["SortingNP"] = dict(
             folder_path=str(sorting_path),
             keep_good_only=False,
         )
-        processed_conversion_options["SortingNP"] = dict(stub_test=stub_test,
-                                                         write_as="processing")
+        processed_conversion_options["SortingNP"] = dict(
+            stub_test=stub_test, write_as="processing"
+        )
 
 
 def session_to_nwb(
@@ -185,9 +187,9 @@ def session_to_nwb(
     logging.info(f"overwrite = {overwrite}")
 
     # Get paths
-    session_paths = get_session_paths.get_session_paths(subject,
-                                                        session,
-                                                        repo=_REPO)
+    session_paths = get_session_paths.get_session_paths(
+        subject, session, repo=_REPO
+    )
     logging.info(f"session_paths: {session_paths}")
 
     # Get paths for nwb files to write
@@ -197,12 +199,11 @@ def session_to_nwb(
     else:
         session_id = f"{session}"
     raw_nwb_path = (
-        session_paths.output /
-        f"sub-{subject}_ses-{session_id}_ecephys.nwb"
+        session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
     )
     processed_nwb_path = (
-        session_paths.output /
-        f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+        session_paths.output
+        / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
     )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
@@ -239,13 +240,15 @@ def session_to_nwb(
     # Add trials data
     logging.info("Adding trials data")
     processed_source_data["Trials"] = dict(
-        folder_path=str(session_paths.behavior_task_data))
+        folder_path=str(session_paths.behavior_task_data)
+    )
     processed_conversion_options["Trials"] = dict()
 
     # Add display data
     logging.info("Adding display data")
     processed_source_data["Display"] = dict(
-        folder_path=str(session_paths.behavior_task_data))
+        folder_path=str(session_paths.behavior_task_data)
+    )
     processed_conversion_options["Display"] = dict()
 
     # Create data converters
@@ -260,10 +263,12 @@ def session_to_nwb(
 
     # Update metadata
     metadata = processed_converter.get_metadata()
-    metadata = _update_metadata(metadata=metadata,
-                                subject=subject,
-                                session_id=session_id,
-                                session_paths=session_paths)
+    metadata = _update_metadata(
+        metadata=metadata,
+        subject=subject,
+        session_id=session_id,
+        session_paths=session_paths,
+    )
 
     # Run conversion
     logging.info("Running processed conversion")

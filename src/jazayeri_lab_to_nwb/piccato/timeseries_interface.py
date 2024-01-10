@@ -166,7 +166,8 @@ class RewardLineInterface(TimestampsFromArrayInterface):
         reward_line = LabeledEvents(
             name="reward_line",
             description=(
-                "Reward line data representing events of reward dispenser"),
+                "Reward line data representing events of reward dispenser"
+            ),
             timestamps=H5DataIO(self._timestamps, compression="gzip"),
             data=self._reward_line,
             labels=["closed", "open"],

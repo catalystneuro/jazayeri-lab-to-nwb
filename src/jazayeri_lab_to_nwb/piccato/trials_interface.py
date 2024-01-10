@@ -128,9 +128,11 @@ class TrialsInterface(TimeIntervalsInterface):
                 '"c", ...) of the corresponding object.'
             ),
             "trial_type": ("For each trial, whether condition is LTM or STM"),
-            "stimulus_set": ("For each trial, string identity symbol of the "
-                             "set of objects. String consists of sorted list "
-                             "of object identity symbols"),
+            "stimulus_set": (
+                "For each trial, string identity symbol of the "
+                "set of objects. String consists of sorted list "
+                "of object identity symbols"
+            ),
             "stimulus_object_positions": (
                 "For each trial, a serialized list with one element for each "
                 "object. Each element is the initial (x, y) position of the "

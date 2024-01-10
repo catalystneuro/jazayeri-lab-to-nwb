@@ -42,7 +42,8 @@ class DisplayInterface(TimeIntervalsInterface):
 
     def get_timestamps(self) -> np.ndarray:
         return super(DisplayInterface, self).get_timestamps(
-            column="start_time")
+            column="start_time"
+        )
 
     def set_aligned_starting_time(self, aligned_starting_time: float) -> None:
         self.dataframe.start_time += aligned_starting_time

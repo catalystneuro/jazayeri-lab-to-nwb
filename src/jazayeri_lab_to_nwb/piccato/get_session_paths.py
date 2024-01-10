@@ -7,8 +7,8 @@ SUBJECT_NAME_TO_ID = {
     "elgar": "elgar",
 }
 
-OM_PATH = '/om2/user/apiccato/phys_preprocessing_open_source/phys_data'
-DANDISET_ID = '000767'
+OM_PATH = "/om2/user/apiccato/phys_preprocessing_open_source/phys_data"
+DANDISET_ID = "000767"
 SessionPaths = collections.namedtuple(
     "SessionPaths",
     [
@@ -50,9 +50,7 @@ def _get_session_paths_openmind(subject, session):
         f"{OM_PATH}/{subject}/{session}/spike_sorting"
     )
 
-    session_path = pathlib.Path(
-        f"{OM_PATH}/{subject}/{session}/"
-    )
+    session_path = pathlib.Path(f"{OM_PATH}/{subject}/{session}/")
 
     session_paths = SessionPaths(
         output=output_path,
