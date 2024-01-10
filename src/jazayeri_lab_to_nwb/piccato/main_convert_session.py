@@ -146,9 +146,10 @@ def _add_spikeglx_data(
 
     # Processed data
     sorting_path = (session_paths.spike_sorting_raw /
-                    "spikeglx/kilosort2_5/sorter_output"
+                    "spikeglx/kilosort2_5_0/sorter_output"
                     )
     if os.path.exists(sorting_path):
+        logging.info("Adding spike sorted data")
         processed_source_data["SortingNP"] = dict(
             folder_path=str(sorting_path),
             keep_good_only=False,
