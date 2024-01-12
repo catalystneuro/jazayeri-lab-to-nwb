@@ -4,3 +4,4 @@ nwbwidgets==0.11.3
 nwbinspector==0.4.31
 pre-commit==3.6.0
 ndx-events==0.2.0
+mat73==0.62

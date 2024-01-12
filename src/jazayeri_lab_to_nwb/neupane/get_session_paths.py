@@ -39,7 +39,6 @@ def _get_session_paths_openmind(subject, session):
     #     f"{subject}/{session}"
     # )
     behavior_path = '/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/EC/amadeus08292019_a.mwk'
-    # cond_matrix = amadeus08292019_a_neur_tensor_gocueon.mat
 
     # Path to spike sorting. This is used for reading spike sorted data.
     # TODO: Handle sessions with multiple sessions

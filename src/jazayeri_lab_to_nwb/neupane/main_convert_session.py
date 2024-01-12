@@ -29,6 +29,7 @@ from uuid import uuid4
 
 import get_session_paths
 import nwb_converter
+import neupane_conversion
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 # Data repository. Either 'globus' or 'openmind'
@@ -350,6 +351,9 @@ def session_to_nwb(
 
     # Add behavioral data
     logging.info("Adding behavior data")
+    # Reads in behavioral data
+    behavior = neupane_conversion.read_behavior_data(session_paths)
+    # TODO: Pass behavioral data as a parameter to add_behavior_data
     conversion_params = add_behavior_data(
         conversion_params=conversion_params,
         behavior_path=session_paths.behavior
@@ -357,6 +361,12 @@ def session_to_nwb(
 
     # Add trials data    
     logging.info("Adding trials data")
+    # Reads in trial-structured behavioral data as a dictionary of lists 
+    trials = neupane_conversion.read_trials_data(session_paths)
+    # TODO: Pass trials object as a parameter to TrialsInterface. I think that 
+    # this function should replace '_read_file' in TrialsInterface (this 
+    # function returns a dataframe with trial data and is called by the 
+    # TrialsInterface parent class constructor)
     conversion_params.add_processed(
         key="Trials",
         value=dict(folder_path=str(session_paths.behavior)),        
@@ -364,6 +374,7 @@ def session_to_nwb(
 
     # Add display data
     logging.info("Adding display data")
+
     conversion_params.add_processed(
         key="Display",
         value=dict(folder_path=str(session_paths.behavior)),        

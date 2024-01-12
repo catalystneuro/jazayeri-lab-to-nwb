@@ -13,6 +13,7 @@ from neuroconv.utils import FolderPathType
 from pynwb import NWBFile
 
 
+
 class TrialsInterface(TimeIntervalsInterface):
     """Class for converting trial-structured data.
 
@@ -46,7 +47,7 @@ class TrialsInterface(TimeIntervalsInterface):
 
     def __init__(self, folder_path: FolderPathType, verbose: bool = True):
         super().__init__(file_path=folder_path, verbose=verbose)
-
+        
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()
         metadata["TimeIntervals"] = dict(
