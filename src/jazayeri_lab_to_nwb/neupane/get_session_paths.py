@@ -45,7 +45,7 @@ def _get_session_paths_openmind(subject, session):
     spike_sorting_path = (
         f"/om4/group/jazlab/sujay_backup/nwb/spike_sorted_data/{subject}_{session}"
     )
-
+    
     # TODO: Handle naming of sync pulses directory
     sync_pulses_path = (f"/om4/group/jazlab/sujay_backup/mtt_data/amadeus08292019_a.mwk")
 

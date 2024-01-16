@@ -352,6 +352,7 @@ def session_to_nwb(
     # Add behavioral data
     logging.info("Adding behavior data")
     # Reads in behavioral data
+    # TODO: Load constants.yaml file
     behavior = neupane_conversion.read_behavior_data(session_paths)
     # TODO: Pass behavioral data as a parameter to add_behavior_data
     conversion_params = add_behavior_data(
