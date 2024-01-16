@@ -197,7 +197,7 @@ def session_to_nwb(
     if stub_test:
         session_id = f"{session}-stub"
     else:
-        session_id = f"{session}"
+        session_id = f"{session}-full"
     raw_nwb_path = (
         session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
     )
