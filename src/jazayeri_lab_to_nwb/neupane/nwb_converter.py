@@ -79,11 +79,8 @@ class NWBConverter(neuroconv.NWBConverter):
         LF=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
         SortingNP=neuroconv.datainterfaces.KiloSortSortingInterface,
         EyePosition=timeseries_interface.EyePositionInterface,
-        PupilSize=timeseries_interface.PupilSizeInterface,
-        RewardLine=timeseries_interface.RewardLineInterface,
-        Audio=timeseries_interface.AudioInterface,
+        HandPosition=timeseries_interface.HandPositionInterface,
         Trials=trials_interface.TrialsInterface,
-        Display=display_interface.DisplayInterface,
     )
 
     def __init__(

@@ -21,7 +21,7 @@ Usage:
 """
 
 import glob
-import json
+import datetime
 import logging
 import sys
 from pathlib import Path
@@ -30,6 +30,7 @@ from uuid import uuid4
 import get_session_paths
 import nwb_converter
 import neupane_conversion
+import numpy as np
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
 # Data repository. Either 'globus' or 'openmind'
@@ -42,6 +43,19 @@ _OVERWRITE = True
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
 
+def serialize(x):
+    """Serialize an input x."""
+    if isinstance(x, np.int_):
+        x = int(x)
+    elif isinstance(x, np.float_):
+        x = float(x)
+    elif isinstance(x, np.ndarray):
+        x = [serialize(y) for y in x]
+    elif isinstance(x, dict):
+        x = {k: serialize(v) for k, v in x.items()}
+    elif isinstance(x, list):
+        x = [serialize(v) for v in x]
+    return x
 
 class NWBConversionParams():
     """Class to hold parameters for NWB conversion."""
@@ -68,13 +82,16 @@ _SUBJECT_TO_AGE = {
     "amadeus": "P10Y",  # Born 6/11/2012
 }
 
-def add_behavior_data(conversion_params: NWBConversionParams,
-                      behavior_path: Path):
-    for key in ['EyePosition', 'PupilSize', 'RewardLine', 'Audio']:
-        """Add non-trial-structured behavioral data to NWB file"""
-        conversion_params.add_raw(
+def add_behavior_data(
+        behavior: dict,
+        conversion_params: NWBConversionParams,
+        behavior_path: Path):
+    """Add non-trial-structured behavioral data"""
+    # for key in ['EyePosition', 'HandPosition']:
+    for key in ['EyePosition']:
+        conversion_params.add_processed(
             key=key,
-            value=dict(folder_path=behavior_path),
+            value=dict(folder_path=str(behavior_path), **behavior[key]),
         )
     return conversion_params
 
@@ -275,7 +292,8 @@ def _update_metadata(metadata, subject, session_id, session_paths):
     metadata = dict_deep_update(metadata, editable_metadata)
 
     # TODO: Read in sesion start time (field t0_oe from file /om4/group/jazlab/sujay_backup/mtt_data/amadeus08292019_a.mwk/amadeus08292019_a.mat)
-    metadata["NWBFile"]["session_start_time"] = 0.0
+    # metadata["NWBFile"]["session_start_time"] = neupane_conversion.read_session_start_time(session_paths=session_paths)
+    metadata["NWBFile"]["session_start_time"] = x = datetime.datetime.now()
 
     # Ensure session_start_time exists in metadata
     if "session_start_time" not in metadata["NWBFile"]:
@@ -327,7 +345,7 @@ def session_to_nwb(
         session_id = f"{session}-stub"
     else:
         session_id = f"{session}"
-    raw_nwb_path = (
+    raw_nwb_path = str(
         session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
     )
     processed_nwb_path = (
@@ -353,37 +371,30 @@ def session_to_nwb(
     logging.info("Adding behavior data")
     # Reads in behavioral data
     # TODO: Load constants.yaml file
-    behavior = neupane_conversion.read_behavior_data(session_paths)
-    # TODO: Pass behavioral data as a parameter to add_behavior_data
+    behavior = neupane_conversion.read_behavior_data(
+        session_paths, subject=subject, session=session)
     conversion_params = add_behavior_data(
+        behavior=behavior,
         conversion_params=conversion_params,
         behavior_path=session_paths.behavior
     )
 
     # Add trials data    
     logging.info("Adding trials data")
+
     # Reads in trial-structured behavioral data as a dictionary of lists 
-    trials = neupane_conversion.read_trials_data(session_paths)
-    # TODO: Pass trials object as a parameter to TrialsInterface. I think that 
-    # this function should replace '_read_file' in TrialsInterface (this 
-    # function returns a dataframe with trial data and is called by the 
-    # TrialsInterface parent class constructor)
+    trials = neupane_conversion.read_trials_data(
+        session_paths, subject=subject, session=session)
     conversion_params.add_processed(
         key="Trials",
-        value=dict(folder_path=str(session_paths.behavior)),        
-    )
-
-    # Add display data
-    logging.info("Adding display data")
-
-    conversion_params.add_processed(
-        key="Display",
-        value=dict(folder_path=str(session_paths.behavior)),        
+        value=dict(trials=trials, folder_path=str(session_paths.behavior)),        
     )
 
     # Create data converters
+    processed_params = serialize(conversion_params.processed_source_data)
+
     processed_converter = nwb_converter.NWBConverter(
-        source_data=conversion_params.processed_source_data,
+        source_data=processed_params,
         sync_dir=session_paths.sync_pulses,
     )
     raw_converter = nwb_converter.NWBConverter(

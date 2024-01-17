@@ -13,14 +13,13 @@ from neuroconv.utils import FolderPathType
 from pynwb import NWBFile
 
 
-
 class TrialsInterface(TimeIntervalsInterface):
     """Class for converting trial-structured data.
 
     All events that occur exactly once per trial are contained in this
     interface.
     """
-
+    # TODO: Create a keymap for trial structured 
     KEY_MAP = {
         "background_indices": "background_indices",
         "broke_fixation": "broke_fixation",
@@ -45,7 +44,11 @@ class TrialsInterface(TimeIntervalsInterface):
         "response_time": "response_time",
     }
 
-    def __init__(self, folder_path: FolderPathType, verbose: bool = True):
+    def __init__(self, 
+                 trials: dict,
+                 folder_path: FolderPathType, 
+                 verbose: bool = True):
+        self._trials = trials
         super().__init__(file_path=folder_path, verbose=verbose)
         
     def get_metadata(self) -> dict:
@@ -59,46 +62,11 @@ class TrialsInterface(TimeIntervalsInterface):
         return metadata
 
     def get_timestamps(self) -> np.ndarray:
-        return super(TrialsInterface, self).get_timestamps(column="start_time")
-
-    def set_aligned_starting_time(self, aligned_starting_time: float) -> None:
-        self.dataframe.closed_loop_response_time += aligned_starting_time
-        self.dataframe.start_time += aligned_starting_time
-        self.dataframe.phase_fixation_time += aligned_starting_time
-        self.dataframe.phase_stimulus_time += aligned_starting_time
-        self.dataframe.phase_delay_time += aligned_starting_time
-        self.dataframe.phase_cue_time += aligned_starting_time
-        self.dataframe.phase_response_time += aligned_starting_time
-        self.dataframe.phase_reveal_time += aligned_starting_time
-        self.dataframe.phase_iti_time += aligned_starting_time
-        self.dataframe.reward_time += aligned_starting_time
-        self.dataframe.response_time += aligned_starting_time
-
+        # TODO: Get trial start time from TTL data        
+        return super(TrialsInterface, self).get_timestamps(column="stim1onttl")
+    
     def _read_file(self, file_path: FolderPathType):
-        # Create dataframe with data for each trial
-        trials = json.load(open(Path(file_path) / "trials.json", "r"))
-        trials = {
-            k_mapped: [d[k] for d in trials]
-            for k, k_mapped in TrialsInterface.KEY_MAP.items()
-        }
-
-        # Field closed_loop_response_position may have None values, so replace
-        # those with NaN to make hdf5 conversion work
-        trials["closed_loop_response_position"] = [
-            [np.nan, np.nan] if x is None else x
-            for x in trials["closed_loop_response_position"]
-        ]
-
-        # Serialize fields with variable-length lists for hdf5 conversion
-        for k in [
-            "stimulus_object_identities",
-            "stimulus_object_positions",
-            "stimulus_object_velocities",
-            "stimulus_object_target",
-        ]:
-            trials[k] = [json.dumps(x) for x in trials[k]]
-
-        return pd.DataFrame(trials)
+        return pd.DataFrame(self._trials)
 
     def add_to_nwbfile(
         self,

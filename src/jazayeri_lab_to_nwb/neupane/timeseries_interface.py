@@ -41,42 +41,53 @@ class TimestampsFromArrayInterface(BaseTemporalAlignmentInterface):
         return self._timestamps
 
 
+class HandPositionInterface(TimestampsFromArrayInterface):
+    """Hand position interface."""
+    def __init__(self, 
+                 folder_path: str, 
+                 times: list, 
+                 values: list,):        
+        super().__init__(folder_path=str(folder_path))
+        # Set data attributes
+        self.set_original_timestamps(np.squeeze(times))
+        self._hand_pos = np.squeeze(values)
+
+    def add_to_nwbfile(self, nwbfile: NWBFile, metadata: dict):
+        del metadata
+
+        # Make SpatialSeries
+        hand_position = SpatialSeries(
+            name="hand_position",
+            data=H5DataIO(self._hand_pos, compression="gzip"),
+            reference_frame="0 is maximum left deflection, 5 is maximum right deflection",
+            unit="voltage",
+            timestamps=H5DataIO(self._timestamps, compression="gzip"),
+            description="Hand position data recorded by joystick potentiometer",
+        )
+
+        # Get processing module
+        module_description = (
+            "Contains behavior, audio, and reward data from experiment."
+        )
+        processing_module = get_module(
+            nwbfile=nwbfile, name="behavior", description=module_description
+        )
+
+        # Add data to module
+        processing_module.add_data_interface(hand_position)
+
+        return nwbfile
+
 class EyePositionInterface(TimestampsFromArrayInterface):
     """Eye position interface."""
-
-    def __init__(self, folder_path: FolderPathType):
-        folder_path = Path(folder_path)
-        super().__init__(folder_path=folder_path)
-
-        # Find eye position files and check they all exist
-        eye_h_file = folder_path / "eye_h_calibrated.json"
-        eye_v_file = folder_path / "eye_v_calibrated.json"
-        assert eye_h_file.exists(), f"Could not find {eye_h_file}"
-        assert eye_v_file.exists(), f"Could not find {eye_v_file}"
-
-        # Load eye data
-        eye_h_data = json.load(open(eye_h_file, "r"))
-        eye_v_data = json.load(open(eye_v_file, "r"))
-        eye_h_times = np.array(eye_h_data["times"])
-        eye_h_values = 0.5 + (np.array(eye_h_data["values"]) / 20)
-        eye_v_times = np.array(eye_v_data["times"])
-        eye_v_values = 0.5 + (np.array(eye_v_data["values"]) / 20)
-
-        # Check eye_h and eye_v have the same number of samples
-        if len(eye_h_times) != len(eye_v_times):
-            raise ValueError(
-                f"len(eye_h_times) = {len(eye_h_times)}, but len(eye_v_times) "
-                f"= {len(eye_v_times)}"
-            )
-        # Check that eye_h_times and eye_v_times are similar to within 0.5ms
-        if not np.allclose(eye_h_times, eye_v_times, atol=0.0005):
-            raise ValueError(
-                "eye_h_times and eye_v_times are not sufficiently similar"
-            )
-
+    def __init__(self, 
+                 folder_path: str, 
+                 times: list, 
+                 values: list,):        
+        super().__init__(folder_path=str(folder_path))
         # Set data attributes
-        self.set_original_timestamps(eye_h_times)
-        self._eye_pos = np.stack([eye_h_values, eye_v_values], axis=1)
+        self.set_original_timestamps(np.squeeze(times))
+        self._eye_pos = np.squeeze(np.stack(values, axis=2))
 
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata: dict):
         del metadata
@@ -103,6 +114,7 @@ class EyePositionInterface(TimestampsFromArrayInterface):
         # Add data to module
         processing_module.add_data_interface(eye_position)
 
+        print('DONE')
         return nwbfile
 
 

@@ -13,7 +13,6 @@ SessionPaths = collections.namedtuple(
         "behavior",
         "spike_sorting",
         "sync_pulses",
-        "session_start_time"
     ],
 )
 
@@ -25,12 +24,9 @@ def _get_session_paths_openmind(subject, session):
     output_path = (
         f"/om2/user/apiccato/sujay_nwb/staging/sub-{subject}"
     )
-
+    session_id = f"{subject}{session}"
     # Path to the raw physiology data.
-    # TODO: Find session open ephys directory
-    # ecephys_path = (
-    #     f"/om4/group/jazlab/sujay_backup/mtt_data/{subject}_{session}"
-    # )
+    # TODO: Reformat session id and write a function to look for this file
     ecephys_path = "/om4/group/jazlab/sujay_backup/mtt_data/amadeus_2019-08-29_12-29-52__a/"
 
     # Path to task and behavior data.
@@ -38,19 +34,16 @@ def _get_session_paths_openmind(subject, session):
     #     "/om4/group/jazlab/sujay_backup/multi_prediction/datasets/data_nwb_trials/"
     #     f"{subject}/{session}"
     # )
-    behavior_path = '/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/EC/amadeus08292019_a.mwk'
+    behavior_path = f'/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/EC/{subject}{session}_a.mwk'
 
     # Path to spike sorting. This is used for reading spike sorted data.
-    # TODO: Handle sessions with multiple sessions
+    # TODO: Handle sessions with multiple MWorks sessions
     spike_sorting_path = (
-        f"/om4/group/jazlab/sujay_backup/nwb/spike_sorted_data/{subject}_{session}"
+        f"/om4/group/jazlab/sujay_backup/nwb/spike_sorted_data/{session_id}_a"
     )
     
     # TODO: Handle naming of sync pulses directory
-    sync_pulses_path = (f"/om4/group/jazlab/sujay_backup/mtt_data/amadeus08292019_a.mwk")
-
-    # TODO: Find session start time
-    session_start_time_path = (f"/om4/group/jazlab/sujay_backup/mtt_data/amadeus08292019_a.mwk/amadeus08292019_a.mat")
+    sync_pulses_path = (f"/om4/group/jazlab/sujay_backup/mtt_data/{session_id}_a.mwk")
 
     session_paths = SessionPaths(
         output=pathlib.Path(output_path),
@@ -58,7 +51,6 @@ def _get_session_paths_openmind(subject, session):
         behavior=pathlib.Path(behavior_path),
         sync_pulses=pathlib.Path(sync_pulses_path),
         spike_sorting=pathlib.Path(spike_sorting_path),
-        session_start_time=pathlib.Path(session_start_time_path),
     )
 
     return session_paths
