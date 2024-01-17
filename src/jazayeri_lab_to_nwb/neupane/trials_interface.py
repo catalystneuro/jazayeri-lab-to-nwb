@@ -62,8 +62,8 @@ class TrialsInterface(TimeIntervalsInterface):
         return metadata
 
     def get_timestamps(self) -> np.ndarray:
-        # TODO: Get trial start time from TTL data        
-        return super(TrialsInterface, self).get_timestamps(column="stim1onttl")
+        # TODO: Get trial start time from TTL data and create a column called start_time        
+        return super(TrialsInterface, self).get_timestamps(column="start_time")
     
     def _read_file(self, file_path: FolderPathType):
         return pd.DataFrame(self._trials)
