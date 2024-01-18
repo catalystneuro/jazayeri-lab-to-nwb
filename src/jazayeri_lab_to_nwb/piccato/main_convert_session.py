@@ -40,7 +40,8 @@ _REPO = "openmind"
 _STUB_TEST = False
 # Whether to overwrite output nwb files
 _OVERWRITE = True
-
+# Whether to only inclue trial-structured data in the processed NWB file
+_TRIALS_ONLY = True
 
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
@@ -194,17 +195,24 @@ def session_to_nwb(
 
     # Get paths for nwb files to write
     session_paths.output.mkdir(parents=True, exist_ok=True)
+    session_id = str(session)
     if stub_test:
-        session_id = f"{session}-stub"
+        session_id = f"{session_id}-stub"
     else:
         session_id = f"{session}-full"
     raw_nwb_path = (
         session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
     )
-    processed_nwb_path = (
-        session_paths.output
-        / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
-    )
+    if not _TRIALS_ONLY:
+        processed_nwb_path = (
+            session_paths.output
+            / f"sub-{subject}_ses-{session_id}_trials+behavior+ecephys.nwb"
+        )
+    else:
+        processed_nwb_path = (
+            session_paths.output
+            / f"sub-{subject}_ses-{session_id}_trials+ecephys.nwb"
+        )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
     logging.info("")
@@ -226,16 +234,21 @@ def session_to_nwb(
     )
 
     # Add behavior data
-    logging.info("Adding behavior data")
-    behavior_task_path = str(session_paths.behavior_task_data)
-    processed_source_data["EyePosition"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["EyePosition"] = dict()
-    processed_source_data["PupilSize"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["PupilSize"] = dict()
-    processed_source_data["RewardLine"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["RewardLine"] = dict()
-    processed_source_data["Audio"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["Audio"] = dict()
+    if not _TRIALS_ONLY:
+        logging.info("Adding behavior data")
+        behavior_task_path = str(session_paths.behavior_task_data)
+        processed_source_data["EyePosition"] = dict(
+            folder_path=behavior_task_path)
+        processed_conversion_options["EyePosition"] = dict()
+        processed_source_data["PupilSize"] = dict(
+            folder_path=behavior_task_path)
+        processed_conversion_options["PupilSize"] = dict()
+        processed_source_data["RewardLine"] = dict(
+            folder_path=behavior_task_path)
+        processed_conversion_options["RewardLine"] = dict()
+        processed_source_data["Audio"] = dict(
+            folder_path=behavior_task_path)
+        processed_conversion_options["Audio"] = dict()
 
     # Add trials data
     logging.info("Adding trials data")
@@ -245,11 +258,12 @@ def session_to_nwb(
     processed_conversion_options["Trials"] = dict()
 
     # Add display data
-    logging.info("Adding display data")
-    processed_source_data["Display"] = dict(
-        folder_path=str(session_paths.behavior_task_data)
-    )
-    processed_conversion_options["Display"] = dict()
+    if not _TRIALS_ONLY:
+        logging.info("Adding display data")
+        processed_source_data["Display"] = dict(
+            folder_path=str(session_paths.behavior_task_data)
+        )
+        processed_conversion_options["Display"] = dict()
 
     # Create data converters
     processed_converter = nwb_converter.NWBConverter(
