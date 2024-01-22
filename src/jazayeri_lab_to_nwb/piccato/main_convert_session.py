@@ -40,8 +40,6 @@ _REPO = "openmind"
 _STUB_TEST = False
 # Whether to overwrite output nwb files
 _OVERWRITE = True
-# Whether to only inclue trial-structured data in the processed NWB file
-_TRIALS_ONLY = True
 
 # Set logger level for info is displayed in console
 logging.getLogger().setLevel(logging.INFO)
@@ -203,16 +201,10 @@ def session_to_nwb(
     raw_nwb_path = (
         session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
     )
-    if not _TRIALS_ONLY:
-        processed_nwb_path = (
-            session_paths.output
-            / f"sub-{subject}_ses-{session_id}_trials+behavior+ecephys.nwb"
-        )
-    else:
-        processed_nwb_path = (
-            session_paths.output
-            / f"sub-{subject}_ses-{session_id}_trials+ecephys.nwb"
-        )
+    processed_nwb_path = (
+        session_paths.output
+        / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
+    )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
     logging.info("")
