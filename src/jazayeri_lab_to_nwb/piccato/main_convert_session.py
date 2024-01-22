@@ -226,21 +226,20 @@ def session_to_nwb(
     )
 
     # Add behavior data
-    if not _TRIALS_ONLY:
-        logging.info("Adding behavior data")
-        behavior_task_path = str(session_paths.behavior_task_data)
-        processed_source_data["EyePosition"] = dict(
-            folder_path=behavior_task_path)
-        processed_conversion_options["EyePosition"] = dict()
-        processed_source_data["PupilSize"] = dict(
-            folder_path=behavior_task_path)
-        processed_conversion_options["PupilSize"] = dict()
-        processed_source_data["RewardLine"] = dict(
-            folder_path=behavior_task_path)
-        processed_conversion_options["RewardLine"] = dict()
-        processed_source_data["Audio"] = dict(
-            folder_path=behavior_task_path)
-        processed_conversion_options["Audio"] = dict()
+    logging.info("Adding behavior data")
+    behavior_task_path = str(session_paths.behavior_task_data)
+    processed_source_data["EyePosition"] = dict(
+        folder_path=behavior_task_path)
+    processed_conversion_options["EyePosition"] = dict()
+    processed_source_data["PupilSize"] = dict(
+        folder_path=behavior_task_path)
+    processed_conversion_options["PupilSize"] = dict()
+    processed_source_data["RewardLine"] = dict(
+        folder_path=behavior_task_path)
+    processed_conversion_options["RewardLine"] = dict()
+    processed_source_data["Audio"] = dict(
+        folder_path=behavior_task_path)
+    processed_conversion_options["Audio"] = dict()
 
     # Add trials data
     logging.info("Adding trials data")
@@ -250,12 +249,11 @@ def session_to_nwb(
     processed_conversion_options["Trials"] = dict()
 
     # Add display data
-    if not _TRIALS_ONLY:
-        logging.info("Adding display data")
-        processed_source_data["Display"] = dict(
-            folder_path=str(session_paths.behavior_task_data)
-        )
-        processed_conversion_options["Display"] = dict()
+    logging.info("Adding display data")
+    processed_source_data["Display"] = dict(
+        folder_path=str(session_paths.behavior_task_data)
+    )
+    processed_conversion_options["Display"] = dict()
 
     # Create data converters
     processed_converter = nwb_converter.NWBConverter(
