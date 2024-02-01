@@ -97,12 +97,16 @@ class NWBConverter(neuroconv.NWBConverter):
         self.sync_dir = sync_dir
 
         unit_name_start = 0
-        for data_interface in self.data_interface_objects.values():
+        for name, data_interface in self.data_interface_objects.items():
             if isinstance(data_interface, BaseSortingExtractorInterface):
                 unit_ids = np.array(data_interface.sorting_extractor.unit_ids)
                 data_interface.sorting_extractor.set_property(
                     key="unit_name",
                     values=(unit_ids + unit_name_start).astype(str),
+                )
+                data_interface.sorting_extractor.set_property(
+                    key="probe",
+                    values=len(unit_ids) * [name.split('Sorting')[1]],
                 )
                 unit_name_start += np.max(unit_ids) + 1
 
