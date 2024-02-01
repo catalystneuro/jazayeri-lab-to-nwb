@@ -127,13 +127,14 @@ def _add_spikeglx_data(
     logging.info("Adding SpikeGLX data")
 
     # Raw data
-    spikeglx_dir = (session_paths.raw_data / "spikeglx")
+    spikeglx_dir = session_paths.raw_data / "spikeglx"
     if not spikeglx_dir.exists():
         logging.info("Found no SpikeGLX data")
         return
     spikeglx_dir = [
-        x for x in spikeglx_dir.iterdir() if
-            ("settling" not in str(x) and "errors" not in str(x))
+        x
+        for x in spikeglx_dir.iterdir()
+        if ("settling" not in str(x) and "errors" not in str(x))
     ]
     if len(spikeglx_dir) == 1:
         spikeglx_dir = spikeglx_dir[0]

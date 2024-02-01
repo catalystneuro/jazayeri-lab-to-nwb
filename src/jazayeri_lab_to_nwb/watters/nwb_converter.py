@@ -106,7 +106,7 @@ class NWBConverter(neuroconv.NWBConverter):
                 )
                 data_interface.sorting_extractor.set_property(
                     key="probe",
-                    values=len(unit_ids) * [name.split('Sorting')[1]],
+                    values=len(unit_ids) * [name.split("Sorting")[1]],
                 )
                 unit_name_start += np.max(unit_ids) + 1
 
