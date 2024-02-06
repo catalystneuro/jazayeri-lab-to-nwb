@@ -4,7 +4,7 @@
 #SBATCH -t 99:00:00
 #SBATCH -n 1
 #SBATCH --mem-per-cpu 30G
-#SBATCH --mail-type=NONE
+#SBATCH --mail-type=END
 #SBATCH --mail-user=apiccato@mit.edu
 #SBATCH --partition=jazayeri
 
