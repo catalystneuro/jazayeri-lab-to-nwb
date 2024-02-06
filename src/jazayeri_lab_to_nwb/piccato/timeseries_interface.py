@@ -5,6 +5,7 @@ stimuli that are not necessarily tied to the trial structure of display
 updates. For trial structured variables, see ../trials_interface.py.
 For variables pertaining to display updates, see ../frames_interface.py.
 """
+
 import json
 from pathlib import Path
 

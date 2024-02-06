@@ -20,7 +20,6 @@ Usage:
     See comments below for descriptions of these variables.
 """
 
-
 import glob
 import json
 import logging
@@ -202,7 +201,8 @@ def session_to_nwb(
         session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
     )
     processed_nwb_path = (
-        session_paths.output / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+        session_paths.output
+        / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
     )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")
@@ -227,17 +227,13 @@ def session_to_nwb(
     # Add behavior data
     logging.info("Adding behavior data")
     behavior_task_path = str(session_paths.behavior_task_data)
-    processed_source_data["EyePosition"] = dict(
-        folder_path=behavior_task_path)
+    processed_source_data["EyePosition"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["EyePosition"] = dict()
-    processed_source_data["PupilSize"] = dict(
-        folder_path=behavior_task_path)
+    processed_source_data["PupilSize"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["PupilSize"] = dict()
-    processed_source_data["RewardLine"] = dict(
-        folder_path=behavior_task_path)
+    processed_source_data["RewardLine"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["RewardLine"] = dict()
-    processed_source_data["Audio"] = dict(
-        folder_path=behavior_task_path)
+    processed_source_data["Audio"] = dict(folder_path=behavior_task_path)
     processed_conversion_options["Audio"] = dict()
 
     # Add trials data

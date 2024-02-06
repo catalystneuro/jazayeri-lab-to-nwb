@@ -1,4 +1,5 @@
 """Primary class for recording data."""
+
 import json
 from typing import Optional
 
