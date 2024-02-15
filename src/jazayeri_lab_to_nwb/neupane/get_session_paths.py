@@ -4,7 +4,11 @@ import collections
 import pathlib
 
 
-
+SESSION_TO_ECEPHYS_DIR = {
+    'amadeus': {
+        '08292019': "amadeus_2019-08-29_12-29-52__a/"
+    }
+}
 SessionPaths = collections.namedtuple(
     "SessionPaths",
     [
@@ -22,18 +26,16 @@ def _get_session_paths_openmind(subject, session):
 
     # Path to write output nwb files to
     output_path = (
-        f"/om2/user/apiccato/sujay_nwb/staging/sub-{subject}"
+        # f"/om/user/sneupane/nwb_data/staging/sub-{subject}"
+        f"/om/user/apiccato/sujay_nwb/staging/sub-{subject}"
     )
     session_id = f"{subject}{session}"
     # Path to the raw physiology data.
-    # TODO: Reformat session id and write a function to look for this file
-    ecephys_path = "/om4/group/jazlab/sujay_backup/mtt_data/amadeus_2019-08-29_12-29-52__a/"
+    ecephys_path = (
+        f"/om4/group/jazlab/sujay_backup/mtt_data/{SESSION_TO_ECEPHYS_DIR[subject][session]}/"
+    )
 
     # Path to task and behavior data.
-    # behavior_path = (
-    #     "/om4/group/jazlab/sujay_backup/multi_prediction/datasets/data_nwb_trials/"
-    #     f"{subject}/{session}"
-    # )
     behavior_path = f'/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/EC/{subject}{session}_a.mwk'
 
     # Path to spike sorting. This is used for reading spike sorted data.
@@ -41,8 +43,7 @@ def _get_session_paths_openmind(subject, session):
     spike_sorting_path = (
         f"/om4/group/jazlab/sujay_backup/nwb/spike_sorted_data/{session_id}_a"
     )
-    
-    # TODO: Handle naming of sync pulses directory
+
     sync_pulses_path = (f"/om4/group/jazlab/sujay_backup/mtt_data/{session_id}_a.mwk")
 
     session_paths = SessionPaths(

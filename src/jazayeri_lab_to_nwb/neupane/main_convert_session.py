@@ -87,8 +87,7 @@ def add_behavior_data(
         conversion_params: NWBConversionParams,
         behavior_path: Path):
     """Add non-trial-structured behavioral data"""
-    # for key in ['EyePosition', 'HandPosition']:
-    for key in ['EyePosition']:
+    for key in ['EyePosition', 'HandPosition']:
         conversion_params.add_processed(
             key=key,
             value=dict(folder_path=str(behavior_path), **behavior[key]),
@@ -366,7 +365,7 @@ def session_to_nwb(
         conversion_params=conversion_params,
         stub_test=stub_test
     )
-
+    import pdb; pdb.set_trace()
     # Add behavioral data
     logging.info("Adding behavior data")
     # Reads in behavioral data
