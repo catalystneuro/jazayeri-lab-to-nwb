@@ -75,7 +75,12 @@ def _add_v_probe_data(
 ):
     """Add V-Probe session data."""
     probe_data_dir = session_paths.raw_data / f"v_probe_{probe_num}"
-    if not probe_data_dir.exists():
+    sorting_path = (
+        session_paths.spike_sorting_raw
+        / f"v_probe_{probe_num}"
+        / "ks_3_output_pre_v6_curated"
+    )
+    if not probe_data_dir.exists() or not sorting_path.exists():
         return
     logging.info(f"Adding V-probe {probe_num} session data")
 
@@ -96,11 +101,6 @@ def _add_v_probe_data(
     )
 
     # Processed data
-    sorting_path = (
-        session_paths.spike_sorting_raw
-        / f"v_probe_{probe_num}"
-        / "ks_3_output_pre_v6_curated"
-    )
     processed_source_data[f"RecordingVP{probe_num}"] = raw_source_data[
         f"RecordingVP{probe_num}"
     ]
@@ -127,15 +127,16 @@ def _add_spikeglx_data(
     logging.info("Adding SpikeGLX data")
 
     # Raw data
-    spikeglx_dir = [
-        x
-        for x in (session_paths.raw_data / "spikeglx").iterdir()
-        if "settling" not in str(x)
-    ]
-    if len(spikeglx_dir) == 0:
+    spikeglx_dir = session_paths.raw_data / "spikeglx"
+    if not spikeglx_dir.exists():
         logging.info("Found no SpikeGLX data")
         return
-    elif len(spikeglx_dir) == 1:
+    spikeglx_dir = [
+        x
+        for x in spikeglx_dir.iterdir()
+        if ("settling" not in str(x) and "errors" not in str(x))
+    ]
+    if len(spikeglx_dir) == 1:
         spikeglx_dir = spikeglx_dir[0]
     else:
         raise ValueError(f"Found multiple spikeglx directories {spikeglx_dir}")
@@ -154,7 +155,7 @@ def _add_spikeglx_data(
         stub_test=stub_test, write_electrical_series=False
     )
 
-    # Processed data
+    # Spike-sorting
     sorting_path = session_paths.spike_sorting_raw / "np_0" / "ks_3_output_v2"
     processed_source_data["SortingNP"] = dict(
         folder_path=str(sorting_path),
@@ -221,10 +222,13 @@ def _update_metadata(metadata, subject, session_id, session_paths):
 
     # Ensure session_start_time exists in metadata
     if "session_start_time" not in metadata["NWBFile"]:
-        raise ValueError(
-            "Session start time was not auto-detected. Please provide it "
-            "in `metadata.yaml`"
+        print(
+            "Cannot find session_start_time in metadata. This is likely "
+            "because there was no neuropixel recorded in the session, since "
+            "metadata start time is loaded from neuropixel metadata. Setting "
+            "start time to be session date."
         )
+        metadata["NWBFile"]["session_start_time"] = session_id
 
     return metadata
 
