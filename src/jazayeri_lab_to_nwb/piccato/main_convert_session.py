@@ -31,7 +31,10 @@ from uuid import uuid4
 import get_session_paths
 import numpy as np
 import nwb_converter
+from neuroconv.tools.spikeinterface import write_sorting
 from neuroconv.utils import dict_deep_update, load_dict_from_file
+from spikeinterface.extractors import read_kilosort, read_spikeglx
+from spikeinterface import curation
 
 # Data repository. Either 'globus' or 'openmind'
 _REPO = "openmind"
@@ -111,11 +114,34 @@ def _update_metadata(metadata, subject, session_id, session_paths):
     return metadata
 
 
+# def _add_curated_sorting_data(
+#         nwbfile_path: str,
+#         session_paths: get_session_paths.SessionPaths,
+#     ):
+#     """Adds curated sorting data to the processed NWB file."""
+#     sorting = read_kilosort(
+#         folder_path=(session_paths.spike_sorting_raw /
+#                      "spikeglx/kilosort2_5_0/sorter_output")
+#     )
+#     spikeglx_dir = Path(
+#         _get_single_file(session_paths.raw_data / "spikeglx", suffix="imec0")
+#     )
+#     sorting = curation.remove_excess_spikes(sorting=sorting)
+#     keep_unit_ids = json.load(open(
+#         session_paths.spike_sorting_raw / "keep_unit_ids.json"))
+#     write_sorting(
+#         nwbfile_path=nwbfile_path,
+#         sorting=sorting,
+#         units_ids=keep_unit_ids,
+#         overwrite=False,
+#         write_as='units',
+#     )
+
+
 def _add_spikeglx_data(
-    raw_source_data,
-    raw_conversion_options,
-    processed_source_data,
-    processed_conversion_options,
+    source_data,
+    conversion_options,
+    conversion_type,
     session_paths,
     stub_test,
 ):
@@ -128,38 +154,43 @@ def _add_spikeglx_data(
     )
     ap_file = _get_single_file(spikeglx_dir, suffix="*.ap.bin")
     lfp_file = _get_single_file(spikeglx_dir, suffix="*.lf.bin")
-    raw_source_data["RecordingNP"] = dict(file_path=ap_file)
-    raw_source_data["LF"] = dict(file_path=lfp_file)
-    processed_source_data["RecordingNP"] = dict(file_path=ap_file)
-    processed_source_data["LF"] = dict(file_path=lfp_file)
-    raw_conversion_options["RecordingNP"] = dict(stub_test=stub_test)
-    raw_conversion_options["LF"] = dict(stub_test=stub_test)
-    processed_conversion_options["RecordingNP"] = dict(
-        stub_test=stub_test, write_electrical_series=False
-    )
-    processed_conversion_options["LF"] = dict(
-        stub_test=stub_test, write_electrical_series=False
-    )
+    if conversion_type == "raw":
+        source_data["RecordingNP"] = dict(file_path=ap_file)
+        source_data["LF"] = dict(file_path=lfp_file)
+        conversion_options["RecordingNP"] = dict(stub_test=stub_test)
+        conversion_options["LF"] = dict(stub_test=stub_test)
 
-    # Processed data
-    sorting_path = (
-        session_paths.spike_sorting_raw
-        / "spikeglx/kilosort2_5_0/sorter_output"
-    )
-    if os.path.exists(sorting_path):
-        logging.info("Adding spike sorted data")
-        processed_source_data["SortingNP"] = dict(
-            folder_path=str(sorting_path),
-            keep_good_only=False,
+    elif conversion_type == 'processed':
+        source_data["RecordingNP"] = dict(file_path=ap_file)
+        source_data["LF"] = dict(file_path=lfp_file)
+
+        conversion_options["RecordingNP"] = dict(
+            stub_test=stub_test, write_electrical_series=False
         )
-        processed_conversion_options["SortingNP"] = dict(
-            stub_test=stub_test, write_as="processing"
+        conversion_options["LF"] = dict(
+            stub_test=stub_test, write_electrical_series=False
         )
+
+        # Processed data
+        sorting_path = (
+            session_paths.spike_sorting_raw
+            / "spikeglx/kilosort2_5_0/sorter_output"
+        )
+        if os.path.exists(sorting_path):
+            logging.info("Adding spike sorted data")
+            source_data["SortingNP"] = dict(
+                folder_path=str(sorting_path),
+                keep_good_only=False,
+            )
+            conversion_options["SortingNP"] = dict(
+                stub_test=stub_test, write_as="processing"
+            )
 
 
 def session_to_nwb(
     subject: str,
     session: str,
+    conversion_type: str,
     stub_test: bool = False,
     overwrite: bool = True,
 ):
@@ -172,6 +203,8 @@ def session_to_nwb(
         Subject, either 'Perle' or 'Elgar'.
     session : string
         Session date in format 'YYYY-MM-DD'.
+    conversion_type: string
+        Conversion type, either 'raw' or 'processed'.
     stub_test : boolean
         Whether or not to generate a preview file by limiting data write to a
         few MB.
@@ -183,6 +216,7 @@ def session_to_nwb(
     """
     logging.info(f"stub_test = {stub_test}")
     logging.info(f"overwrite = {overwrite}")
+    logging.info(f"conversion_type = {conversion_type}")
 
     # Get paths
     session_paths = get_session_paths.get_session_paths(
@@ -214,88 +248,119 @@ def session_to_nwb(
     processed_source_data = {}
     processed_conversion_options = {}
 
-    # Add SpikeGLX data
-    _add_spikeglx_data(
-        raw_source_data=raw_source_data,
-        raw_conversion_options=raw_conversion_options,
-        processed_source_data=processed_source_data,
-        processed_conversion_options=processed_conversion_options,
-        session_paths=session_paths,
-        stub_test=stub_test,
-    )
+    if conversion_type == "raw":
+        # Add SpikeGLX data
+        _add_spikeglx_data(
+            source_data=raw_source_data,
+            conversion_options=raw_conversion_options,
+            conversion_type='raw',
+            session_paths=session_paths,
+            stub_test=stub_test,
+        )
+        raw_converter = nwb_converter.NWBConverter(
+            source_data=raw_source_data,
+            sync_dir=str(session_paths.sync_pulses),
+        )
+        logging.info("Running raw data conversion")
 
-    # Add behavior data
-    logging.info("Adding behavior data")
-    behavior_task_path = str(session_paths.behavior_task_data)
-    processed_source_data["EyePosition"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["EyePosition"] = dict()
-    processed_source_data["PupilSize"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["PupilSize"] = dict()
-    processed_source_data["RewardLine"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["RewardLine"] = dict()
-    processed_source_data["Audio"] = dict(folder_path=behavior_task_path)
-    processed_conversion_options["Audio"] = dict()
+        # Get metadata
+        # NOTE: This might not work. Previously, metadata was from processed
+        metadata = raw_converter.get_metadata()
+        metadata = _update_metadata(
+            metadata=metadata,
+            subject=subject,
+            session_id=session_id,
+            session_paths=session_paths,
+        )
+        metadata["NWBFile"]["identifier"] = str(uuid4())
 
-    # Add trials data
-    logging.info("Adding trials data")
-    processed_source_data["Trials"] = dict(
-        folder_path=str(session_paths.behavior_task_data)
-    )
-    processed_conversion_options["Trials"] = dict()
+        # Run conversion
+        raw_converter.run_conversion(
+            metadata=metadata,
+            nwbfile_path=raw_nwb_path,
+            conversion_options=raw_conversion_options,
+            overwrite=overwrite,
+        )
 
-    # Add display data
-    logging.info("Adding display data")
-    processed_source_data["Display"] = dict(
-        folder_path=str(session_paths.behavior_task_data)
-    )
-    processed_conversion_options["Display"] = dict()
+    elif conversion_type == "processed":
+        # Add behavior data
+        logging.info("Adding behavior data")
+        _add_spikeglx_data(
+            source_data=processed_source_data,
+            conversion_options=processed_conversion_options,
+            conversion_type='processed',
+            session_paths=session_paths,
+            stub_test=stub_test,
+        )
+        behavior_task_path = str(session_paths.behavior_task_data)
+        processed_source_data["EyePosition"] = dict(
+            folder_path=behavior_task_path)
+        processed_conversion_options["EyePosition"] = dict()
+        processed_source_data["PupilSize"] = dict(
+            folder_path=behavior_task_path)
+        processed_conversion_options["PupilSize"] = dict()
+        processed_source_data["RewardLine"] = dict(
+            folder_path=behavior_task_path)
+        processed_conversion_options["RewardLine"] = dict()
+        processed_source_data["Audio"] = dict(folder_path=behavior_task_path)
+        processed_conversion_options["Audio"] = dict()
 
-    # Create data converters
-    processed_converter = nwb_converter.NWBConverter(
-        source_data=processed_source_data,
-        sync_dir=session_paths.sync_pulses,
-    )
-    raw_converter = nwb_converter.NWBConverter(
-        source_data=raw_source_data,
-        sync_dir=str(session_paths.sync_pulses),
-    )
+        # Add trials data
+        logging.info("Adding trials data")
+        processed_source_data["Trials"] = dict(
+            folder_path=str(session_paths.behavior_task_data)
+        )
+        processed_conversion_options["Trials"] = dict()
 
-    # Update metadata
-    metadata = processed_converter.get_metadata()
-    metadata = _update_metadata(
-        metadata=metadata,
-        subject=subject,
-        session_id=session_id,
-        session_paths=session_paths,
-    )
+        # Add display data
+        logging.info("Adding display data")
+        processed_source_data["Display"] = dict(
+            folder_path=str(session_paths.behavior_task_data)
+        )
+        processed_conversion_options["Display"] = dict()
 
-    # Run conversion
-    logging.info("Running processed conversion")
-    processed_converter.run_conversion(
-        metadata=metadata,
-        nwbfile_path=processed_nwb_path,
-        conversion_options=processed_conversion_options,
-        overwrite=overwrite,
-    )
+        # Create data converters
+        processed_converter = nwb_converter.NWBConverter(
+            source_data=processed_source_data,
+            sync_dir=session_paths.sync_pulses,
+        )
 
-    logging.info("Running raw data conversion")
-    metadata["NWBFile"]["identifier"] = str(uuid4())
-    raw_converter.run_conversion(
-        metadata=metadata,
-        nwbfile_path=raw_nwb_path,
-        conversion_options=raw_conversion_options,
-        overwrite=overwrite,
-    )
+        # Get metadata
+        metadata = processed_converter.get_metadata()
+        metadata = _update_metadata(
+            metadata=metadata,
+            subject=subject,
+            session_id=session_id,
+            session_paths=session_paths,
+        )
+
+        # Run conversion
+        logging.info("Running processed conversion")
+        processed_converter.run_conversion(
+            metadata=metadata,
+            nwbfile_path=processed_nwb_path,
+            conversion_options=processed_conversion_options,
+            overwrite=overwrite,
+        )
+
+    # logging.info("Writing curated sorting output to processed NWB")
+    # _add_curated_sorting_data(
+    #     nwbfile_path=processed_nwb_path,
+    #     session_paths=session_paths,
+    # )
 
 
 if __name__ == "__main__":
     """Run session conversion."""
-    subject = sys.argv[1]
-    session = sys.argv[2]
+    session = sys.argv[1]
+    conversion_type = sys.argv[2]
+    subject = session.split('/')[0]
+    session = session.split('/')[1]
     logging.info(f"\nStarting conversion for {subject}/{session}\n")
     session_to_nwb(
         subject=subject,
         session=session,
+        conversion_type=conversion_type,
         stub_test=_STUB_TEST,
         overwrite=_OVERWRITE,
     )
