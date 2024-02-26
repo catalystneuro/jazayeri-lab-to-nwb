@@ -12,7 +12,6 @@ def read_trials_data(session_paths: SessionPaths,
     behavior_path = session_paths.behavior
 
     # Any tensor file will work here
-    # TODO: Make this a function that finds file
     cond_matrix_path = behavior_path / f'{subject}{session}_a_neur_tensor_gocueon.mat'
     
     cond_mat = mat73.loadmat(
@@ -34,13 +33,14 @@ def _read_ttl_data(session_paths: SessionPaths,
     # TODO: Read in TTL data and return dictionary of lists
     """Read in TTL data from Matlab files."""
     behavior_path = session_paths.behavior
-    # TODO: replace hard-coded name with subject/session
+
     ttl_path = behavior_path / f'{subject}{session}_a.mat'
     ttl_mat = loadmat(ttl_path)
     ttl_dict = {}
     variable_names = ['gocuettl', 'joy1offttl', 'joy1onttl', 'stim1onttl',]
     for var in variable_names:
         ttl_dict[var] = ttl_mat[var].squeeze()
+    ttl_dict['start_time'] = ttl_dict['stim1onttl']
     return ttl_dict
 
 def read_behavior_data(session_paths: SessionPaths, 
@@ -50,7 +50,6 @@ def read_behavior_data(session_paths: SessionPaths,
 
     behavior_path = session_paths.behavior
     behavior_dict = {}
-    # TODO: replace hard-coded name with subject/session
     ttl_path = behavior_path / f'{subject}{session}_a.mat'
     ttl_mat = loadmat(ttl_path)
     
@@ -62,9 +61,8 @@ def read_behavior_data(session_paths: SessionPaths,
     eyet_aligned = eyet - mworks_start_time + offset
     behavior_dict['EyePosition'] = {}
     behavior_dict['EyePosition']['times'] = eyet_aligned
-    behavior_dict['EyePosition']['values'] = np.stack([eyex, eyey], axis=1).reshape(2, -1)
-    # TODO: Assert that length of times and values matches    
-
+    behavior_dict['EyePosition']['values'] = (
+        np.stack([eyex, eyey], axis=1).reshape(2, -1))
 
     joyt = ttl_mat['joy_time']
     joy = ttl_mat['joy']
@@ -72,7 +70,7 @@ def read_behavior_data(session_paths: SessionPaths,
     behavior_dict['HandPosition'] = {}
     behavior_dict['HandPosition']['times'] = np.array(joyt_aligned)
     behavior_dict['HandPosition']['values'] = np.array(joy)
-    # TODO: Assert that length of times and values matches    
+
     return behavior_dict
     
 
@@ -81,7 +79,6 @@ def read_session_start_time(
         subject: str, 
         session: str):   
     behavior_path = session_paths.behavior
-    # TODO: replace hard-coded name with subject/session
     ttl_path = behavior_path / 'amadeus08292019_a.mat'
     ttl_mat = loadmat(ttl_path)
     import pdb; pdb.set_trace()

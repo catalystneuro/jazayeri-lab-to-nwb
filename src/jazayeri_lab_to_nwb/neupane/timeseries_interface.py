@@ -87,7 +87,7 @@ class EyePositionInterface(TimestampsFromArrayInterface):
         super().__init__(folder_path=str(folder_path))
         # Set data attributes
         self.set_original_timestamps(np.squeeze(times))
-        self._eye_pos = np.squeeze(np.stack(values, axis=2))
+        self._eye_pos = np.squeeze(np.stack(values, axis=1))
 
     def add_to_nwbfile(self, nwbfile: NWBFile, metadata: dict):
         del metadata

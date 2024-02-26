@@ -292,7 +292,7 @@ def _update_metadata(metadata, subject, session_id, session_paths):
 
     # TODO: Read in sesion start time (field t0_oe from file /om4/group/jazlab/sujay_backup/mtt_data/amadeus08292019_a.mwk/amadeus08292019_a.mat)
     # metadata["NWBFile"]["session_start_time"] = neupane_conversion.read_session_start_time(session_paths=session_paths)
-    metadata["NWBFile"]["session_start_time"] = x = datetime.datetime.now()
+    metadata["NWBFile"]["session_start_time"] = datetime.datetime.now()
 
     # Ensure session_start_time exists in metadata
     if "session_start_time" not in metadata["NWBFile"]:
@@ -365,7 +365,6 @@ def session_to_nwb(
         conversion_params=conversion_params,
         stub_test=stub_test
     )
-    import pdb; pdb.set_trace()
     # Add behavioral data
     logging.info("Adding behavior data")
     # Reads in behavioral data
