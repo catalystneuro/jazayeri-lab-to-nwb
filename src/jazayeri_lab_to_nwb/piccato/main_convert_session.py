@@ -33,8 +33,8 @@ import numpy as np
 import nwb_converter
 from neuroconv.tools.spikeinterface import write_sorting
 from neuroconv.utils import dict_deep_update, load_dict_from_file
-from spikeinterface.extractors import read_kilosort, read_spikeglx
 from spikeinterface import curation
+from spikeinterface.extractors import read_kilosort, read_spikeglx
 
 # Data repository. Either 'globus' or 'openmind'
 _REPO = "openmind"
@@ -160,7 +160,7 @@ def _add_spikeglx_data(
         conversion_options["RecordingNP"] = dict(stub_test=stub_test)
         conversion_options["LF"] = dict(stub_test=stub_test)
 
-    elif conversion_type == 'processed':
+    elif conversion_type == "processed":
         source_data["RecordingNP"] = dict(file_path=ap_file)
         source_data["LF"] = dict(file_path=lfp_file)
 
@@ -253,7 +253,7 @@ def session_to_nwb(
         _add_spikeglx_data(
             source_data=raw_source_data,
             conversion_options=raw_conversion_options,
-            conversion_type='raw',
+            conversion_type="raw",
             session_paths=session_paths,
             stub_test=stub_test,
         )
@@ -288,19 +288,22 @@ def session_to_nwb(
         _add_spikeglx_data(
             source_data=processed_source_data,
             conversion_options=processed_conversion_options,
-            conversion_type='processed',
+            conversion_type="processed",
             session_paths=session_paths,
             stub_test=stub_test,
         )
         behavior_task_path = str(session_paths.behavior_task_data)
         processed_source_data["EyePosition"] = dict(
-            folder_path=behavior_task_path)
+            folder_path=behavior_task_path
+        )
         processed_conversion_options["EyePosition"] = dict()
         processed_source_data["PupilSize"] = dict(
-            folder_path=behavior_task_path)
+            folder_path=behavior_task_path
+        )
         processed_conversion_options["PupilSize"] = dict()
         processed_source_data["RewardLine"] = dict(
-            folder_path=behavior_task_path)
+            folder_path=behavior_task_path
+        )
         processed_conversion_options["RewardLine"] = dict()
         processed_source_data["Audio"] = dict(folder_path=behavior_task_path)
         processed_conversion_options["Audio"] = dict()
@@ -354,8 +357,8 @@ if __name__ == "__main__":
     """Run session conversion."""
     session = sys.argv[1]
     conversion_type = sys.argv[2]
-    subject = session.split('/')[0]
-    session = session.split('/')[1]
+    subject = session.split("/")[0]
+    session = session.split("/")[1]
     logging.info(f"\nStarting conversion for {subject}/{session}\n")
     session_to_nwb(
         subject=subject,
