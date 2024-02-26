@@ -235,7 +235,7 @@ def _add_spikeglx_data(
     )
 
 
-def _update_metadata(metadata, subject, session_id, session_paths):
+def _update_metadata(metadata, subject, session, session_id, session_paths):
     """Update metadata."""
 
     # Add subject_id, session_id, sex, and age
@@ -290,9 +290,10 @@ def _update_metadata(metadata, subject, session_id, session_paths):
     editable_metadata = load_dict_from_file(editable_metadata_path)
     metadata = dict_deep_update(metadata, editable_metadata)
 
-    # TODO: Read in sesion start time (field t0_oe from file /om4/group/jazlab/sujay_backup/mtt_data/amadeus08292019_a.mwk/amadeus08292019_a.mat)
-    # metadata["NWBFile"]["session_start_time"] = neupane_conversion.read_session_start_time(session_paths=session_paths)
-    metadata["NWBFile"]["session_start_time"] = datetime.datetime.now()
+
+    metadata["NWBFile"]["session_start_time"] = (
+        neupane_conversion.read_session_start_time(session=session)
+    )
 
     # Ensure session_start_time exists in metadata
     if "session_start_time" not in metadata["NWBFile"]:
@@ -367,8 +368,8 @@ def session_to_nwb(
     )
     # Add behavioral data
     logging.info("Adding behavior data")
+
     # Reads in behavioral data
-    # TODO: Load constants.yaml file
     behavior = neupane_conversion.read_behavior_data(
         session_paths, subject=subject, session=session)
     conversion_params = add_behavior_data(
@@ -390,7 +391,6 @@ def session_to_nwb(
 
     # Create data converters
     processed_params = serialize(conversion_params.processed_source_data)
-
     processed_converter = nwb_converter.NWBConverter(
         source_data=processed_params,
         sync_dir=session_paths.sync_pulses,
@@ -402,7 +402,8 @@ def session_to_nwb(
 
     # Update metadata
     metadata = processed_converter.get_metadata()
-    metadata = _update_metadata(metadata, subject, session_id, session_paths)
+    metadata = _update_metadata(
+        metadata, subject, session=session, session_id=session_id, session_paths=session_paths)
 
     # Run conversion
     logging.info("Running processed conversion")

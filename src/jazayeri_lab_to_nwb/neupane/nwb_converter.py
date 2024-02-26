@@ -1,11 +1,7 @@
 """Primary NWBConverter class for this dataset."""
 
-import json
-import logging
-from pathlib import Path
 from typing import Optional
 
-import display_interface
 import neuroconv
 import numpy as np
 import timeseries_interface

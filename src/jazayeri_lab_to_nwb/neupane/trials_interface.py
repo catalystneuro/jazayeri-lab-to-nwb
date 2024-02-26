@@ -19,30 +19,6 @@ class TrialsInterface(TimeIntervalsInterface):
     All events that occur exactly once per trial are contained in this
     interface.
     """
-    # TODO: Create a keymap for trial structured 
-    KEY_MAP = {
-        "background_indices": "background_indices",
-        "broke_fixation": "broke_fixation",
-        "stimulus_object_identities": "stimulus_object_identities",
-        "stimulus_object_positions": "stimulus_object_positions",
-        "stimulus_object_velocities": "stimulus_object_velocities",
-        "stimulus_object_target": "stimulus_object_target",
-        "delay_object_blanks": "delay_object_blanks",
-        "closed_loop_response_position": "closed_loop_response_position",
-        "closed_loop_response_time": "closed_loop_response_time",
-        "time_start": "start_time",
-        "time_phase_fixation": "phase_fixation_time",
-        "time_phase_stimulus": "phase_stimulus_time",
-        "time_phase_delay": "phase_delay_time",
-        "time_phase_cue": "phase_cue_time",
-        "time_phase_response": "phase_response_time",
-        "time_phase_reveal": "phase_reveal_time",
-        "time_phase_iti": "phase_iti_time",
-        "reward_time": "reward_time",
-        "reward_duration": "reward_duration",
-        "response_position": "response_position",
-        "response_time": "response_time",
-    }
 
     def __init__(self, 
                  trials: dict,
@@ -62,7 +38,6 @@ class TrialsInterface(TimeIntervalsInterface):
         return metadata
 
     def get_timestamps(self) -> np.ndarray:
-        # TODO: Get trial start time from TTL data and create a column called start_time        
         return super(TrialsInterface, self).get_timestamps(column="start_time")
     
     def _read_file(self, file_path: FolderPathType):
@@ -84,82 +59,12 @@ class TrialsInterface(TimeIntervalsInterface):
     @property
     def column_descriptions(self):
         column_descriptions = {
-            "background_indices": (
-                "For each trial, the indices of the background noise pattern "
-                "patch."
-            ),
-            "broke_fixation": (
-                "For each trial, whether the subject broke fixation and the "
-                "trial was aborted"
-            ),
-            "stimulus_object_identities": (
-                "For each trial, a serialized list with one element for each "
-                'object. Each element is the identity symbol (e.g. "a", "b", '
-                '"c", ...) of the corresponding object.'
-            ),
-            "stimulus_object_positions": (
-                "For each trial, a serialized list with one element for each "
-                "object. Each element is the initial (x, y) position of the "
-                "corresponding object, in coordinates of arena width."
-            ),
-            "stimulus_object_velocities": (
-                "For each trial, a serialized list with one element for each "
-                "object. Each element is the initial (dx/dt, dy/dt) velocity "
-                "of the corresponding object, in units of arena width per "
-                "display update."
-            ),
-            "stimulus_object_target": (
-                "For each trial, a serialized list with one element for each "
-                "object. Each element is a boolean indicating whether the "
-                "corresponding object is ultimately the cued target."
-            ),
-            "delay_object_blanks": (
-                "For each trial, a boolean indicating whether the objects were "
-                "rendered as blank discs during the delay phase."
-            ),
-            "closed_loop_response_position": (
-                "For each trial, the position of the response saccade used by "
-                "the closed-loop game engine. This is used for determining "
-                "reward."
-            ),
-            "closed_loop_response_time": (
-                "For each trial, the time of the response saccade used by "
-                "the closed-loop game engine. This is used for the timing of "
-                "reward delivery."
-            ),
-            "start_time": "Start time of each trial.",
-            "phase_fixation_time": (
-                "Time of fixation phase onset for each trial."
-            ),
-            "phase_stimulus_time": (
-                "Time of stimulus phase onset for each trial."
-            ),
-            "phase_delay_time": "Time of delay phase onset for each trial.",
-            "phase_cue_time": "Time of cue phase onset for each trial.",
-            "phase_response_time": (
-                "Time of response phase onset for each trial."
-            ),
-            "phase_reveal_time": "Time of reveal phase onset for each trial.",
-            "phase_iti_time": (
-                "Time of inter-trial interval onset for each trial."
-            ),
-            "reward_time": "Time of reward delivery onset for each trial.",
-            "reward_duration": "Reward duration for each trial",
-            "response_position": (
-                "Response position for each trial. This differs from "
-                "closed_loop_response_position in that this is calculated "
-                "post-hoc from high-resolution eye tracking data, hence is "
-                "more accurate. Note that unlike "
-                "closed_loop_response_position, this may be inconsistent with "
-                "reward delivery."
-            ),
-            "response_time": (
-                "Response time for each trial. This differs from "
-                "closed_loop_response_time in that this is calculated post-hoc "
-                "from high-resolution eye tracking data, hence is more "
-                "accurate. Note that unlike closed_loop_response_time, this "
-                "may be inconsistent with reward delivery."
-            ),
+            "gocuettl": "Time of go cue.",
+            "joy1offttl": "Time of joystick release",
+            "joy1onttl": "Time of joystick press",
+            "stim1onttl": "Time of stimulus onset",
+            "start_time": "Time of trial start, equal to stimulus onset",
+            # Add condition variables
         }
 
         return column_descriptions

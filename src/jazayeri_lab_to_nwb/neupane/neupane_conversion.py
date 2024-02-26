@@ -1,7 +1,7 @@
 import mat73
 import numpy as np
 from scipy.io import loadmat
-
+from datetime import datetime
 from get_session_paths import SessionPaths
 
 def read_trials_data(session_paths: SessionPaths, 
@@ -30,7 +30,6 @@ def read_trials_data(session_paths: SessionPaths,
 def _read_ttl_data(session_paths: SessionPaths, 
                    subject: str, 
                    session: str):
-    # TODO: Read in TTL data and return dictionary of lists
     """Read in TTL data from Matlab files."""
     behavior_path = session_paths.behavior
 
@@ -74,13 +73,7 @@ def read_behavior_data(session_paths: SessionPaths,
     return behavior_dict
     
 
-def read_session_start_time(
-        session_paths: SessionPaths,
-        subject: str, 
-        session: str):   
-    behavior_path = session_paths.behavior
-    ttl_path = behavior_path / 'amadeus08292019_a.mat'
-    ttl_mat = loadmat(ttl_path)
-    import pdb; pdb.set_trace()
+def read_session_start_time(session: str):   
+    return str(datetime.strptime(session, '%m%d%Y'))
 
 
