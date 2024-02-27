@@ -19,7 +19,6 @@ class TrialsInterface(TimeIntervalsInterface):
     All events that occur exactly once per trial are contained in this
     interface.
     """
-
     def __init__(self, 
                  trials: dict,
                  folder_path: FolderPathType, 
@@ -64,7 +63,6 @@ class TrialsInterface(TimeIntervalsInterface):
             "joy1onttl": "Time of joystick press",
             "stim1onttl": "Time of stimulus onset",
             "start_time": "Time of trial start, equal to stimulus onset",
-            # Add condition variables
         }
 
         return column_descriptions
