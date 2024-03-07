@@ -36,7 +36,7 @@ from neuroconv.utils import dict_deep_update, load_dict_from_file
 # Data repository. Either 'globus' or 'openmind'
 _REPO = "openmind"
 # Whether to run all the physiology data or only a stub
-_STUB_TEST = True
+_STUB_TEST = False
 # Whether to overwrite output nwb files
 _OVERWRITE = True
 
@@ -244,7 +244,7 @@ def _update_metadata(metadata, subject, session, session_id, session_paths):
     metadata["Subject"]["sex"] = _SUBJECT_TO_SEX[subject]
     metadata["Subject"]["age"] = _SUBJECT_TO_AGE[subject]
 
-    # TODO: Extract information from README.md
+    # TODO: Extract information from README.md -> include MNI coordinates of recording location 
     # # Add probe locations
     # probe_metadata_file = (
     #     session_paths.data_open_source / "probes.metadata.json"

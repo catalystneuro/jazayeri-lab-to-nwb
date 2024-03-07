@@ -1,16 +1,18 @@
 NWBFile:
   # related_publications: # no pubs yet
-  #   - https://doi.org/12345
+  #   - https://www.biorxiv.org/content/10.1101/2022.12.15.520640v1
   session_description:
-    Data from macaque performing multi-object working memory task. Subject is
-    presented with multiple objects at different locations on a screen. After a
-    delay, the subject is then cued with one of the objects, now displayed at
-    the center of the screen. Subject should respond by saccading to the
-    location of the cued object at its initial presentation.
+    Data from macaque performing mental navigation task. Subject is
+    presented with a start and a target landmark, sampled from a linear
+    map of 6 landmarks on a screen. After a delay, the subject is then cued 
+    with a go signal to navigate from start to target landmark with a
+    joystick. Subject should respond by deflecting the joystick in the right
+    direction and holding it until the subject thinks it has arrived at the target
+    landmark. The visual drift or intervening landmarks are all occluded from view
+    making the task a purely mental navigation. 
   institution: MIT
-  lab: Jazayeri
+  labs: Jazayeri, Fiete
   experimenter:
-    - Watters, Nicholas
-    - Gabel, John
+    - Neupane, Sujaya
 Subject:
   species: Macaca mulatta

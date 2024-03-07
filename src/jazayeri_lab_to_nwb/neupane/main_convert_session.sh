@@ -1,11 +1,11 @@
 #!/bin/sh
 
-#SBATCH -o /om2/user/apiccato/jazayeri-lab-to-nwb/src/jazayeri_lab_to_nwb/neupane/logs/%A.out
-#SBATCH -t 99:00:00
+#SBATCH -o /om2/user/sneupane/jazayeri-lab-to-nwb/src/jazayeri_lab_to_nwb/neupane/logs/%A.out
+#SBATCH -t 01:00:00
 #SBATCH -n 1
 #SBATCH --mem-per-cpu 30G
 #SBATCH --mail-type=NONE
-#SBATCH --mail-user=apiccato@mit.edu
+#SBATCH --mail-user=sneupane@mit.edu
 #SBATCH --partition=jazayeri
 
 # Script to convert a session to NWB format. Takes in two arguments from user:
@@ -28,5 +28,5 @@ fi
 
 source ~/.bashrc
 conda activate jazayeri_lab_to_nwb_env
-cd /om2/user/apiccato/jazayeri-lab-to-nwb
+cd /om2/user/sneupane/jazayeri-lab-to-nwb
 python -u src/jazayeri_lab_to_nwb/neupane/main_convert_session.py $SUBJECT $SESSION

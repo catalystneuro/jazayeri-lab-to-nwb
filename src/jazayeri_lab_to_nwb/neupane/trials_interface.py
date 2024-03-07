@@ -64,7 +64,21 @@ class TrialsInterface(TimeIntervalsInterface):
             "joy1onttl": "Time of joystick press",
             "stim1onttl": "Time of stimulus onset",
             "start_time": "Time of trial start, equal to stimulus onset",
+
             # Add condition variables
+            "ta": "Actual vector (seconds)",
+            "tp": "Produced vector (seconds)",
+            "curr": "Start landmark",
+            "target": "Target landmark",
+            "rt": "Response time = joystick press time - go cue time",
+            "delay": ".4-1.4s delay for go cue. Drawn from an exponential distribution",
+            "trial_type": "1=linear map visible (NTS), 2=centre visible, periphery occluded, 3=fully occluded (MNAV)",
+            "seqq": "which sequence: 1,2,3 or 4",
+            "attempt": "# of attempts to perform the trial",
+            "succ": "binary: successful trial or not",
+            "numrepeat": "# of times the same condition was repeated, sometimes implemented to prevent deliberate aborts",
+            "validtrials_mm": "binary: trial labeled as valid or lapse based on Gaussian Mixture Model fit to tp distrbutions",
+            
         }
 
         return column_descriptions

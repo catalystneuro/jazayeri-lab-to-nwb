@@ -27,7 +27,7 @@ def _get_session_paths_openmind(subject, session):
     # Path to write output nwb files to
     output_path = (
         # f"/om/user/sneupane/nwb_data/staging/sub-{subject}"
-        f"/om/user/apiccato/sujay_nwb/staging/sub-{subject}"
+        f"/om/user/sneupane/sujay_nwb/staging/sub-{subject}"
     )
     session_id = f"{subject}{session}"
     # Path to the raw physiology data.
