@@ -19,7 +19,6 @@ class TrialsInterface(TimeIntervalsInterface):
     All events that occur exactly once per trial are contained in this
     interface.
     """
-
     def __init__(self, 
                  trials: dict,
                  folder_path: FolderPathType, 
