@@ -146,16 +146,16 @@ def _add_curated_sorting_data(
     )
 
     # Adding waveform template
-    # waveform_extractor = sc.load_waveforms(
-    #     session_paths.postprocessed_data / 'waveforms'
-    # )
-    # write_waveforms(
-    #     waveform_extractor=waveform_extractor,
-    #     nwbfile_path=nwbfile_path,
-    #     overwrite=False,
-    #     unit_ids=unit_ids,
-    #     write_as='units',
-    # )
+    waveform_extractor = sc.load_waveforms(
+        session_paths.postprocessed_data / 'waveforms'
+    )
+    write_waveforms(
+        waveform_extractor=waveform_extractor,
+        nwbfile_path=nwbfile_path,
+        overwrite=False,
+        unit_ids=unit_ids,
+        write_as='units',
+    )
 
     # Adding stable trials information
     read_io = pynwb.NWBHDF5IO(
@@ -305,7 +305,13 @@ def session_to_nwb(
         # Add SpikeGLX data
         nwb_path = (
             session_paths.output /
-            f"sub-{subject}_ses-{session_id}_ecephys.nwb"
+            f"sub-{subject}_ses-{session_id}_ecephys.nwb")
+        _add_spikeglx_data(
+            source_data=raw_source_data,
+            conversion_options=raw_conversion_options,
+            conversion_type="raw",
+            session_paths=session_paths,
+            stub_test=stub_test,
         )
 
         converter = nwb_converter.NWBConverter(
@@ -358,6 +364,13 @@ def session_to_nwb(
         source_data["Audio"] = dict(
             folder_path=behavior_task_path)
         conversion_options["Audio"] = dict()
+        _add_spikeglx_data(
+            source_data=source_data,
+            conversion_options=conversion_options,
+            conversion_type="processed",
+            session_paths=session_paths,
+            stub_test=stub_test,
+        )
 
         # Add trials data
         logging.info("Adding trials data")
@@ -439,8 +452,8 @@ if __name__ == "__main__":
     """Run session conversion."""
     session = sys.argv[1]
     conversion_type = sys.argv[2]
-    subject = session.split('/')[0]
-    session = session.split('/')[1]
+    subject = session.split("/")[0]
+    session = session.split("/")[1]
     logging.info(f"\nStarting conversion for {subject}/{session}\n")
     session_to_nwb(
         subject=subject,
