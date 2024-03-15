@@ -9,7 +9,6 @@ from neuroconv.datainterfaces.ecephys.baserecordingextractorinterface import (
     BaseRecordingExtractorInterface,
 )
 from neuroconv.utils import FilePathType
-from spikeinterface import BaseRecording
 
 
 class DatRecordingInterface(BaseRecordingExtractorInterface):

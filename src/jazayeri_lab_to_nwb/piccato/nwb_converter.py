@@ -133,6 +133,7 @@ class NWBConverter(neuroconv.NWBConverter):
                 lf_interface = self.data_interface_objects["LF"]
             else:
                 raise ValueError("Invalid probe_name {probe_name}")
+
             intercept = transform["intercept"]
             coef = transform["coef"]
 
@@ -140,7 +141,6 @@ class NWBConverter(neuroconv.NWBConverter):
             orig_timestamps = recording_interface.get_original_timestamps()
             aligned_timestamps = intercept + coef * (start + orig_timestamps)
             recording_interface.set_aligned_timestamps(aligned_timestamps)
-
             # Align LFP timestamps
             if lf_interface is not None:
                 orig_timestamps = lf_interface.get_original_timestamps()
@@ -174,7 +174,9 @@ class NWBConverter(neuroconv.NWBConverter):
         for data_interface in self.data_interface_objects.values():
             if isinstance(data_interface, BaseSortingExtractorInterface):
                 # Do not need to align because recording will be aligned
+                # before spike sorting
                 continue
             start_time = data_interface.set_aligned_starting_time(
                 aligned_starting_time=zero_time
             )
+

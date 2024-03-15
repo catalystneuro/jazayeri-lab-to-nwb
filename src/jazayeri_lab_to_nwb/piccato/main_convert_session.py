@@ -40,7 +40,7 @@ import pynwb
 # Data repository. Either 'globus' or 'openmind'
 _REPO = "openmind"
 # Whether to run all the physiology data or only a stub
-_STUB_TEST = False
+_STUB_TEST = True
 # Whether to overwrite output nwb files
 _OVERWRITE = True
 
@@ -130,20 +130,22 @@ def _add_curated_sorting_data(
     )
 
     # Adding curated units
-    unit_ids = list(json.load(open(
+    curated_unit_idxs = list(json.load(open(
         session_paths.postprocessed_data / 'manual_curation.json', 'r')
         ).keys())
-    unit_ids = [int(unit_id) for unit_id in unit_ids]
-    print(f"unit_ids: {unit_ids}")
+    curated_unit_idxs = [int(unit_id) for unit_id in curated_unit_idxs]
+    unit_ids = sorting.get_unit_ids()
+    curated_unit_ids = [unit_ids[idx] for idx in curated_unit_idxs]
+
     write_sorting(
         sorting=sorting,
         nwbfile_path=nwbfile_path,
-        unit_ids=unit_ids,
+        unit_ids=curated_unit_ids,
         overwrite=False,
         write_as='units',
     )
 
-    # # Adding waveform template
+    # Adding waveform template
     # waveform_extractor = sc.load_waveforms(
     #     session_paths.postprocessed_data / 'waveforms'
     # )
@@ -159,23 +161,21 @@ def _add_curated_sorting_data(
     read_io = pynwb.NWBHDF5IO(
         nwbfile_path, mode='r', load_namespaces=True,
     )
+    nwbfile = read_io.read()
     stable_trials = json.load(open(
         session_paths.postprocessed_data / 'stability.json', 'r'
     ))
     units_stable_trials = [
-        stable_trials[unit_id] for unit_id in unit_ids
+        stable_trials[unit_idx] for unit_idx in curated_unit_idxs
     ]
     description = (
         "For each trial, whether this unit was stable in the recording."
     )
-
-    nwbfile = read_io.read()
-    units_data = nwbfile['units']
+    units_data = nwbfile.units
     units_data.add_column(
         name='stable_trials',
         description=description,
         data=units_stable_trials)
-
     os.remove(nwbfile_path)
     with pynwb.NWBHDF5IO(nwbfile_path, mode='w') as write_io:
         write_io.export(
@@ -200,13 +200,16 @@ def _add_spikeglx_data(
     )
     ap_file = _get_single_file(spikeglx_dir, suffix="*.ap.bin")
     lfp_file = _get_single_file(spikeglx_dir, suffix="*.lf.bin")
+
     if conversion_type == _ECEPHYS_CONV_TYPE:
-        source_data["RecordingNP"] = dict(file_path=ap_file)
+        source_data["RecordingNP"] = dict(
+            file_path=ap_file,
+        )
         source_data["LF"] = dict(file_path=lfp_file)
         conversion_options["RecordingNP"] = dict(stub_test=stub_test)
         conversion_options["LF"] = dict(stub_test=stub_test)
-
-    elif conversion_type == _SPIKES_CONV_TYPE:
+        return
+    if conversion_type == _SPIKES_CONV_TYPE:
         source_data["RecordingNP"] = dict(file_path=ap_file)
         source_data["LF"] = dict(file_path=lfp_file)
 
@@ -230,8 +233,8 @@ def _add_spikeglx_data(
             conversion_options["SortingNP"] = dict(
                 stub_test=stub_test, write_as="processing"
             )
-
-    elif conversion_type == "behavior+task":
+        return
+    if conversion_type == "behavior+task":
         source_data["RecordingNP"] = dict(file_path=ap_file)
         source_data["LF"] = dict(file_path=lfp_file)
         conversion_options["RecordingNP"] = dict(
@@ -240,6 +243,7 @@ def _add_spikeglx_data(
         conversion_options["LF"] = dict(
             stub_test=stub_test, write_electrical_series=False
         )
+        return
 
 
 def session_to_nwb(
@@ -286,47 +290,32 @@ def session_to_nwb(
         session_id = f"{session_id}-stub"
     else:
         session_id = f"{session}-full"
-    ecephys_nwb_path = (
-        session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
-    )
-    behavior_task_nwb_path = (
-        session_paths.output
-        / f"sub-{subject}_ses-{session_id}_behavior+task.nwb"
-    )
-    spikes_nwb_path = (
-        session_paths.output
-        / f"sub-{subject}_ses-{session_id}_spikes.nwb"
-    )
-    logging.info(f"ecephys_nwb_path = {ecephys_nwb_path}")
-    logging.info(f"behavior_task_nwb_path = {behavior_task_nwb_path}")
-    logging.info(f"spikes_nwb_path = {spikes_nwb_path}")
-    logging.info("")
-
     # Initialize empty data dictionaries
-    ecephys_source_data = {}
-    ecephys_conversion_options = {}
-    behavior_task_source_data = {}
-    behavior_task_conversion_options = {}
-    spikes_source_data = {}
-    spikes_conversion_options = {}
 
+    source_data = {}
+    conversion_options = {}
+    _add_spikeglx_data(
+        source_data=source_data,
+        conversion_options=conversion_options,
+        conversion_type=conversion_type,
+        session_paths=session_paths,
+        stub_test=stub_test,
+    )
     if conversion_type == _ECEPHYS_CONV_TYPE:
         # Add SpikeGLX data
-        _add_spikeglx_data(
-            source_data=ecephys_source_data,
-            conversion_options=ecephys_conversion_options,
-            conversion_type=_ECEPHYS_CONV_TYPE,
-            session_paths=session_paths,
-            stub_test=stub_test,
+        nwb_path = (
+            session_paths.output /
+            f"sub-{subject}_ses-{session_id}_ecephys.nwb"
         )
-        ecephys_converter = nwb_converter.NWBConverter(
-            source_data=ecephys_source_data,
+
+        converter = nwb_converter.NWBConverter(
+            source_data=source_data,
             sync_dir=str(session_paths.sync_pulses),
         )
         logging.info("Running ecephys data conversion")
 
         # Get metadata
-        metadata = ecephys_converter.get_metadata()
+        metadata = converter.get_metadata()
         metadata = _update_metadata(
             metadata=metadata,
             subject=subject,
@@ -334,63 +323,64 @@ def session_to_nwb(
             session_paths=session_paths,
         )
         metadata["NWBFile"]["identifier"] = str(uuid4())
-
+        
+        for interface_name, data_interface in converter.data_interface_objects.items():
+            if 'Recording' in interface_name:
+                print(data_interface.sampling_frequency)
         # Run conversion
-        ecephys_converter.run_conversion(
+        converter.run_conversion(
             metadata=metadata,
-            nwbfile_path=ecephys_nwb_path,
-            conversion_options=ecephys_conversion_options,
+            nwbfile_path=nwb_path,
+            conversion_options=conversion_options,
             overwrite=overwrite,
         )
 
-    elif conversion_type == "behavior+task":
+        return
+    if conversion_type == _BEHAVIOR_TASK_CONV_TYPE:
         # Add SpikeGLX data
-        _add_spikeglx_data(
-            source_data=behavior_task_source_data,
-            conversion_options=behavior_task_conversion_options,
-            conversion_type=_BEHAVIOR_TASK_CONV_TYPE,
-            session_paths=session_paths,
-            stub_test=stub_test,
+        nwb_path = (
+            session_paths.output
+            / f"sub-{subject}_ses-{session_id}_behavior+task.nwb"
         )
 
         # Add behavior data
         logging.info("Adding behavior data")
         behavior_task_path = str(session_paths.behavior_task_data)
-        behavior_task_source_data["EyePosition"] = dict(
+        source_data["EyePosition"] = dict(
             folder_path=behavior_task_path)
-        behavior_task_conversion_options["EyePosition"] = dict()
-        behavior_task_source_data["PupilSize"] = dict(
+        conversion_options["EyePosition"] = dict()
+        source_data["PupilSize"] = dict(
             folder_path=behavior_task_path)
-        behavior_task_conversion_options["PupilSize"] = dict()
-        behavior_task_source_data["RewardLine"] = dict(
+        conversion_options["PupilSize"] = dict()
+        source_data["RewardLine"] = dict(
             folder_path=behavior_task_path)
-        behavior_task_conversion_options["RewardLine"] = dict()
-        behavior_task_source_data["Audio"] = dict(
+        conversion_options["RewardLine"] = dict()
+        source_data["Audio"] = dict(
             folder_path=behavior_task_path)
-        behavior_task_conversion_options["Audio"] = dict()
+        conversion_options["Audio"] = dict()
 
         # Add trials data
         logging.info("Adding trials data")
-        behavior_task_source_data["Trials"] = dict(
+        source_data["Trials"] = dict(
             folder_path=str(session_paths.behavior_task_data)
         )
-        behavior_task_conversion_options["Trials"] = dict()
+        conversion_options["Trials"] = dict()
 
         # Add display data
         logging.info("Adding display data")
-        behavior_task_source_data["Display"] = dict(
+        source_data["Display"] = dict(
             folder_path=str(session_paths.behavior_task_data)
         )
-        behavior_task_conversion_options["Display"] = dict()
+        conversion_options["Display"] = dict()
 
         # Create data converters
-        behavior_task_converter = nwb_converter.NWBConverter(
-            source_data=behavior_task_source_data,
+        converter = nwb_converter.NWBConverter(
+            source_data=source_data,
             sync_dir=session_paths.sync_pulses,
         )
 
         # Get metadata
-        metadata = behavior_task_converter.get_metadata()
+        metadata = converter.get_metadata()
         metadata = _update_metadata(
             metadata=metadata,
             subject=subject,
@@ -400,24 +390,21 @@ def session_to_nwb(
 
         # Run conversion
         logging.info("Running behavior+task conversion")
-        behavior_task_converter.run_conversion(
+        converter.run_conversion(
             metadata=metadata,
-            nwbfile_path=behavior_task_nwb_path,
-            conversion_options=behavior_task_conversion_options,
+            nwbfile_path=nwb_path,
+            conversion_options=conversion_options,
             overwrite=overwrite,
         )
-    elif conversion_type == 'spikes':
-        _add_spikeglx_data(
-            source_data=spikes_source_data,
-            conversion_options=spikes_conversion_options,
-            conversion_type='spikes',
-            session_paths=session_paths,
-            stub_test=stub_test,
+        return
+    if conversion_type == _SPIKES_CONV_TYPE:
+        nwb_path = (
+            session_paths.output
+            / f"sub-{subject}_ses-{session_id}_spikes.nwb"
         )
-
         # Create data converter
         spikes_converter = nwb_converter.NWBConverter(
-            source_data=spikes_source_data,
+            source_data=source_data,
             sync_dir=session_paths.sync_pulses,
         )
 
@@ -434,15 +421,16 @@ def session_to_nwb(
         logging.info('Running spikes conversion')
         spikes_converter.run_conversion(
             metadata=metadata,
-            nwbfile_path=spikes_nwb_path,
-            conversion_options=spikes_conversion_options,
+            nwbfile_path=nwb_path,
+            conversion_options=conversion_options,
             overwrite=overwrite,
         )
-        time.sleep(10)
+
         # Adding curated spike sorting and waveform data
+        time.sleep(10)
         logging.info("Writing curated sorting output to processed NWB")
         _add_curated_sorting_data(
-            nwbfile_path=spikes_nwb_path,
+            nwbfile_path=nwb_path,
             session_paths=session_paths,
         )
 
