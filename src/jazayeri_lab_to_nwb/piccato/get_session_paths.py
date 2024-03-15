@@ -18,7 +18,7 @@ SessionPaths = collections.namedtuple(
         "session_data",
         "sync_pulses",
         "spike_sorting_raw",
-        "postprocessed_data"
+        "postprocessed_data",
     ],
 )
 
@@ -33,7 +33,9 @@ def _get_session_paths_openmind(subject, session):
     )
 
     # Path to the raw data. This is used for reading raw physiology data.
-    ecephys_data_path = pathlib.Path(f"{OM_PATH}/{subject}/{session}/raw_data/")
+    ecephys_data_path = pathlib.Path(
+        f"{OM_PATH}/{subject}/{session}/raw_data/"
+    )
 
     # Path to task and behavior data.
     behavior_task_data_path = pathlib.Path(
@@ -64,7 +66,7 @@ def _get_session_paths_openmind(subject, session):
         behavior_task_data=pathlib.Path(behavior_task_data_path),
         sync_pulses=sync_pulses_path,
         spike_sorting_raw=spike_sorting_raw_path,
-        postprocessed_data=postprocessed_data_path
+        postprocessed_data=postprocessed_data_path,
     )
 
     return session_paths

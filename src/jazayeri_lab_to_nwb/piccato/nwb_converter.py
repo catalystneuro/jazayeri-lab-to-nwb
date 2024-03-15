@@ -179,4 +179,3 @@ class NWBConverter(neuroconv.NWBConverter):
             start_time = data_interface.set_aligned_starting_time(
                 aligned_starting_time=zero_time
             )
-
