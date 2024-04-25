@@ -5,8 +5,16 @@ import pathlib
 
 
 SESSION_TO_ECEPHYS_DIR = {
-    'amadeus': {
-        '08292019': "amadeus_2019-08-29_12-29-52__a/"
+   
+
+    'mahler': {
+        "04122021_a": "mahler_2021-04-12_13-11-22__a/",
+        "04132021_a": "mahler_2021-04-13_13-41-58__a/",
+        "04142021_a": "mahler_2021-04-14_13-06-04__a/",
+        "04212021_a": "mahler_2021-04-21_12-38-38__a/",
+        "04222021_b": "mahler_2021-04-22_13-56-54__b/",
+        "04252021_a": "mahler_2021-04-25_15-02-38__a/",
+        "04272021_a": "mahler_2021-04-27_14-01-16__a/"
     }
 }
 SessionPaths = collections.namedtuple(
@@ -32,19 +40,19 @@ def _get_session_paths_openmind(subject, session):
     session_id = f"{subject}{session}"
     # Path to the raw physiology data.
     ecephys_path = (
-        f"/om4/group/jazlab/sujay_backup/mtt_data/{SESSION_TO_ECEPHYS_DIR[subject][session]}/"
+        f"/om4/group/jazlab/sujay_backup/mtt_data_mahler/{SESSION_TO_ECEPHYS_DIR[subject][session]}/"
     )
 
     # Path to task and behavior data.
-    behavior_path = f'/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/EC/{subject}{session}_a.mwk'
+    behavior_path = f'/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/EC/{subject}{session}.mwk'
 
     # Path to spike sorting. This is used for reading spike sorted data.
     # TODO: Handle sessions with multiple MWorks sessions
     spike_sorting_path = (
-        f"/om4/group/jazlab/sujay_backup/nwb/spike_sorted_data/{session_id}_a"
+        f"/om4/group/jazlab/sujay_backup/nwb/spike_sorted_data/{session_id}"
     )
 
-    sync_pulses_path = (f"/om4/group/jazlab/sujay_backup/mtt_data/{session_id}_a.mwk")
+    sync_pulses_path = (f"/om4/group/jazlab/sujay_backup/mtt_data/{session_id}.mwk")
 
     session_paths = SessionPaths(
         output=pathlib.Path(output_path),

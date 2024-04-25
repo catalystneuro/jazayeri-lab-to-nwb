@@ -77,9 +77,12 @@ class NWBConversionParams():
 
 _SUBJECT_TO_SEX = {
     "amadeus": "M",
+    "mahler": "M"
+
 }
 _SUBJECT_TO_AGE = {
     "amadeus": "P10Y",  # Born 6/11/2012
+    "mahler": "P05Y",
 }
 
 def add_behavior_data(
@@ -169,7 +172,7 @@ def _add_v_probe_data(
     # Processed data
     sorting_path = (
         session_paths.spike_sorting
-        / "kilosorted2"
+        / "kilosorted3"
     )
 
     conversion_params.add_processed(
@@ -342,9 +345,9 @@ def session_to_nwb(
     # Get paths for nwb files to write
     session_paths.output.mkdir(parents=True, exist_ok=True)
     if stub_test:
-        session_id = f"{session}-stub"
+        session_id = f"{session[0:-2]}-stub"
     else:
-        session_id = f"{session}"
+        session_id = f"{session[0:-2]}"
     raw_nwb_path = str(
         session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
     )

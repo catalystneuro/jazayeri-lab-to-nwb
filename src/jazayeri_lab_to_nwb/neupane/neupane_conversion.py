@@ -12,7 +12,7 @@ def read_trials_data(session_paths: SessionPaths,
     behavior_path = session_paths.behavior
 
     # Any tensor file will work here
-    cond_matrix_path = behavior_path / f'{subject}{session}_a_neur_tensor_gocueon.mat'
+    cond_matrix_path = behavior_path / f'{subject}{session}_neur_tensor_gocueon.mat'
     
     cond_mat = mat73.loadmat(
         cond_matrix_path, only_include=['cond_label', 'cond_matrix'])
@@ -33,7 +33,7 @@ def _read_ttl_data(session_paths: SessionPaths,
     """Read in TTL data from Matlab files."""
     behavior_path = session_paths.behavior
 
-    ttl_path = behavior_path / f'{subject}{session}_a.mat'
+    ttl_path = behavior_path / f'{subject}{session}.mat'
     ttl_mat = loadmat(ttl_path)
     ttl_dict = {}
     variable_names = ['gocuettl', 'joy1offttl', 'joy1onttl', 'stim1onttl',]
@@ -49,7 +49,7 @@ def read_behavior_data(session_paths: SessionPaths,
 
     behavior_path = session_paths.behavior
     behavior_dict = {}
-    ttl_path = behavior_path / f'{subject}{session}_a.mat'
+    ttl_path = behavior_path / f'{subject}{session}.mat'
     ttl_mat = loadmat(ttl_path)
     
     eyet = ttl_mat['eyex_time']
@@ -74,6 +74,6 @@ def read_behavior_data(session_paths: SessionPaths,
     
 
 def read_session_start_time(session: str):   
-    return str(datetime.strptime(session, '%m%d%Y'))
+    return str(datetime.strptime(session[:-2], '%m%d%Y'))
 
 

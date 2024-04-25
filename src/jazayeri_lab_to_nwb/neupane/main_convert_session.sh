@@ -1,9 +1,9 @@
 #!/bin/sh
 
 #SBATCH -o /om2/user/sneupane/jazayeri-lab-to-nwb/src/jazayeri_lab_to_nwb/neupane/logs/%A.out
-#SBATCH -t 01:00:00
+#SBATCH -t 03:00:00
 #SBATCH -n 1
-#SBATCH --mem-per-cpu 30G
+#SBATCH --mem-per-cpu 80G
 #SBATCH --mail-type=NONE
 #SBATCH --mail-user=sneupane@mit.edu
 #SBATCH --partition=jazayeri

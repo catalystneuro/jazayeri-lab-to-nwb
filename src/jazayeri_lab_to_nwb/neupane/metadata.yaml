@@ -11,7 +11,7 @@ NWBFile:
     landmark. The visual drift or intervening landmarks are all occluded from view
     making the task a purely mental navigation. 
   institution: MIT
-  labs: Jazayeri, Fiete
+  lab: Jazayeri, Fiete
   experimenter:
     - Neupane, Sujaya
 Subject:
