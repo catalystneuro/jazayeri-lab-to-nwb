@@ -147,3 +147,5 @@ dmypy.json
 
 # NWB files
 **.nwb
+
+*.out
