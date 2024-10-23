@@ -77,10 +77,12 @@ class NWBConversionParams():
 
 # TODO: Edit subject to sex mapping and subject to age mapping
 _SUBJECT_TO_SEX = {
-    "amadeus": "M",
+    "Faure": "M",
+    "Nielsen": "M", 
 }
 _SUBJECT_TO_AGE = {
-    "amadeus": "P10Y",  # Born 6/11/2012
+    "Faure": "P10Y",  # Born 6/11/2012
+    "Nielsen": "P10Y",
 }
 
 
@@ -293,7 +295,6 @@ def session_to_nwb(
     processed_params = serialize(conversion_params.processed_source_data)
     processed_converter = nwb_converter.NWBConverter(
         source_data=processed_params,
-        sync_dir=session_paths.sync_pulses,
     )
     # raw_converter = nwb_converter.NWBConverter(
     #     source_data=conversion_params.raw_source_data,

@@ -67,27 +67,26 @@ class NWBConverter(neuroconv.NWBConverter):
     """Primary conversion class for extracellular electrophysiology dataset."""
 
     data_interface_classes = dict(
-        RecordingVP0=DatRecordingInterface,
-        SortingVP0=neuroconv.datainterfaces.KiloSortSortingInterface,
-        RecordingVP1=DatRecordingInterface,
-        SortingVP1=neuroconv.datainterfaces.KiloSortSortingInterface,
-        RecordingNP=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
-        LF=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
-        SortingNP=neuroconv.datainterfaces.KiloSortSortingInterface,
-        EyePosition=timeseries_interface.EyePositionInterface,
-        HandPosition=timeseries_interface.HandPositionInterface,
+        # RecordingVP0=DatRecordingInterface,
+        # SortingVP0=neuroconv.datainterfaces.KiloSortSortingInterface,
+        # RecordingVP1=DatRecordingInterface,
+        # SortingVP1=neuroconv.datainterfaces.KiloSortSortingInterface,
+        # RecordingNP=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
+        # LF=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
+        # SortingNP=neuroconv.datainterfaces.KiloSortSortingInterface,
+        # EyePosition=timeseries_interface.EyePositionInterface,
+        # HandPosition=timeseries_interface.HandPositionInterface,
+        
         Trials=trials_interface.TrialsInterface,
     )
 
     def __init__(
         self,
         source_data: dict[str, dict],
-        sync_dir: Optional[FolderPathType] = None,
         verbose: bool = True,
     ):
         """Validate source_data and initialize all data interfaces."""
         super().__init__(source_data=source_data, verbose=verbose)
-        self.sync_dir = sync_dir
 
         unit_name_start = 0
         for data_interface in self.data_interface_objects.values():
