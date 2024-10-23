@@ -121,6 +121,8 @@ def read_trials_data(
             # Store the unique value of the field for this trial
             trials[field].append(unique_values[0])
 
+    trials['start_time'] = trials['geo_present']
+
     return trials
 
 # Need to update
