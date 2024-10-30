@@ -5,8 +5,8 @@ import pathlib
 
 # TODO: If you want subject names to be different, change this.
 SUBJECT_NAME_TO_ID = {
-    "Perle": "monkey0",
-    "Elgar": "monkey1",
+    "Faure": "monkey0",
+    "Nielsen": "monkey1",
 }
 
 SessionPaths = collections.namedtuple(
