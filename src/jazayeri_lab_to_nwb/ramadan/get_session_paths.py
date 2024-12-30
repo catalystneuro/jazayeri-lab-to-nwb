@@ -18,12 +18,12 @@ SessionPaths = collections.namedtuple(
     ],
 )
 
-
 def _get_session_paths_openmind(subject, session):
     """Get paths to all components of the data on openmind."""
     # subject_id = SUBJECT_NAME_TO_ID[subject]
     output_path = ('./output')
-    behavior_path = f"/Volumes/Portable/Kilosort/{session}/{session}_good_trials_concat.mat"
+    # behavior_path = f"/Volumes/Portable/Kilosort/{subject}/{session}_good_trials_concat.mat"
+    behavior_path = f"./data/{subject}/{session}_good_trials_concat.mat"
     phys_path = ('')
     # # Path to write output nwb files to
     # output_path = (

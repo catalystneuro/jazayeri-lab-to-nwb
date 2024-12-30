@@ -48,14 +48,20 @@ class TrialsInterface(TimeIntervalsInterface):
         metadata: Optional[dict] = None,
         tag: str = "trials",
     ):
-        return super(TrialsInterface, self).add_to_nwbfile(
+        super(TrialsInterface, self).add_to_nwbfile(
             nwbfile=nwbfile,
             metadata=metadata,
             tag=tag,
             column_descriptions=self.column_descriptions,
         )
+        # creating processing module
+        ecephys_processing_module = nwbfile.create_processing_module(
+            name="ecephys", description="Intermediate data derived from extracellular electrophysiology recordings.")
+        # TODO: Add binned aligned spikes
+        # ecephys_processing_module.add(binned_aligned_spikes)
+        
 
-    # TODO: Add descriptions for all columns
+
     @property    
     def column_descriptions(self):
         column_descriptions = {

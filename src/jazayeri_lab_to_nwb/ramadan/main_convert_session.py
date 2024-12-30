@@ -75,16 +75,16 @@ class NWBConversionParams():
         self.processed_source_data[key] = value
         self.processed_conversion_options[key] = conversion_options
 
-# TODO: Edit subject to sex mapping and subject to age mapping
+
 _SUBJECT_TO_SEX = {
     "Faure": "M",
     "Nielsen": "M", 
 }
+# TODO: Make this mapping accurate 
 _SUBJECT_TO_AGE = {
     "Faure": "P10Y",  # Born 6/11/2012
     "Nielsen": "P10Y",
 }
-
 
 def add_ecephys_data(
         session_paths: get_session_paths.SessionPaths,
@@ -261,45 +261,29 @@ def session_to_nwb(
     # Initialize empty data dictionaries
     conversion_params = NWBConversionParams()
 
-    # Add electrophysiology data
-    # logging.info("Adding ecephys data")
-    # conversion_params = add_ecephys_data(
-    #     session_paths=session_paths,
-    #     conversion_params=conversion_params,
-    #     stub_test=stub_test
-    # )
-
-
-    # Reads in behavioral data
-    # logging.info("Adding behavior data")
-    # behavior = neupane_conversion.read_behavior_data(
-    #     session_paths, subject=subject, session=session)
-    # conversion_params = add_behavior_data(
-    #     behavior=behavior,
-    #     conversion_params=conversion_params,
-    #     behavior_path=session_paths.behavior
-    # )
-
     # Add trials data    
     logging.info("Adding trials data")
 
     # Reads in trial-structured behavioral data as a dictionary of lists 
     trials = conversion_utils.read_trials_data(
         session_paths, subject=subject, session=session)
+
+    binned_aligned_spikes = conversion_utils.read_binned_data(
+        session_paths, subject=subject, session=session)
+
     conversion_params.add_processed(
         key="Trials",
-        value=dict(trials=trials, folder_path=str(session_paths.behavior)),        
+        value=dict(trials=trials, 
+                   binned_aligned_spikes=binned_aligned_spikes,
+                   folder_path=str(session_paths.behavior)),        
     )
-
+    
     # Create data converters
     processed_params = serialize(conversion_params.processed_source_data)
     processed_converter = nwb_converter.NWBConverter(
         source_data=processed_params,
     )
-    # raw_converter = nwb_converter.NWBConverter(
-    #     source_data=conversion_params.raw_source_data,
-    #     sync_dir=str(session_paths.sync_pulses),
-    # )
+
 
     # Update metadata
     metadata = processed_converter.get_metadata()
