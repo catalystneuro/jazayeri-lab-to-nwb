@@ -23,10 +23,12 @@ Usage:
 import glob
 import datetime
 import logging
+import os
 import sys
 from pathlib import Path
 from uuid import uuid4
 
+from pynwb import NWBHDF5IO, NWBFile
 import get_session_paths
 import nwb_converter
 import jazayeri_lab_to_nwb.ramadan.conversion_utils as conversion_utils
@@ -265,16 +267,12 @@ def session_to_nwb(
     logging.info("Adding trials data")
 
     # Reads in trial-structured behavioral data as a dictionary of lists 
-    trials = conversion_utils.read_trials_data(
-        session_paths, subject=subject, session=session)
-
-    binned_aligned_spikes = conversion_utils.read_binned_data(
-        session_paths, subject=subject, session=session)
+    trials = conversion_utils.read_trials_data()
+        # session_paths, subject=subject, session=session)
 
     conversion_params.add_processed(
         key="Trials",
         value=dict(trials=trials, 
-                   binned_aligned_spikes=binned_aligned_spikes,
                    folder_path=str(session_paths.behavior)),        
     )
     
@@ -304,14 +302,26 @@ def session_to_nwb(
         overwrite=overwrite,
     )
 
-    # logging.info("Running raw data conversion")
-    # metadata["NWBFile"]["identifier"] = str(uuid4())
-    # raw_converter.run_conversion(
-    #     metadata=metadata,
-    #     nwbfile_path=raw_nwb_path,
-    #     conversion_options=conversion_params.raw_conversion_options,
-    #     overwrite=overwrite,
-    # )
+    # Read in NWB file
+    read_io = NWBHDF5IO(processed_nwb_path)
+    nwbfile = read_io.read()
+
+    # Add processing module with binned spikes extension to file
+    ecephys_processing_module = nwbfile.create_processing_module(
+        name="ecephys", 
+        description="Intermediate data derived from extracellular electrophysiology recordings.")
+    binned_aligned_spikes = conversion_utils.read_binned_data(
+        session=session)
+    ecephys_processing_module.add(binned_aligned_spikes)
+
+    # Remove old NWB file and overwrite with new, modified one
+    os.remove(processed_nwb_path)
+    with NWBHDF5IO(processed_nwb_path, mode='w') as write_io:
+        write_io.export(
+            src_io=read_io,
+            nwbfile=nwbfile,
+            write_args={"link_data": False}
+        )
 
 if __name__ == "__main__":
     """Run session conversion."""
