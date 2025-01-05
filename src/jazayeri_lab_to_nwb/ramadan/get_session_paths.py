@@ -15,6 +15,7 @@ SessionPaths = collections.namedtuple(
         "behavior", 
         "phys",
         "output",
+        "start_time",
     ],
 )
 
@@ -22,9 +23,15 @@ def _get_session_paths_openmind(subject, session):
     """Get paths to all components of the data on openmind."""
     # subject_id = SUBJECT_NAME_TO_ID[subject]
     output_path = ('./output')
-    behavior_path = f"/Volumes/Portable/Kilosort/{subject}/{session}_good_trials_concat.mat"
+    behavior_path = f"/Volumes/Portable/Kilosort/{session}/{session}_good_trials_concat.mat"
     # behavior_path = f"./data/{subject}/{session}_good_trials_concat.mat"
-    phys_path = ('')
+
+    start_time_data_type='_t0.imec0.lf.meta'
+    start_time_path = f"/Volumes/Portable/Kilosort/{session}/{session}{start_time_data_type}"
+
+    binned_data_type='_whole_trial_FR'
+    phys_path = f"/Volumes/Portable/Kilosort/{session}/{session}{binned_data_type}.mat"
+
     # # Path to write output nwb files to
     # output_path = (
     #     f"/om/user/nwatters/nwb_data_multi_prediction/staging/sub-{subject}"
@@ -67,6 +74,7 @@ def _get_session_paths_openmind(subject, session):
         output=pathlib.Path(output_path),
         behavior=pathlib.Path(behavior_path),
         phys=pathlib.Path(phys_path),
+        start_time = pathlib.Path(start_time_path),
     )
 
     return session_paths

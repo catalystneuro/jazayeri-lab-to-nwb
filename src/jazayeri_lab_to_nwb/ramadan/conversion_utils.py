@@ -4,22 +4,17 @@ import mat73
 from scipy.io import loadmat
 
 def read_binned_data(
-        session: str,
-        data_type: str='_whole_trial_FR',
-        data_type_behavior: str='_good_trials_concat'
-):
-    # Read data from file
-    # TODO: Specify path to data
-    path = f"/Volumes/Portable/Kilosort/{session}/{session}{data_type}.mat"
-
+        path_neural: str,
+        path_beh: str,
+        ):
+    
     print('loading neural data')
     # Read neural data
     neural_data = mat73.loadmat(
-        path, only_include=['smooth_session'])
+        path_neural, only_include=['smooth_session'])
     # Read behavior data
     print('loading behavioral data')
-    path = f"/Volumes/Portable/Kilosort/{session}/{session}{data_type_behavior}.mat"
-    data = mat73.loadmat(path)
+    data = mat73.loadmat(path_beh)
     # Extract the 'save_all_data' field from the loaded data
     save_all_data = data['save_all_data']
 
@@ -71,13 +66,9 @@ def reorganize_neural_data(neural_data, nrns_all, trial_indices_all):
 
 
 def read_trials_data(
-
+    path: str
 ):
     trials = {}
-
-    # TODO: Specify path to data
-    # path = session_paths.behavior
-    path = f"/Volumes/Portable/Kilosort/{'june_24_g0'}/{'june_24_g0'}{'_good_trials_concat'}.mat"
     # load behavior data
     data = mat73.loadmat(path)
 
@@ -133,11 +124,7 @@ def read_trials_data(
 
 # Need to update
 def read_session_start_time(
-        session: str,
-        data_type='_t0.imec0.lf.meta'):
-    
-    # TODO: Specify path to data
-    path = f"/Volumes/Portable/Kilosort/{session}/{session}{data_type}"
+        path: str):
     
     with open(path, 'r') as file:
         file_contents = file.readlines()
@@ -152,13 +139,3 @@ def read_session_start_time(
             file_create_time = line.strip().split('=')[1]
             break
     return file_create_time
-
-
-if __name__ == '__main__':
-
-    subject_id = 'Faure'
-    session_id = 'june_24_g0'
-    probe = 'NP'
-    read_trials_data()
-    # read_binned_data(subject_id=subject_id, session_id=session_id, probe=probe, data_type='_whole_trial_FR', data_type_behavior='_good_trials_concat')
-    # read_session_start_time(subject_id=subject_id, session_id=session_id, probe=probe, data_type='_t0.imec0.lf.meta')

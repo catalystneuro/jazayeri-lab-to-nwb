@@ -84,7 +84,7 @@ _SUBJECT_TO_SEX = {
 }
 # TODO: Make this mapping accurate 
 _SUBJECT_TO_AGE = {
-    "Faure": "P10Y",  # Born 6/11/2012
+    "Faure": "P10Y", 
     "Nielsen": "P10Y",
 }
 
@@ -196,7 +196,7 @@ def _update_metadata(metadata, subject, session, session_id, session_paths):
 
 
     metadata["NWBFile"]["session_start_time"] = (
-        conversion_utils.read_session_start_time(session=session)
+        conversion_utils.read_session_start_time(path= session_paths.start_time)
     )
 
     # Ensure session_start_time exists in metadata
@@ -267,7 +267,7 @@ def session_to_nwb(
     logging.info("Adding trials data")
 
     # Reads in trial-structured behavioral data as a dictionary of lists 
-    trials = conversion_utils.read_trials_data()
+    trials = conversion_utils.read_trials_data(path=session_paths.behavior)
         # session_paths, subject=subject, session=session)
 
     conversion_params.add_processed(
@@ -310,8 +310,8 @@ def session_to_nwb(
     ecephys_processing_module = nwbfile.create_processing_module(
         name="ecephys", 
         description="Intermediate data derived from extracellular electrophysiology recordings.")
-    binned_aligned_spikes = conversion_utils.read_binned_data(
-        session=session)
+    binned_aligned_spikes = conversion_utils.read_binned_data(path_neural = session_paths.phys,
+                                               path_beh=session_paths.behavior)
     ecephys_processing_module.add(binned_aligned_spikes)
 
     # Remove old NWB file and overwrite with new, modified one
