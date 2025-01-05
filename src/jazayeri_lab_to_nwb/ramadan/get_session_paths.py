@@ -21,54 +21,24 @@ SessionPaths = collections.namedtuple(
 
 def _get_session_paths_openmind(subject, session):
     """Get paths to all components of the data on openmind."""
-    # subject_id = SUBJECT_NAME_TO_ID[subject]
+
     output_path = ('./output')
-    behavior_path = f"/Volumes/Portable/Kilosort/{session}/{session}_good_trials_concat.mat"
-    # behavior_path = f"./data/{subject}/{session}_good_trials_concat.mat"
+    behavior_path = f"/om2/user/mramadan/Neurophys/Sorting/Analysis/NP/{subject}/Good_Trials/{session}_good_trials_concat.mat"
 
     start_time_data_type='_t0.imec0.lf.meta'
-    start_time_path = f"/Volumes/Portable/Kilosort/{session}/{session}{start_time_data_type}"
+    start_time_path = f"/om4/group/jazlab/Mahdi/Neurophys/Sorting/Data_KS/Faure/NP/{session}/{session}_imec0/{session}{start_time_data_type}"
 
     binned_data_type='_whole_trial_FR'
-    phys_path = f"/Volumes/Portable/Kilosort/{session}/{session}{binned_data_type}.mat"
+    phys_path = f"/om2/user/mramadan/Neurophys/Sorting/Analysis/NP/{subject}/Firing_Rates/{session}{binned_data_type}.mat"
 
-    # # Path to write output nwb files to
-    # output_path = (
-    #     f"/om/user/nwatters/nwb_data_multi_prediction/staging/sub-{subject}"
-    # )
+    # output_path = ('./output')
+    # behavior_path = f"/Volumes/Portable/Kilosort/{session}/{session}_good_trials_concat.mat"
 
-    # # Path to the raw data. This is used for reading raw physiology data.
-    # raw_data_path = (
-    #     f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/"
-    #     f"{session}/raw_data"
-    # )
+    # start_time_data_type='_t0.imec0.lf.meta'
+    # start_time_path = f"/Volumes/Portable/Kilosort/{session}/{session}{start_time_data_type}"
 
-    # # Path to task and behavior data.
-    # task_behavior_data_path = (
-    #     "/om4/group/jazlab/nwatters/multi_prediction/datasets/data_nwb_trials/"
-    #     f"{subject}/{session}"
-    # )
-
-    # # Path to open-source data. This is used for reading behavior and task data.
-    # data_open_source_path = (
-    #     "/om4/group/jazlab/nwatters/multi_prediction/datasets/data_open_source/"
-    #     f"Subjects/{subject_id}/{session}/001"
-    # )
-
-    # # Path to sync pulses. This is used for reading timescale transformations
-    # # between physiology and mworks data streams.
-    # sync_pulses_path = (
-    #     "/om4/group/jazlab/nwatters/multi_prediction/data_processed/"
-    #     f"{subject}/{session}/sync_pulses"
-    # )
-
-    # # Path to spike sorting. This is used for reading spike sorted data.
-    # spike_sorting_raw_path = (
-    #     f"/om4/group/jazlab/nwatters/multi_prediction/phys_data/{subject}/"
-    #     f"{session}/spike_sorting"
-    # )
-
-
+    # binned_data_type='_whole_trial_FR'
+    # phys_path = f"/Volumes/Portable/Kilosort/{session}/{session}{binned_data_type}.mat"
 
     session_paths = SessionPaths(
         output=pathlib.Path(output_path),
