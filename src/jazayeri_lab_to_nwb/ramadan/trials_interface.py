@@ -1,6 +1,7 @@
 """Class for converting trial-structured data."""
 
 import json
+import conversion_utils
 from pathlib import Path
 from typing import Optional
 
@@ -54,11 +55,7 @@ class TrialsInterface(TimeIntervalsInterface):
             tag=tag,
             column_descriptions=self.column_descriptions,
         )
-        # creating processing module
-        ecephys_processing_module = nwbfile.create_processing_module(
-            name="ecephys", description="Intermediate data derived from extracellular electrophysiology recordings.")
-        # TODO: Add binned aligned spikes
-        # ecephys_processing_module.add(binned_aligned_spikes)
+        
         
 
 
