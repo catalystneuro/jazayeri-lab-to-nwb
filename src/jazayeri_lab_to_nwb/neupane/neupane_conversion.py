@@ -56,7 +56,7 @@ def read_behavior_data(session_paths: SessionPaths,
     eyex = ttl_mat['eyex']
     eyey = ttl_mat['eyey']
     offset = ttl_mat['mworks_lead']
-    mworks_start_time = ttl_mat['t0_mworks']
+    mworks_start_time = 0 #ttl_mat['t0_mworks'] 
     eyet_aligned = eyet - mworks_start_time + offset
     behavior_dict['EyePosition'] = {}
     behavior_dict['EyePosition']['times'] = eyet_aligned

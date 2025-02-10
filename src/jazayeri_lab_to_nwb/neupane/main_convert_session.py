@@ -97,32 +97,13 @@ def add_behavior_data(
         )
     return conversion_params
 
-def add_ecephys_data(
-        session_paths: get_session_paths.SessionPaths,
-        conversion_params: NWBConversionParams,
-        stub_test: bool):
-    """
-    Add electrophysiology data to an NWB file.
-
-    Parameters:
-
-    Returns:
-        None
-    """
-    conversion_params = _add_v_probe_data(
-        conversion_params=conversion_params,
-        session_paths=session_paths,
-        stub_test=stub_test,
-    )
-
-    return conversion_params
-
 
 def _get_single_file(directory, suffix=""):
     """Get path to a file in given directory with given suffix.
 
     Raises error if not exactly one satisfying file.
     """
+   
     files = list(glob.glob(str(directory / f"*{suffix}")))
     if len(files) == 0:
         raise ValueError(f"No {suffix} files found in {directory}")
@@ -189,53 +170,86 @@ def _add_v_probe_data(
 
 
 def _add_spikeglx_data(
-    raw_source_data,
-    raw_conversion_options,
-    processed_source_data,
-    processed_conversion_options,
+    #raw_source_data,
+    #raw_conversion_options,
+    #processed_source_data,
+    conversion_params,
     session_paths,
     stub_test,
 ):
     """Add SpikeGLX recording data."""
+    print(session_paths)
+    probe_data_dir = session_paths.ecephys
+    if not probe_data_dir.exists():
+        logging.info(f"Ecephys data directory {probe_data_dir} does not exist")
+        return
+
     logging.info("Adding SpikeGLX data")
 
     # Raw data
-    spikeglx_dir = [
-        x
-        for x in (session_paths.raw_data / "spikeglx").iterdir()
-        if "settling" not in str(x)
-    ]
-    if len(spikeglx_dir) == 0:
-        logging.info("Found no SpikeGLX data")
-        return
-    elif len(spikeglx_dir) == 1:
-        spikeglx_dir = spikeglx_dir[0]
-    else:
-        raise ValueError(f"Found multiple spikeglx directories {spikeglx_dir}")
-    ap_file = _get_single_file(spikeglx_dir, suffix="/*.ap.bin")
-    lfp_file = _get_single_file(spikeglx_dir, suffix="/*.lf.bin")
-    raw_source_data["RecordingNP"] = dict(file_path=ap_file)
-    raw_source_data["LF"] = dict(file_path=lfp_file)
-    processed_source_data["RecordingNP"] = dict(file_path=ap_file)
-    processed_source_data["LF"] = dict(file_path=lfp_file)
-    raw_conversion_options["RecordingNP"] = dict(stub_test=stub_test)
-    raw_conversion_options["LF"] = dict(stub_test=stub_test)
-    processed_conversion_options["RecordingNP"] = dict(
-        stub_test=stub_test, write_electrical_series=False
+    ap_file = _get_single_file(probe_data_dir, suffix=".ap.bin")
+    lfp_file = _get_single_file(probe_data_dir, suffix=".lf.bin")
+    probe_num = 0
+
+     # TODO: Add metadata from README about probe
+    conversion_params.add_raw(
+        key=f"RecordingNP{probe_num}",
+        value=dict(
+            file_path=ap_file,
+            #probe_key=f"probe{(probe_num + 1):02d}",
+            #probe_name=f"neuropixel{probe_num}",
+            #channel_count=384,
+            #ypitch=100,
+            #dtype="double",
+            #es_key=f"ElectricalSeriesVP{probe_num}",
+        ),
+        stub_test=stub_test,
     )
-    processed_conversion_options["LF"] = dict(
-        stub_test=stub_test, write_electrical_series=False
+
+    conversion_params.add_raw(
+        key=f"RecordingNP{probe_num}lfp",
+        value=dict(
+            file_path=lfp_file,
+            #probe_key=f"probe{(probe_num + 1):02d}",
+            #probe_name=f"neuropixel{probe_num}",
+            #channel_count=384,
+            #ypitch=100,
+            #dtype="double",
+            #es_key=f"ElectricalSeriesVP{probe_num}",
+        ),
+        stub_test=stub_test,
+    )
+    
+    conversion_params.add_processed(
+        key=f"RecordingNP{probe_num}lfp",
+        value=conversion_params.raw_source_data[f"RecordingNP{probe_num}lfp"],
+        stub_test=stub_test,
+        write_electrical_series=False,
+    )
+    
+    conversion_params.add_processed(
+        key=f"RecordingNP{probe_num}",
+        value=conversion_params.raw_source_data[f"RecordingNP{probe_num}"],
+        stub_test=stub_test,
+        write_electrical_series=False,
     )
 
     # Processed data
-    sorting_path = session_paths.spike_sorting_raw / "np_0" / "ks_3_output_v2"
-    processed_source_data["SortingNP"] = dict(
-        folder_path=str(sorting_path),
-        keep_good_only=False,
+    sorting_path = (
+        session_paths.spike_sorting
+        / "kilosorted25"
     )
-    processed_conversion_options["SortingNP"] = dict(
-        stub_test=stub_test, write_as="processing"
+
+    conversion_params.add_processed(
+        key=f"SortingNP{probe_num}",
+        value=dict(
+            folder_path=str(sorting_path),
+            keep_good_only=False
+        ),
+        stub_test=stub_test,
+        write_as="processing"
     )
+    return conversion_params
 
 
 def _update_metadata(metadata, subject, session, session_id, session_paths):
@@ -364,11 +378,22 @@ def session_to_nwb(
 
     # Add electrophysiology data
     logging.info("Adding ecephys data")
-    conversion_params = add_ecephys_data(
-        session_paths=session_paths,
-        conversion_params=conversion_params,
-        stub_test=stub_test
-    )
+
+    if 'imec' in str(session_paths.ecephys):
+        # Add SpikeGLX data
+        conversion_params = _add_spikeglx_data(
+            conversion_params=conversion_params,
+            session_paths=session_paths,
+            stub_test=stub_test,
+        )
+    else:
+        # Add VP probe data
+        conversion_params = _add_v_probe_data(
+            conversion_params=conversion_params,
+            session_paths=session_paths,
+            stub_test=stub_test,
+        )
+
     # Add behavioral data
     logging.info("Adding behavior data")
 

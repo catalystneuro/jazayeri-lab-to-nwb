@@ -6,15 +6,13 @@ import pathlib
 
 SESSION_TO_ECEPHYS_DIR = {
    
-
+#change folder here for vprobe vs NP probe
     'mahler': {
-        "04122021_a": "mahler_2021-04-12_13-11-22__a/",
-        "04132021_a": "mahler_2021-04-13_13-41-58__a/",
-        "04142021_a": "mahler_2021-04-14_13-06-04__a/",
-        "04212021_a": "mahler_2021-04-21_12-38-38__a/",
-        "04222021_b": "mahler_2021-04-22_13-56-54__b/",
-        "04252021_a": "mahler_2021-04-25_15-02-38__a/",
-        "04272021_a": "mahler_2021-04-27_14-01-16__a/"
+        "03122021_a": "03122021_mahler_g0/03122021_mahler_g0_imec0/",
+        "03152021_a": "03152021_mahler_a_g0/03152021_mahler_a_g0_imec0/",
+        "03172021_a": "031720221_mahler_a_g0/031720221_mahler_a_g0_imec0/",
+        "03182021_a": "031820221_mahler_a_g0/031820221_mahler_a_g0_imec0/",
+        "03192021_a": "031920221_mahler_a_g0/031920221_mahler_a_g0_imec0/"
     }
 }
 SessionPaths = collections.namedtuple(
@@ -40,11 +38,12 @@ def _get_session_paths_openmind(subject, session):
     session_id = f"{subject}{session}"
     # Path to the raw physiology data.
     ecephys_path = (
-        f"/om4/group/jazlab/sujay_backup/mtt_data_mahler/{SESSION_TO_ECEPHYS_DIR[subject][session]}/"
+        #f"/om4/group/jazlab/sujay_backup/mtt_data_mahler/{SESSION_TO_ECEPHYS_DIR[subject][session]}/" #vprobe
+        f"/om4/group/jazlab/sujay_backup/np_data/{SESSION_TO_ECEPHYS_DIR[subject][session]}/" #neuropixel
     )
 
     # Path to task and behavior data.
-    behavior_path = f'/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/EC/{subject}{session}.mwk'
+    behavior_path = f'/om4/group/jazlab/sujay_backup/nwb/physiology_data_for_sharing/7a/{subject}{session}.mwk'
 
     # Path to spike sorting. This is used for reading spike sorted data.
     # TODO: Handle sessions with multiple MWorks sessions
