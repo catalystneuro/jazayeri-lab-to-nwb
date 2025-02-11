@@ -7,12 +7,19 @@ import pathlib
 SESSION_TO_ECEPHYS_DIR = {
    
 #change folder here for vprobe vs NP probe
-    'mahler': {
-        "03122021_a": "03122021_mahler_g0/03122021_mahler_g0_imec0/",
-        "03152021_a": "03152021_mahler_a_g0/03152021_mahler_a_g0_imec0/",
-        "03172021_a": "031720221_mahler_a_g0/031720221_mahler_a_g0_imec0/",
-        "03182021_a": "031820221_mahler_a_g0/031820221_mahler_a_g0_imec0/",
-        "03192021_a": "031920221_mahler_a_g0/031920221_mahler_a_g0_imec0/"
+    #'mahler': {
+    #   "03122021_a": "03122021_mahler_g0/03122021_mahler_g0_imec0/",
+    #   "03152021_a": "03152021_mahler_a_g0/03152021_mahler_a_g0_imec0/",
+    #   "03172021_a": "031720221_mahler_a_g0/031720221_mahler_a_g0_imec0/",
+    #   "03182021_a": "031820221_mahler_a_g0/031820221_mahler_a_g0_imec0/",
+    #   "03192021_a": "031920221_mahler_a_g0/031920221_mahler_a_g0_imec0/"
+    #}
+    'amadeus': {
+        "06242019_a": "amadeus_2019-06-24_13-43-07__a/",
+        "01042020_a": "amadeus_2020-01-04_13-30-05__a/",
+        "06302020_b": "amadeus_2020-06-30_12-20-31__b/",
+        "07032020_b": "amadeus_2020-07-03_13-16-05__b/",
+        "07082020_b": "amadeus_2020-07-08_13-22-32__b/"
     }
 }
 SessionPaths = collections.namedtuple(
@@ -38,8 +45,8 @@ def _get_session_paths_openmind(subject, session):
     session_id = f"{subject}{session}"
     # Path to the raw physiology data.
     ecephys_path = (
-        #f"/om4/group/jazlab/sujay_backup/mtt_data_mahler/{SESSION_TO_ECEPHYS_DIR[subject][session]}/" #vprobe
-        f"/om4/group/jazlab/sujay_backup/np_data/{SESSION_TO_ECEPHYS_DIR[subject][session]}/" #neuropixel
+        f"/om4/group/jazlab/sujay_backup/mtt_data/{SESSION_TO_ECEPHYS_DIR[subject][session]}/" #vprobe
+        #f"/om4/group/jazlab/sujay_backup/np_data/{SESSION_TO_ECEPHYS_DIR[subject][session]}/" #neuropixel
     )
 
     # Path to task and behavior data.

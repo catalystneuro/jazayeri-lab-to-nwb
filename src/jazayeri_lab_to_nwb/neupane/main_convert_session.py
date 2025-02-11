@@ -153,7 +153,7 @@ def _add_v_probe_data(
     # Processed data
     sorting_path = (
         session_paths.spike_sorting
-        / "kilosorted3"
+        / "kilosorted2"
     )
 
     conversion_params.add_processed(
