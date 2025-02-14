@@ -1,0 +1,10 @@
+NWBFile:
+  # related_publications: # no pubs yet
+  session_description:
+    Data from macaque performing a task # TODO: fill in
+  institution: MIT
+  lab: Jazayeri
+  experimenter:
+    - Chen, Ruidong
+Subject:
+  species: Macaca mulatta
