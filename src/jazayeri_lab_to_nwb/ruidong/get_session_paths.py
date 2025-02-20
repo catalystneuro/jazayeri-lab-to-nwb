@@ -2,12 +2,19 @@
 
 import collections
 import pathlib
+import pandas as pd
 
 # TODO: If you want subject names to be different, change this.
 SUBJECT_NAME_TO_ID = {
     "Offenbach": "monkey0",
     "Lalo": "monkey1",
 }
+
+
+def load_subject_names():
+    subject_names_path = "/Volumes/Transfer/nwb_test/data/subject_names.csv"
+    return pd.read_csv(subject_names_path)
+
 
 SessionPaths = collections.namedtuple(
     "SessionPaths",
@@ -43,19 +50,41 @@ def _get_session_paths_openmind(subject, session):
     return session_paths
 
 
+def get_probe_id(subject, session):
+    if subject == "Offenbach":
+        subject = "O"
+    elif subject == "Lalo":
+        subject = "L"
+    subject_names = load_subject_names()
+    # find the v_probe for this subject on this session
+    session_df = subject_names[subject_names["date"] == session]
+    # check if subject is in column 'subject1' or 'subject2'
+    if subject in session_df["subject1"].values:
+        probe_id = "v_probe_1"
+    elif subject in session_df["subject2"].values:
+        probe_id = "v_probe_2"
+    else:
+        raise ValueError(f"Subject {subject} not found in session {session}")
+    return probe_id
+
+
 def _get_session_paths_local(subject, session):
     """Get paths to all components of the data on local machine."""
+    probe_id = get_probe_id(subject, session)
 
-    output_path = "./output"
-    root = "/Volumes/Transfer/nwb/data/social_O_L/"
+    output_path = "/Volumes/Transfer/output"
+    root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
     # does this need to be a file? my behavior source data is a directory, each trial is a file in a subdirectory.
     behavior_path = f"{root}/{session}/results/moog_events/"
 
-    # I don't have this file, what is it?
+    # I don't have this file, what is it? -- put something random for now
     start_time_path = f"{root}/{session}/results/{session}"
 
-    binned_data_type = "_whole_trial_FR"
-    phys_path = f"{root}/{session}/results/{session}{binned_data_type}.mat"
+    binned_data_type = "cache_fdbk_-3_3"
+    phys_path = f"{root}/{session}/results/{probe_id}/{binned_data_type}.json"
+
+    # this is the raw data from open_ephys (converted to dat format)
+    dat_path = f"{root}/{session}/results/{probe_id}/data.dat"
 
     session_paths = SessionPaths(
         output=pathlib.Path(output_path),
