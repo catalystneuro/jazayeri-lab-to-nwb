@@ -82,13 +82,12 @@ class NWBConversionParams:
 
 
 _SUBJECT_TO_SEX = {
-    "Offenbach": "M",
+    "Offenbach": "F",
     "Lalo": "M",
 }
-# TODO: Make this mapping accurate
 _SUBJECT_TO_AGE = {
-    "Offenbach": "P10Y",
-    "Lalo": "P10Y",
+    "Offenbach": "P6Y",
+    "Lalo": "P11Y",
 }
 
 
