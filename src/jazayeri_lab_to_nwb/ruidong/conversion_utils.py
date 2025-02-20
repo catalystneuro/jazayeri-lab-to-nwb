@@ -1,141 +1,169 @@
 import numpy as np
+import pandas as pd
+import json
+from get_session_paths import get_probe_id
 from ndx_binned_spikes import BinnedAlignedSpikes
-import mat73
-from scipy.io import loadmat
+import re
+from datetime import datetime, timezone, timedelta
+
+
+def from_json(d):
+    if isinstance(d, dict) and d.get("type") == "ndarray":
+        return np.array(d["value"])
+    return d
+
 
 def read_binned_data(
-        path_neural: str,
-        path_beh: str,
-        ):
-    
-    print('loading neural data')
-    # Read neural data
-    neural_data = mat73.loadmat(
-        path_neural, only_include=['smooth_session'])
-    # Read behavior data
-    print('loading behavioral data')
-    data = mat73.loadmat(path_beh)
-    # Extract the 'save_all_data' field from the loaded data
-    save_all_data = data['save_all_data']
+    subject_id: str,
+    session_id: str,
+    event: str,
+):
+    # Read data from file
+    probe_id = get_probe_id(subject_id, session_id)
+    path_neural = f"/Volumes/Transfer/nwb_test/data/social_O_L/{session_id}/results/{probe_id}/spikes/cache_{event}_-3_3.json"
+    print("loading neural data")
+    with open(path_neural, "r") as f:
+        dataT = json.load(f, object_hook=from_json)
+    print("loading behavioral data")
+    path_behav = f"/Volumes/Transfer/nwb_test/data/social_O_L/{session_id}/results/moog_events/trial_info.csv"
+    df_bhv = pd.read_csv(path_behav)
 
-     # Extract 'nrns_all' and 'trial_indices_all'
-    nrns_all = save_all_data['nrns']  # Neuron identifiers
-    trial_indices_all = save_all_data['trial_indices_all']  # Trial identifiers
+    # Reorganize neural data into 3D array # Nun x Ntrial x Ntime
+    reorganized_data = reorganize_neural_data(dataT, df_bhv)
 
-    # Reorganize neural data into 3D array
-    reorganized_data = reorganize_neural_data(neural_data, nrns_all, trial_indices_all)
-
-    # TODO: Specify event timestamps
-    event_timestamps = np.linspace(1, int(np.shape(reorganized_data)[1]),int(np.shape(reorganized_data)[1])) # The timestamps to which we align the counts
-    milliseconds_from_event_to_first_bin = 0.0  
-    bin_width_in_milliseconds = 1.0
+    # Specify event timestamps
+    event_timestamps = dataT["timepoints"]
+    bin_width_in_milliseconds = 100.0
     binned_aligned_spikes = BinnedAlignedSpikes(
         data=reorganized_data,
         event_timestamps=event_timestamps,
         bin_width_in_milliseconds=bin_width_in_milliseconds,
-        milliseconds_from_event_to_first_bin=milliseconds_from_event_to_first_bin
+        milliseconds_from_event_to_first_bin=-3000.0,
     )
     return binned_aligned_spikes
 
-def reorganize_neural_data(neural_data, nrns_all, trial_indices_all):
+
+def reorganize_neural_data(dataT, df_bhv):
     # Extract the dimensions of the data
-    maximum_number_of_timepoints = np.shape(neural_data['smooth_session'])[1]  # Number of columns in the neural data (e.g., 16552)
-    number_of_trials = len(np.unique(trial_indices_all))  # Number of unique trials
-    number_of_neurons = len(np.unique(nrns_all))  # Number of unique neurons
+    maximum_number_of_timepoints = np.shape(dataT["unit"][0]["response"])[
+        1
+    ]  # Number of columns in the neural data (e.g., 16552)
+    number_of_trials = len(df_bhv)  # Number of unique trials
+    number_of_neurons = len(dataT["unit"])  # Number of unique neurons
 
     # Create a 3D array filled with NaN values
-    reorganized_data = np.full((number_of_trials, maximum_number_of_timepoints, number_of_neurons), np.nan)
+    reorganized_data = np.full(
+        (number_of_trials, maximum_number_of_timepoints, number_of_neurons),
+        np.nan,
+    )
 
-    # Create mappings for trial indices and neuron indices
-    trial_id_to_index = {trial_id: idx for idx, trial_id in enumerate(np.unique(trial_indices_all))}
-    neuron_id_to_index = {neuron_id: idx for idx, neuron_id in enumerate(np.unique(nrns_all))}
-
-    # Loop through each row of the neural data and place the firing rates into the 3D array
-    for i in range(np.shape(neural_data['smooth_session'])[0]):
-        neuron_id = nrns_all[i]
-        trial_id = trial_indices_all[i]
-
-        # Get the corresponding indices in the 3D array
-        trial_idx = trial_id_to_index[trial_id]
-        neuron_idx = neuron_id_to_index[neuron_id]
+    # Loop through each unit and place the firing rates into the 3D array
+    for i in range(number_of_neurons):
+        unit = dataT["unit"][i]
+        # Extract the trial indices for this unit
+        trial_ids = unit["task_variable"]["trial_num"]
+        responses = unit["response"]
 
         # Fill the array for this trial and neuron
-        reorganized_data[trial_idx, :, neuron_idx] = neural_data['smooth_session'][i]
+        for i_resp, trial in enumerate(trial_ids):
+            i_trial = df_bhv[df_bhv["trial_num"] == trial].index[0]
+            reorganized_data[i_trial, :, i] = responses[i_resp, :]
 
     return reorganized_data
 
 
-def read_trials_data(
-    path: str
-):
+def read_trials_data(session_id: str):
     trials = {}
-    # load behavior data
-    data = mat73.loadmat(path)
 
-    # Extract the 'save_all_data' field from the loaded data
-    save_all_data = data['save_all_data']
+    path_behav = f"/Volumes/Transfer/nwb_test/data/social_O_L/{session_id}/results/moog_events/trial_info.csv"
+    # load behavior data
+    df_bhv = pd.read_csv(path_behav)
 
     # List of fields you want to loop through and store in the trials dictionary
-    fields_to_extract = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6' , 'vel', 'LR',
-                         'LR2', 'trial_answer1', 'trial_answer2', 'trial_answer3',
-                         'trial_answer4', 'geo_present', 'fixation_cue_present',
-                         'fix_start', 'flash_one', 'flash_two', 'flash_three',
-                         'fixation_off', 'saccade_init', 'answer_time', 'trial_end',
-                         'geo_type', 'path_type', 'rand_geo', 'trial_fade', 
-                         'trial_indices_all']  # Add other fields as needed
-    
+    fields_to_extract = [
+        "trial_num",
+        "choice_a0",
+        "choice_a1",
+        "player",
+        "reward",
+        "touched_polls",
+        "difficulty",
+        "better_choice",
+        "history",
+        "pos_in_block",
+        "pos_in_block_obj",
+        "attention_full",
+        "attention_full_L",
+        "n_pre_switch_actor",
+    ]  # Add other fields as needed
+
     # initialize trials
     for field in fields_to_extract:
-        trials[field] = []
+        trials[field] = df_bhv[field].tolist()
 
-    # nrns_all = save_all_data['nrns']
-    # Extract 'nrns_all' and 'trial_indices_all' for neuron and trial identification
-    trial_indices_all = save_all_data['trial_indices_all']
-
-    # Get the unique trial identifiers
-    unique_trials = np.unique(trial_indices_all)
-
-    # Loop over each unique trial
-    for trial_id in unique_trials:
-        # Find indices where the trial matches the current trial_id
-        trial_mask = (trial_indices_all == trial_id)
-
-        # Loop through each field you want to extract
-        for field in fields_to_extract:
-            # Get the array corresponding to the field
-            field_data = save_all_data[field]
-
-            if field == 'nrns':
-                # Special case: We will handle 'nrns' field later with binary matrix conversion
-                continue
-            else:
-                # For other fields, store the unique value for the trial
-                unique_values = np.unique(field_data[trial_mask])
-                    
-                if len(unique_values) > 1:
-                    raise ValueError(f"Multiple unique values of '{field}' found for trial {trial_id}.")
-                
-                # Store the unique value of the field for this trial
-                trials[field].append(unique_values[0])
-
-    trials['start_time'] = trials['geo_present']
+    # Add the trial start times
+    trials["start_time"] = df_bhv["trial_start_time"].tolist()
 
     return trials
 
+
+def convert_timestamp(raw_timestamp, tz_offset="-05:00"):
+    """
+    Converts a raw timestamp string in the format YYYY-MM-DD_HH-MM-SS into an ISO8601 extended format,
+    assuming the provided timezone offset. By default, tz_offset is set to "-05:00" (EST).
+
+    Args:
+        raw_timestamp (str): The timestamp string, e.g. "2023-02-09_13-41-15".
+        tz_offset (str): The timezone offset as a string. Default is "-05:00" for EST.
+
+    Returns:
+        str: The ISO8601 formatted timestamp with millisecond precision.
+    """
+    # Parse the raw timestamp
+    dt = datetime.strptime(raw_timestamp, "%Y-%m-%d_%H-%M-%S")
+    dt = dt.replace(microsecond=0)
+
+    if tz_offset is None:
+        # If no offset is provided, assume UTC.
+        dt = dt.replace(tzinfo=timezone.utc)
+        iso_str = dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    else:
+        # Parse the timezone offset (e.g., "-05:00" for EST)
+        sign = 1 if tz_offset[0] == "+" else -1
+        hours = int(tz_offset[1:3])
+        minutes = int(tz_offset[4:6])
+        offset = timezone(timedelta(hours=sign * hours, minutes=sign * minutes))
+        dt = dt.replace(tzinfo=offset)
+        iso_str = dt.isoformat(timespec="milliseconds")
+
+    return iso_str
+
+
 # Need to update
-def read_session_start_time(
-        path: str):
-    
-    with open(path, 'r') as file:
+def read_session_start_time(path: str):
+
+    with open(path, "r") as file:
         file_contents = file.readlines()
 
-    # Initialize a variable to store fileCreateTime
-    file_create_time = None
+    # Initialize a variable to store acquisition start time
+    raw_timestamp = None
 
-   # Loop through each line to find 'fileCreateTime'
+    # Loop through each line to find 'MAIN state'
+    # The line will look like     <MAIN state="1" value="2023-02-09_13-41-15"/>
+    # We want to extract 2023-02-09_13-41-15 as a time stamp
+    # Date and time of the experiment/session start. The date is stored in UTC with local timezone offset as ISO 8601 extended formatted string: 2018-09-28T14:43:54.123+02:00. Dates stored in UTC end in “Z” with no timezone offset. Date accuracy is up to milliseconds.
     for line in file_contents:
-        if "fileCreateTime" in line:
-            # Split the line by '=' and extract the timestamp
-            file_create_time = line.strip().split('=')[1]
+        if "MAIN state" in line:
+            # Expected line example:
+            # <MAIN state="1" value="2023-02-09_13-41-15"/>
+            match = re.search(r'value="([^"]+)"', line)
+            if match:
+                raw_timestamp = match.group(1)
             break
-    return file_create_time
+    if raw_timestamp:
+        # Convert the raw timestamp, assuming EST (UTC-5)
+        iso_timestamp = convert_timestamp(raw_timestamp, tz_offset="-05:00")
+        print(f"Session start time: {iso_timestamp}")
+        return iso_timestamp
+    else:
+        raise ValueError("Session start time not found in the provided file.")

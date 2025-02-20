@@ -31,12 +31,12 @@ from uuid import uuid4
 from pynwb import NWBHDF5IO, NWBFile
 import get_session_paths
 import nwb_converter
-import jazayeri_lab_to_nwb.ruidong.conversion_utils as conversion_utils
+import conversion_utils
 import numpy as np
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
-# Data repository. Either 'globus' or 'openmind'
-_REPO = "openmind"
+# Data repository. Either 'local' or 'openmind'
+_REPO = "local"
 # Whether to run all the physiology data or only a stub
 _STUB_TEST = False
 # Whether to overwrite output nwb files
@@ -50,7 +50,7 @@ def serialize(x):
     """Serialize an input x."""
     if isinstance(x, np.int_):
         x = int(x)
-    elif isinstance(x, np.float_):
+    elif isinstance(x, np.float64):
         x = float(x)
     elif isinstance(x, np.ndarray):
         x = [serialize(y) for y in x]
@@ -263,7 +263,7 @@ def session_to_nwb(
     logging.info("Adding trials data")
 
     # Reads in trial-structured behavioral data as a dictionary of lists
-    trials = conversion_utils.read_trials_data(path=session_paths.behavior)
+    trials = conversion_utils.read_trials_data(session_id)
     # session_paths, subject=subject, session=session)
 
     conversion_params.add_processed(
@@ -301,8 +301,9 @@ def session_to_nwb(
         name="ecephys",
         description="Intermediate data derived from extracellular electrophysiology recordings.",
     )
+    # TODO add the other binned spike centered on choice
     binned_aligned_spikes = conversion_utils.read_binned_data(
-        path_neural=session_paths.phys, path_beh=session_paths.behavior
+        subject, session, "fdbk"
     )
     ecephys_processing_module.add(binned_aligned_spikes)
 

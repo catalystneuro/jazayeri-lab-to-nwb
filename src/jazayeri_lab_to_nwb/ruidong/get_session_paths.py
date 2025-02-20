@@ -56,6 +56,8 @@ def get_probe_id(subject, session):
     elif subject == "Lalo":
         subject = "L"
     subject_names = load_subject_names()
+    # make sure session is a number
+    session = int(session)
     # find the v_probe for this subject on this session
     session_df = subject_names[subject_names["date"] == session]
     # check if subject is in column 'subject1' or 'subject2'
@@ -77,8 +79,8 @@ def _get_session_paths_local(subject, session):
     # does this need to be a file? my behavior source data is a directory, each trial is a file in a subdirectory.
     behavior_path = f"{root}/{session}/results/moog_events/"
 
-    # I don't have this file, what is it? -- put something random for now
-    start_time_path = f"{root}/{session}/results/{session}"
+    # Read start time from settings.xml (OpenEphys start acquisition time)
+    start_time_path = f"{root}/{session}/phys_raw/OpenEphys/settings.xml"
 
     binned_data_type = "cache_fdbk_-3_3"
     phys_path = f"{root}/{session}/results/{probe_id}/{binned_data_type}.json"
