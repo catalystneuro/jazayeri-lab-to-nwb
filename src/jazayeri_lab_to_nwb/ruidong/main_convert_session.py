@@ -21,14 +21,12 @@ Usage:
 """
 
 import glob
-import datetime
 import logging
 import os
 import sys
 from pathlib import Path
-from uuid import uuid4
 
-from pynwb import NWBHDF5IO, NWBFile
+from pynwb import NWBHDF5IO
 import get_session_paths
 import nwb_converter
 import conversion_utils
@@ -259,9 +257,16 @@ def session_to_nwb(
     # Initialize empty data dictionaries
     conversion_params = NWBConversionParams()
 
+    logging.info("Adding behavior data")
+    # TODO: Edit this to point to eye data
+    # behavior_path = str(session_paths.task_behavior_data)
+    # conversion_params.processed_source_data["EyePosition"] = dict(
+    #     folder_path=behavior_path
+    # )
+    # conversion_params.processed_conversion_options["EyePosition"] = dict()
+
     # Add trials data
     logging.info("Adding trials data")
-
     # Reads in trial-structured behavioral data as a dictionary of lists
     trials = conversion_utils.read_trials_data(session_id)
     # session_paths, subject=subject, session=session)
@@ -301,11 +306,17 @@ def session_to_nwb(
         name="ecephys",
         description="Intermediate data derived from extracellular electrophysiology recordings.",
     )
-    # TODO add the other binned spike centered on choice
-    binned_aligned_spikes = conversion_utils.read_binned_data(
+
+    binned_aligned_spikes_fdbk = conversion_utils.read_binned_data(
         subject, session, "fdbk"
     )
-    ecephys_processing_module.add(binned_aligned_spikes)
+    ecephys_processing_module.add(binned_aligned_spikes_fdbk)
+
+    # this works:
+    binned_aligned_spikes_choice = conversion_utils.read_binned_data(
+        subject, session, "choice"
+    )
+    ecephys_processing_module.add(binned_aligned_spikes_choice)
 
     # Remove old NWB file and overwrite with new, modified one
     os.remove(processed_nwb_path)

@@ -16,9 +16,10 @@ def from_json(d):
 def read_binned_data(
     subject_id: str,
     session_id: str,
-    event: str,
+    name: str,
 ):
     # Read data from file
+    event = name
     probe_id = get_probe_id(subject_id, session_id)
     path_neural = f"/Volumes/Transfer/nwb_test/data/social_O_L/{session_id}/results/{probe_id}/spikes/cache_{event}_-3_3.json"
     print("loading neural data")
@@ -39,6 +40,7 @@ def read_binned_data(
         event_timestamps=event_timestamps,
         bin_width_in_milliseconds=bin_width_in_milliseconds,
         milliseconds_from_event_to_first_bin=-3000.0,
+        name=name,
     )
     return binned_aligned_spikes
 

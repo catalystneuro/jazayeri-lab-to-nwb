@@ -47,7 +47,7 @@ class EyePositionInterface(TimestampsFromArrayInterface):
     def __init__(self, folder_path: FolderPathType):
         folder_path = Path(folder_path)
         super().__init__(folder_path=folder_path)
-
+        # TODO: Read in eye position data and timestamps
         # Find eye position files and check they all exist
         eye_h_file = folder_path / "eye_h_calibrated.json"
         eye_v_file = folder_path / "eye_v_calibrated.json"
