@@ -258,12 +258,11 @@ def session_to_nwb(
     conversion_params = NWBConversionParams()
 
     logging.info("Adding behavior data")
-    # TODO: Edit this to point to eye data
-    # behavior_path = str(session_paths.task_behavior_data)
-    # conversion_params.processed_source_data["EyePosition"] = dict(
-    #     folder_path=behavior_path
-    # )
-    # conversion_params.processed_conversion_options["EyePosition"] = dict()
+    eye_path = str(session_paths.eye_path)
+    conversion_params.processed_source_data["EyePosition"] = dict(
+        folder_path=eye_path
+    )
+    # TODO: add joystick position
 
     # Add trials data
     logging.info("Adding trials data")

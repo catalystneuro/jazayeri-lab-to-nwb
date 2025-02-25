@@ -20,6 +20,7 @@ SessionPaths = collections.namedtuple(
     "SessionPaths",
     [
         "behavior",
+        "eye_path",
         "phys",
         "output",
         "start_time",
@@ -88,9 +89,13 @@ def _get_session_paths_local(subject, session):
     # this is the raw data from open_ephys (converted to dat format)
     dat_path = f"{root}/{session}/results/{probe_id}/data.dat"
 
+    # eye path
+    eye_path = f"{root}/{session}/results/mworks_events"
+
     session_paths = SessionPaths(
         output=pathlib.Path(output_path),
         behavior=pathlib.Path(behavior_path),
+        eye_path=pathlib.Path(eye_path),
         phys=pathlib.Path(phys_path),
         start_time=pathlib.Path(start_time_path),
     )

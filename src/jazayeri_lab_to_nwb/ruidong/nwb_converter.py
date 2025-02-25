@@ -74,7 +74,7 @@ class NWBConverter(neuroconv.NWBConverter):
         # RecordingNP=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
         # LF=neuroconv.datainterfaces.SpikeGLXRecordingInterface,
         # SortingNP=neuroconv.datainterfaces.KiloSortSortingInterface,
-        # EyePosition=timeseries_interface.EyePositionInterface,
+        EyePosition=timeseries_interface.EyePositionInterface,
         # HandPosition=timeseries_interface.HandPositionInterface,
         Trials=trials_interface.TrialsInterface,
     )
