@@ -231,6 +231,8 @@ def session_to_nwb(
     logging.info(f"stub_test = {stub_test}")
     logging.info(f"overwrite = {overwrite}")
 
+    joystick_id = 0 if subject == "Offenbach" else 1
+
     # Get paths
     session_paths = get_session_paths.get_session_paths(
         subject, session, repo=_REPO
@@ -264,7 +266,7 @@ def session_to_nwb(
     )
     joystick_path = str(session_paths.joystick_path)
     conversion_params.processed_source_data["JoystickPosition"] = dict(
-        folder_path=joystick_path, id=0
+        folder_path=joystick_path, id=joystick_id
     )
 
     # Add trials data
