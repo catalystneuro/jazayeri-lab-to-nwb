@@ -262,7 +262,10 @@ def session_to_nwb(
     conversion_params.processed_source_data["EyePosition"] = dict(
         folder_path=eye_path
     )
-    # TODO: add joystick position
+    joystick_path = str(session_paths.joystick_path)
+    conversion_params.processed_source_data["JoystickPosition"] = dict(
+        folder_path=joystick_path, id=0
+    )
 
     # Add trials data
     logging.info("Adding trials data")

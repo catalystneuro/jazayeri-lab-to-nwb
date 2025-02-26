@@ -21,6 +21,7 @@ SessionPaths = collections.namedtuple(
     [
         "behavior",
         "eye_path",
+        "joystick_path",
         "phys",
         "output",
         "start_time",
@@ -90,12 +91,19 @@ def _get_session_paths_local(subject, session):
     dat_path = f"{root}/{session}/results/{probe_id}/data.dat"
 
     # eye path
-    eye_path = f"{root}/{session}/results/mworks_events"
+    if subject == "Offenbach":
+        eye_path = f"{root}/{session}/results/mworks_events"
+    elif subject == "Lalo":
+        eye_path = f"{root}/{session}/results/mworks_events_2nd_eyelink"
+
+    # joystick path
+    joystick_path = f"{root}/{session}/results/mworks_events"
 
     session_paths = SessionPaths(
         output=pathlib.Path(output_path),
         behavior=pathlib.Path(behavior_path),
         eye_path=pathlib.Path(eye_path),
+        joystick_path=pathlib.Path(joystick_path),
         phys=pathlib.Path(phys_path),
         start_time=pathlib.Path(start_time_path),
     )
