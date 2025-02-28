@@ -67,7 +67,7 @@ class NWBConverter(neuroconv.NWBConverter):
     """Primary conversion class for extracellular electrophysiology dataset."""
 
     data_interface_classes = dict(
-        # RecordingVP0=DatRecordingInterface,
+        RecordingVP=DatRecordingInterface,
         # SortingVP0=neuroconv.datainterfaces.KiloSortSortingInterface,
         # RecordingVP1=DatRecordingInterface,
         # SortingVP1=neuroconv.datainterfaces.KiloSortSortingInterface,

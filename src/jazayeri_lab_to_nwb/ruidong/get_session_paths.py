@@ -22,6 +22,7 @@ SessionPaths = collections.namedtuple(
         "behavior",
         "eye_path",
         "joystick_path",
+        "ece_path",
         "phys",
         "output",
         "start_time",
@@ -104,6 +105,7 @@ def _get_session_paths_local(subject, session):
         behavior=pathlib.Path(behavior_path),
         eye_path=pathlib.Path(eye_path),
         joystick_path=pathlib.Path(joystick_path),
+        ece_path=pathlib.Path(dat_path),
         phys=pathlib.Path(phys_path),
         start_time=pathlib.Path(start_time_path),
     )

@@ -25,6 +25,7 @@ import logging
 import os
 import sys
 from pathlib import Path
+from uuid import uuid4
 
 from pynwb import NWBHDF5IO
 import get_session_paths
@@ -89,92 +90,6 @@ _SUBJECT_TO_AGE = {
 }
 
 
-def add_ecephys_data(
-    session_paths: get_session_paths.SessionPaths,
-    conversion_params: NWBConversionParams,
-    stub_test: bool,
-):
-    """
-    Add electrophysiology data to an NWB file.
-
-    Parameters:
-
-    Returns:
-        None
-    """
-    conversion_params = _add_v_probe_data(
-        conversion_params=conversion_params,
-        session_paths=session_paths,
-        stub_test=stub_test,
-    )
-
-    return conversion_params
-
-
-def _get_single_file(directory, suffix=""):
-    """Get path to a file in given directory with given suffix.
-
-    Raises error if not exactly one satisfying file.
-    """
-    files = list(glob.glob(str(directory / f"*{suffix}")))
-    if len(files) == 0:
-        raise ValueError(f"No {suffix} files found in {directory}")
-    if len(files) > 1:
-        raise ValueError(f"Multiple {suffix} files found in {directory}")
-    return files[0]
-
-
-def _add_v_probe_data(
-    conversion_params,
-    session_paths,
-    stub_test,
-):
-    """Add V-Probe session data."""
-    probe_data_dir = session_paths.ecephys
-    if not probe_data_dir.exists():
-        logging.info(f"Ecephys data directory {probe_data_dir} does not exist")
-        return
-
-    logging.info(f"Adding V-probe session data")
-
-    # Raw data
-    recording_file = _get_single_file(probe_data_dir, suffix=".dat")
-    probe_num = 0
-
-    # TODO: Add metadata from README about probe
-    conversion_params.add_raw(
-        key=f"RecordingVP{probe_num}",
-        value=dict(
-            file_path=recording_file,
-            probe_key=f"probe{(probe_num + 1):02d}",
-            probe_name=f"vprobe{probe_num}",
-            channel_count=32,
-            ypitch=100,
-            dtype="double",
-            es_key=f"ElectricalSeriesVP{probe_num}",
-        ),
-        stub_test=stub_test,
-    )
-    conversion_params.add_processed(
-        key=f"RecordingVP{probe_num}",
-        value=conversion_params.raw_source_data[f"RecordingVP{probe_num}"],
-        stub_test=stub_test,
-        write_electrical_series=False,
-    )
-
-    # Processed data
-    sorting_path = session_paths.spike_sorting / "kilosorted2"
-
-    conversion_params.add_processed(
-        key=f"SortingVP{probe_num}",
-        value=dict(folder_path=str(sorting_path), keep_good_only=False),
-        stub_test=stub_test,
-        write_as="processing",
-    )
-
-    return conversion_params
-
-
 def _update_metadata(metadata, subject, session, session_id, session_paths):
     """Update metadata."""
 
@@ -192,6 +107,8 @@ def _update_metadata(metadata, subject, session, session_id, session_paths):
     metadata["NWBFile"]["session_start_time"] = (
         conversion_utils.read_session_start_time(path=session_paths.start_time)
     )
+
+    # metadata["Ecephys"]["ElectricalSeriesVP"] = "Raw voltage data from V-Probe"
 
     # Ensure session_start_time exists in metadata
     if "session_start_time" not in metadata["NWBFile"]:
@@ -260,6 +177,7 @@ def session_to_nwb(
     conversion_params = NWBConversionParams()
 
     logging.info("Adding behavior data")
+    # TODO: eye and joystick should go to raw data.
     eye_path = str(session_paths.eye_path)
     conversion_params.processed_source_data["EyePosition"] = dict(
         folder_path=eye_path
@@ -285,6 +203,33 @@ def session_to_nwb(
     processed_converter = nwb_converter.NWBConverter(
         source_data=processed_params,
     )
+    raw_source_data = {}
+    recording_file = session_paths.ece_path
+    recording_file = str(recording_file)
+    conversion_params.add_raw(
+        key=f"RecordingVP",
+        value=dict(
+            file_path=recording_file,
+            probe_key=f"probe",
+            probe_name=f"vprobe",
+            channel_count=64,
+            ypitch=50,
+            dtype="double",
+            es_key=f"ElectricalSeriesVP",
+        ),
+        stub_test=stub_test,
+    )
+    raw_source_data[f"RecordingVP"] = dict(
+        file_path=recording_file,
+        probe_key=f"probe",
+        probe_name=f"vprobe",
+        es_key=f"ElectricalSeriesVP",
+    )
+    raw_converter = nwb_converter.NWBConverter(
+        source_data=raw_source_data,
+    )
+    raw_conversion_options = conversion_params.raw_conversion_options
+    raw_conversion_options[f"RecordingVP"] = dict(stub_test=stub_test)
 
     # Update metadata
     metadata = processed_converter.get_metadata()
@@ -328,6 +273,18 @@ def session_to_nwb(
         write_io.export(
             src_io=read_io, nwbfile=nwbfile, write_args={"link_data": False}
         )
+
+    logging.info("Running raw data conversion")
+    metadata = raw_converter.get_metadata()
+    metadata = _update_metadata(
+        metadata, subject, session, session_id, session_paths
+    )
+    raw_converter.run_conversion(
+        metadata=metadata,
+        nwbfile_path=raw_nwb_path,
+        conversion_options=raw_conversion_options,
+        overwrite=overwrite,
+    )
 
 
 if __name__ == "__main__":
