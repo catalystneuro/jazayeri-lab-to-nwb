@@ -20,12 +20,10 @@ Usage:
     See comments below for descriptions of these variables.
 """
 
-import glob
 import logging
 import os
 import sys
 from pathlib import Path
-from uuid import uuid4
 
 from pynwb import NWBHDF5IO
 import get_session_paths
