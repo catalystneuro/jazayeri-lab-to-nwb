@@ -13,6 +13,9 @@ SUBJECT_NAME_TO_ID = {
 
 def load_subject_names():
     subject_names_path = "/Volumes/Transfer/nwb_test/data/subject_names.csv"
+    # if path does not exist, use openmind path
+    if not pathlib.Path(subject_names_path).exists():
+        subject_names_path = "/om2/user/ruidong/data/data_srl/subject_names.csv"
     return pd.read_csv(subject_names_path)
 
 
@@ -28,29 +31,6 @@ SessionPaths = collections.namedtuple(
         "start_time",
     ],
 )
-
-
-def _get_session_paths_openmind(subject, session):
-    """Get paths to all components of the data on openmind."""
-
-    output_path = "./output"
-    # does this need to be a file? my behavior source data is a directory, each trial is a file in a subdirectory.
-    behavior_path = f"/om2/user/ruidong/data/social_O_L/{session}/behavior/"
-
-    start_time_data_type = "_t0.imec0.lf.meta"
-    start_time_path = f"/om4/group/jazlab/Mahdi/Neurophys/Sorting/Data_KS/Offenbach/NP/{session}/{session}_imec0/{session}{start_time_data_type}"
-
-    binned_data_type = "_whole_trial_FR"
-    phys_path = f"/om2/user/ruidong/Neurophys/Sorting/Analysis/NP/{subject}/Firing_Rates/{session}{binned_data_type}.mat"
-
-    session_paths = SessionPaths(
-        output=pathlib.Path(output_path),
-        behavior=pathlib.Path(behavior_path),
-        phys=pathlib.Path(phys_path),
-        start_time=pathlib.Path(start_time_path),
-    )
-
-    return session_paths
 
 
 def get_probe_id(subject, session):
@@ -73,12 +53,15 @@ def get_probe_id(subject, session):
     return probe_id
 
 
-def _get_session_paths_local(subject, session):
+def get_session_paths(subject, session, repo="local"):
     """Get paths to all components of the data on local machine."""
     probe_id = get_probe_id(subject, session)
 
     output_path = "/Volumes/Transfer/output"
     root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
+    if repo == "openmind":
+        output_path = "/om2/user/ruidong/data/nwb"
+        root = "/om2/user/ruidong/data/data_srl/social_O_L"
     # does this need to be a file? my behavior source data is a directory, each trial is a file in a subdirectory.
     behavior_path = f"{root}/{session}/results/moog_events/"
 
@@ -111,15 +94,3 @@ def _get_session_paths_local(subject, session):
     )
 
     return session_paths
-
-
-def get_session_paths(subject, session, repo="openmind"):
-    """Get paths to all components of the data.
-
-    Returns:
-        SessionPaths namedtuple.
-    """
-    if repo == "openmind":
-        return _get_session_paths_openmind(subject=subject, session=session)
-    elif repo == "local":
-        return _get_session_paths_local(subject=subject, session=session)
