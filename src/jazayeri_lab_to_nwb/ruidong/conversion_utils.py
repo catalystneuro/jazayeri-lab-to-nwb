@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import json
+import pathlib
 from get_session_paths import get_probe_id
 from ndx_binned_spikes import BinnedAlignedSpikes
 import re
@@ -21,12 +22,18 @@ def read_binned_data(
     # Read data from file
     event = name
     probe_id = get_probe_id(subject_id, session_id)
-    path_neural = f"/Volumes/Transfer/nwb_test/data/social_O_L/{session_id}/results/{probe_id}/spikes/cache_{event}_-3_3.json"
+    root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
+    if not pathlib.Path(output_path).exists():
+        output_path = "/om2/user/ruidong/data/nwb"
+        root = "/om2/user/ruidong/data/data_srl/social_O_L"
+    path_neural = (
+        f"{root}/{session_id}/results/{probe_id}/spikes/cache_{event}_-3_3.json"
+    )
     print("loading neural data")
     with open(path_neural, "r") as f:
         dataT = json.load(f, object_hook=from_json)
     print("loading behavioral data")
-    path_behav = f"/Volumes/Transfer/nwb_test/data/social_O_L/{session_id}/results/moog_events/trial_info.csv"
+    path_behav = f"{root}/{session_id}/results/moog_events/trial_info.csv"
     df_bhv = pd.read_csv(path_behav)
 
     # Reorganize neural data into 3D array # Nun x Ntrial x Ntime
@@ -76,8 +83,11 @@ def reorganize_neural_data(dataT, df_bhv):
 
 def read_trials_data(session_id: str):
     trials = {}
-
-    path_behav = f"/Volumes/Transfer/nwb_test/data/social_O_L/{session_id}/results/moog_events/trial_info.csv"
+    root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
+    if not pathlib.Path(output_path).exists():
+        output_path = "/om2/user/ruidong/data/nwb"
+        root = "/om2/user/ruidong/data/data_srl/social_O_L"
+    path_behav = f"{root}/{session_id}/results/moog_events/trial_info.csv"
     # load behavior data
     df_bhv = pd.read_csv(path_behav)
 
