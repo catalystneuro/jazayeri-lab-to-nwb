@@ -29,6 +29,7 @@ SessionPaths = collections.namedtuple(
         "phys",
         "output",
         "start_time",
+        "ks_path",
     ],
 )
 
@@ -53,13 +54,13 @@ def get_probe_id(subject, session):
     return probe_id
 
 
-def get_session_paths(subject, session, repo="local"):
+def get_session_paths(subject, session):
     """Get paths to all components of the data on local machine."""
     probe_id = get_probe_id(subject, session)
 
     output_path = "/Volumes/Transfer/output"
     root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
-    if repo == "openmind":
+    if not pathlib.Path(output_path).exists():
         output_path = "/om2/user/ruidong/data/nwb"
         root = "/om2/user/ruidong/data/data_srl/social_O_L"
     # does this need to be a file? my behavior source data is a directory, each trial is a file in a subdirectory.
@@ -73,6 +74,9 @@ def get_session_paths(subject, session, repo="local"):
 
     # this is the raw data from open_ephys (converted to dat format)
     dat_path = f"{root}/{session}/results/{probe_id}/data.dat"
+
+    # this is the sorted spikes from kilosort
+    kilosort_path = f"{root}/{session}/results/{probe_id}/ks_output"
 
     # eye path
     if subject == "Offenbach":
@@ -91,6 +95,7 @@ def get_session_paths(subject, session, repo="local"):
         ece_path=pathlib.Path(dat_path),
         phys=pathlib.Path(phys_path),
         start_time=pathlib.Path(start_time_path),
+        ks_path=pathlib.Path(kilosort_path),
     )
 
     return session_paths

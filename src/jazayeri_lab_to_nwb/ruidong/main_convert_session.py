@@ -32,8 +32,6 @@ import conversion_utils
 import numpy as np
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
-# Data repository. Either 'local' or 'openmind'
-_REPO = "local"
 # Whether to run all the physiology data or only a stub
 _STUB_TEST = False
 # Whether to overwrite output nwb files
@@ -149,9 +147,7 @@ def session_to_nwb(
     joystick_id = 0 if subject == "Offenbach" else 1
 
     # Get paths
-    session_paths = get_session_paths.get_session_paths(
-        subject, session, repo=_REPO
-    )
+    session_paths = get_session_paths.get_session_paths(subject, session)
     logging.info(f"session_paths: {session_paths}")
 
     # Get paths for nwb files to write
@@ -196,6 +192,17 @@ def session_to_nwb(
         value=dict(trials=trials, folder_path=str(session_paths.behavior)),
     )
 
+    # This works but requires editing nwb package locally
+    # this file: /Users/rc/miniconda/envs/nwb/lib/python3.10/site-packages/spikeinterface/extractors/phykilosortextractors.py
+    ks_path = str(session_paths.ks_path)
+    conversion_params.processed_source_data["SortingVP"] = dict(
+        folder_path=ks_path,
+        keep_good_only=False,
+    )
+
+    conversion_params.processed_conversion_options[f"SortingVP"] = dict(
+        stub_test=stub_test, write_as="units"
+    )
     # Create data converters
     processed_params = serialize(conversion_params.processed_source_data)
     processed_converter = nwb_converter.NWBConverter(
@@ -223,6 +230,7 @@ def session_to_nwb(
         probe_name=f"vprobe",
         es_key=f"ElectricalSeriesVP",
     )
+
     raw_converter = nwb_converter.NWBConverter(
         source_data=raw_source_data,
     )
@@ -272,17 +280,17 @@ def session_to_nwb(
             src_io=read_io, nwbfile=nwbfile, write_args={"link_data": False}
         )
 
-    logging.info("Running raw data conversion")
-    metadata = raw_converter.get_metadata()
-    metadata = _update_metadata(
-        metadata, subject, session, session_id, session_paths
-    )
-    raw_converter.run_conversion(
-        metadata=metadata,
-        nwbfile_path=raw_nwb_path,
-        conversion_options=raw_conversion_options,
-        overwrite=overwrite,
-    )
+    # logging.info("Running raw data conversion")
+    # metadata = raw_converter.get_metadata()
+    # metadata = _update_metadata(
+    #     metadata, subject, session, session_id, session_paths
+    # )
+    # raw_converter.run_conversion(
+    #     metadata=metadata,
+    #     nwbfile_path=raw_nwb_path,
+    #     conversion_options=raw_conversion_options,
+    #     overwrite=overwrite,
+    # )
 
 
 if __name__ == "__main__":

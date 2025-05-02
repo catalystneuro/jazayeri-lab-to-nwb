@@ -68,7 +68,7 @@ class NWBConverter(neuroconv.NWBConverter):
 
     data_interface_classes = dict(
         RecordingVP=DatRecordingInterface,
-        # SortingVP0=neuroconv.datainterfaces.KiloSortSortingInterface,
+        SortingVP=neuroconv.datainterfaces.KiloSortSortingInterface,
         # RecordingVP1=DatRecordingInterface,
         # SortingVP1=neuroconv.datainterfaces.KiloSortSortingInterface,
         # SortingNP=neuroconv.datainterfaces.KiloSortSortingInterface,
