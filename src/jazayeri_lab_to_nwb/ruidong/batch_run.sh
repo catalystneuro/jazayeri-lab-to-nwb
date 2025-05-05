@@ -4,7 +4,7 @@
 file_path="subject_names.csv"
 
 # Loop through each line in the CSV file, skipping the header
-tail -n +2 "$file_path" | while IFS=',' read -r session date trial type subject1 subject2
+tail -n +2 "$file_path" | while IFS=',' read -r session date trialtype subject1 subject2
 do
     # Check if subject1 is "O"
     if [[ "$subject1" == "O" ]]; then
