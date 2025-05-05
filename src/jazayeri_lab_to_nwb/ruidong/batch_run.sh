@@ -6,6 +6,10 @@ file_path="subject_names.csv"
 # Loop through each line in the CSV file, skipping the header
 tail -n +2 "$file_path" | while IFS=',' read -r session date trialtype subject1 subject2
 do
+    # Trim leading and trailing whitespaces from the fields
+    subject1=$(echo "$subject1" | xargs)
+    subject2=$(echo "$subject2" | xargs)
+
     # Check if subject1 is "O"
     if [[ "$subject1" == "O" ]]; then
         # Run the command for subject1 "O"
