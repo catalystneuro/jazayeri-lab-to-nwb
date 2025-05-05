@@ -173,7 +173,7 @@ def session_to_nwb(
     logging.info("Adding behavior data")
     eye_path = str(session_paths.eye_path)
     # add eye and joystick data if this path exists
-    if os.path.exists(eye_path):
+    if os.path.exists(os.path.join(eye_path, "eyex_v.npy")):
         conversion_params.processed_source_data["EyePosition"] = dict(
             folder_path=eye_path
         )
