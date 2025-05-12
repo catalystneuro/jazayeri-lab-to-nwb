@@ -56,7 +56,7 @@ fi
 
 # compare files
 if [[ -f "\$TARGET_FILE" ]]; then
-  if cmp -s "$DAT_SRC" "$TARGET_FILE"; then
+  if cmp -s "$\DAT_SRC" "\$TARGET_FILE"; then
     echo "[\$(date)] \$TARGET_FILE is identical to source; skipping copy."
   else
     echo "[\$(date)] Checksums differ; copying \$DAT_SRC → \$TARGET_FILE"
