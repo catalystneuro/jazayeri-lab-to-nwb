@@ -157,11 +157,11 @@ def session_to_nwb(
     else:
         session_id = f"{session}"
     raw_nwb_path = str(
-        session_paths.output / f"sub-{subject}_ses-{session_id}_ecephys.nwb"
+        session_paths.output / f"sub-{subject}_ses-{session_id}_raw_ephys.nwb"
     )
     processed_nwb_path = (
         session_paths.output
-        / f"sub-{subject}_ses-{session_id}_behavior+ecephys.nwb"
+        / f"sub-{subject}_ses-{session_id}_behavior+rates.nwb"
     )
     logging.info(f"raw_nwb_path = {raw_nwb_path}")
     logging.info(f"processed_nwb_path = {processed_nwb_path}")

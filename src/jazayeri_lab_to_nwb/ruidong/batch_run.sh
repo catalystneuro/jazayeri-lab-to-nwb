@@ -8,8 +8,8 @@ set -euo pipefail
 # ─── Config ────────────────────────────────────────────────────────────────────
 
 CSV="subject_names.csv"                          # input CSV (must exist here)
-PARTITION="jazayeri"
-MEM="40G"
+PARTITION="ruidong"
+MEM="80G"
 EMAIL="ruidong@mit.edu"
 MAIL_FLAGS="FAIL,CANCEL"
 
@@ -79,6 +79,7 @@ EOF
          --mem="$MEM" \
          --mail-user="$EMAIL" \
          --mail-type="$MAIL_FLAGS" \
+         --time=24:00:00 \
          "$JOBSCRIPT"
 }
 
