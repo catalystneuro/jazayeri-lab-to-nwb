@@ -280,17 +280,17 @@ def session_to_nwb(
             src_io=read_io, nwbfile=nwbfile, write_args={"link_data": False}
         )
 
-    # logging.info("Running raw data conversion")
-    # metadata = raw_converter.get_metadata()
-    # metadata = _update_metadata(
-    #     metadata, subject, session, session_id, session_paths
-    # )
-    # raw_converter.run_conversion(
-    #     metadata=metadata,
-    #     nwbfile_path=raw_nwb_path,
-    #     conversion_options=raw_conversion_options,
-    #     overwrite=overwrite,
-    # )
+    logging.info("Running raw data conversion")
+    metadata = raw_converter.get_metadata()
+    metadata = _update_metadata(
+        metadata, subject, session, session_id, session_paths
+    )
+    raw_converter.run_conversion(
+        metadata=metadata,
+        nwbfile_path=raw_nwb_path,
+        conversion_options=raw_conversion_options,
+        overwrite=overwrite,
+    )
 
 
 if __name__ == "__main__":
