@@ -54,11 +54,9 @@ if [[ -z "\$DAT_SRC" ]]; then
   exit 1
 fi
 
-# compare md5 checksums
+# compare files
 if [[ -f "\$TARGET_FILE" ]]; then
-  MD5_SRC=\$(md5sum "\$DAT_SRC" | cut -d' ' -f1)
-  MD5_TGT=\$(md5sum "\$TARGET_FILE" | cut -d' ' -f1)
-  if [[ "\$MD5_SRC" == "\$MD5_TGT" ]]; then
+  if cmp -s "$DAT_SRC" "$TARGET_FILE"; then
     echo "[\$(date)] \$TARGET_FILE is identical to source; skipping copy."
   else
     echo "[\$(date)] Checksums differ; copying \$DAT_SRC → \$TARGET_FILE"
