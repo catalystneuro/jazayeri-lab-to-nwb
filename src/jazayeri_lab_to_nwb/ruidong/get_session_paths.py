@@ -70,7 +70,9 @@ def get_session_paths(subject, session):
     start_time_path = f"{root}/{session}/phys_raw/OpenEphys/settings.xml"
 
     binned_data_type = "cache_fdbk_-3_3"
-    phys_path = f"{root}/{session}/results/{probe_id}/{binned_data_type}.json"
+    phys_path = (
+        f"{root}/{session}/results/{probe_id}/spikes/{binned_data_type}.json"
+    )
 
     # this is the raw data from open_ephys (converted to dat format)
     dat_path = f"{root}/{session}/results/{probe_id}/data.dat"
