@@ -32,6 +32,12 @@ submit_job() {
 #!/usr/bin/env bash
 set -euo pipefail
 
+date="$date"
+probe="$probe"
+performer="$performer"
+SRC_DIR="$SRC_DIR"
+TARGET_FILE="$TARGET_FILE"
+
 # ensure the output directory exists
 mkdir -p "\$(dirname "$TARGET_FILE")"
 
