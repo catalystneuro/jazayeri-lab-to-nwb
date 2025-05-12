@@ -68,6 +68,8 @@ else
 fi
 
 # finally, run your conversion
+source /home/ruidong/.bashrc
+conda activate nwb
 python main_convert_session.py $performer $date
 EOF
 
