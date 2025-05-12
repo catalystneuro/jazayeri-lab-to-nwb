@@ -8,7 +8,7 @@ set -euo pipefail
 # ─── Config ────────────────────────────────────────────────────────────────────
 
 CSV="subject_names.csv"                          # input CSV (must exist here)
-PARTITION="ruidong"
+PARTITION="normal"
 MEM="80G"
 EMAIL="ruidong@mit.edu"
 MAIL_FLAGS="FAIL,CANCEL"
