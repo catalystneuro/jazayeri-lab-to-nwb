@@ -30,7 +30,9 @@ submit_job() {
 
   cat > "$JOBSCRIPT" <<EOF
 #!/usr/bin/env bash
-set -euo pipefail
+# Avoid unbound variable error in /etc/bashrc
+export BASHRCSOURCED=1
+set -eo pipefail
 
 date="$date"
 probe="$probe"
