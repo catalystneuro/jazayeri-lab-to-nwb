@@ -71,19 +71,19 @@ EOF
 # Skip header row, then read: session,date,trial_type,subject1,subject2,...
 tail -n +2 "$CSV" | while IFS=',' read -r session date trial_type subject1 subject2 _; do
   # strip CRs + trim whitespace
-  date=\$(echo "\$date"      | tr -d '\\r' | xargs)
-  subject1=\$(echo "\$subject1" | tr -d '\\r' | xargs)
-  subject2=\$(echo "\$subject2" | tr -d '\\r' | xargs)
+  date=$(echo "$date"      | tr -d '\r' | xargs)
+  subject1=$(echo "$subject1" | tr -d '\r' | xargs)
+  subject2=$(echo "$subject2" | tr -d '\r' | xargs)
 
   # subject1 → v_probe_1
-  if [[ "\$subject1" == "O" || "\$subject1" == "L" ]]; then
-    performer1=\$([[ "\$subject1" == "O" ]] && echo "Offenbach" || echo "Lalo")
-    submit_job "\$date" 1 "\$performer1"
+  if [[ "$subject1" == "O" || "$subject1" == "L" ]]; then
+    performer1=$([[ "$subject1" == "O" ]] && echo "Offenbach" || echo "Lalo")
+    submit_job "$date" 1 "$performer1"
   fi
 
   # subject2 → v_probe_2
-  if [[ "\$subject2" == "O" || "\$subject2" == "L" ]]; then
-    performer2=\$([[ "\$subject2" == "O" ]] && echo "Offenbach" || echo "Lalo")
-    submit_job "\$date" 2 "\$performer2"
+  if [[ "$subject2" == "O" || "$subject2" == "L" ]]; then
+    performer2=$([[ "$subject2" == "O" ]] && echo "Offenbach" || echo "Lalo")
+    submit_job "$date" 2 "$performer2"
   fi
 done
