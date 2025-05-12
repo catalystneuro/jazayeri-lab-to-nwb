@@ -35,22 +35,30 @@ set -euo pipefail
 # ensure the output directory exists
 mkdir -p "\$(dirname "$TARGET_FILE")"
 
-# if data.dat exists and is ≥1 MB, skip copy
-if [[ -f "$TARGET_FILE" && \$(stat -c%s "$TARGET_FILE") -ge 1048576 ]]; then
-  echo "[\$(date)] $TARGET_FILE is ≥1 MB; no copy needed."
-else
-  # find the largest .dat in the source directory
-  DAT_SRC=\$(find "$SRC_DIR" -maxdepth 1 -type f -name '*.dat' -printf '%s %p\n' \\
-            | sort -nr \\
-            | head -n1 \\
+# locate the largest .dat in the source directory
+DAT_SRC=\$(find "\$SRC_DIR" -maxdepth 1 -type f -name '*.dat' -printf '%s %p\n' \
+            | sort -nr \
+            | head -n1 \
             | cut -d' ' -f2-)
 
-  if [[ -n "\$DAT_SRC" ]]; then
-    echo "[\$(date)] Copying \$DAT_SRC → $TARGET_FILE"
-    cp "\$DAT_SRC" "$TARGET_FILE"
+if [[ -z "\$DAT_SRC" ]]; then
+  echo "[\$(date)] ERROR: no .dat files found in \$SRC_DIR" >&2
+  exit 1
+fi
+
+# compare md5 checksums
+if [[ -f "\$TARGET_FILE" ]]; then
+  MD5_SRC=\$(md5sum "\$DAT_SRC" | cut -d' ' -f1)
+  MD5_TGT=\$(md5sum "\$TARGET_FILE" | cut -d' ' -f1)
+  if [[ "\$MD5_SRC" == "\$MD5_TGT" ]]; then
+    echo "[\$(date)] \$TARGET_FILE is identical to source; skipping copy."
   else
-    echo "[\$(date)] ERROR: no .dat files found in $SRC_DIR" >&2
+    echo "[\$(date)] Checksums differ; copying \$DAT_SRC → \$TARGET_FILE"
+    cp "\$DAT_SRC" "\$TARGET_FILE"
   fi
+else
+  echo "[\$(date)] \$TARGET_FILE missing; copying \$DAT_SRC → \$TARGET_FILE"
+  cp "\$DAT_SRC" "\$TARGET_FILE"
 fi
 
 # finally, run your conversion
