@@ -9,7 +9,7 @@ set -euo pipefail
 
 CSV="subject_names.csv"                          # input CSV (must exist here)
 PARTITION="jazayeri"
-MEM="4G"
+MEM="40G"
 EMAIL="ruidong@mit.edu"
 MAIL_FLAGS="FAIL,CANCEL"
 
