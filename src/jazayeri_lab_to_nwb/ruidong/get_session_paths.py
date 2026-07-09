@@ -15,7 +15,7 @@ def load_subject_names():
     subject_names_path = "/Volumes/Transfer/nwb_test/data/subject_names.csv"
     # if path does not exist, use openmind path
     if not pathlib.Path(subject_names_path).exists():
-        subject_names_path = "/om2/user/ruidong/data/data_srl/subject_names.csv"
+        subject_names_path = "/home/ruidong/om2_home/data/data_srl/subject_names.csv"
     return pd.read_csv(subject_names_path)
 
 
@@ -61,8 +61,8 @@ def get_session_paths(subject, session):
     output_path = "/Volumes/Transfer/output"
     root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
     if not pathlib.Path(output_path).exists():
-        output_path = "/om2/user/ruidong/data/nwb"
-        root = "/om2/user/ruidong/data/data_srl/social_O_L"
+        output_path = "/home/ruidong/om2_home/data/nwb"
+        root = "/home/ruidong/om2_home/data/data_srl/social_O_L"
     # does this need to be a file? my behavior source data is a directory, each trial is a file in a subdirectory.
     behavior_path = f"{root}/{session}/results/moog_events/"
 

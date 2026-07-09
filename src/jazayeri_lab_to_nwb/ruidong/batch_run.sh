@@ -22,7 +22,7 @@ submit_job() {
 
   # Source & target paths
   local SRC_DIR="/om4/group/jazlab/ruidong/data/data_srl/social_O_L/${date}/results/v_probe_${probe}"
-  local TARGET_FILE="/om2/user/ruidong/data/data_srl/social_O_L/${date}/results/v_probe_${probe}/data.dat"
+  local TARGET_FILE="/home/ruidong/om2_home/data/data_srl/social_O_L/${date}/results/v_probe_${probe}/data.dat"
 
   # Create a tiny per-job script so we can write multi-line checks clearly
   local JOBSCRIPT

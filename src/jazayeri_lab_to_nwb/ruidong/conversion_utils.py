@@ -24,7 +24,7 @@ def read_binned_data(
     probe_id = get_probe_id(subject_id, session_id)
     root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
     if not pathlib.Path(root).exists():
-        root = "/om2/user/ruidong/data/data_srl/social_O_L"
+        root = "/home/ruidong/om2_home/data/data_srl/social_O_L"
     path_neural = (
         f"{root}/{session_id}/results/{probe_id}/spikes/cache_{event}_-3_3.json"
     )
@@ -95,7 +95,7 @@ def read_trials_data(session_id: str, trials_transform=None):
     trials = {}
     root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
     if not pathlib.Path(root).exists():
-        root = "/om2/user/ruidong/data/data_srl/social_O_L"
+        root = "/home/ruidong/om2_home/data/data_srl/social_O_L"
     path_behav = f"{root}/{session_id}/results/moog_events/trial_info.csv"
     # load behavior data
     df_bhv = pd.read_csv(path_behav)
