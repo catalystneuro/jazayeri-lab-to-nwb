@@ -161,8 +161,18 @@ def read_recording_offset(offset_csv_path, fs=30000.0):
     ``offset_seconds = value / fs``.  Returns 0.0 if the path is None/missing
     (i.e. fall back to the absolute OE clock).
     """
-    if offset_csv_path is None or not os.path.exists(offset_csv_path):
+    if offset_csv_path is None:
         return 0.0
+    if not os.path.exists(offset_csv_path):
+        # In a batch a silently-missing offset produces a file misaligned by
+        # ~offset seconds with no error. Fail loudly instead. To intentionally
+        # skip the recording-clock offset (e.g. absolute-OE-clock output), pass
+        # offset_csv_path=None explicitly.
+        raise FileNotFoundError(
+            f"offset.csv not found at {offset_csv_path}. The recording-clock "
+            f"offset is required for correct alignment; generate it with "
+            f"get_offest_from_binary.py, or pass offset_csv_path=None to opt out."
+        )
     val = float(np.genfromtxt(offset_csv_path, delimiter=","))
     return val / fs
 

@@ -21,7 +21,7 @@ submit_job() {
   local performer="$3" # Offenbach or Lalo
 
   # Source & target paths
-  local SRC_DIR="/om4/group/jazlab/ruidong/data/data_srl/social_O_L/${date}/results/v_probe_${probe}"
+  local SRC_DIR="/home/ruidong/om4_home/data/data_srl/social_O_L/${date}/results/v_probe_${probe}"
   local TARGET_FILE="/home/ruidong/om2_home/data/data_srl/social_O_L/${date}/results/v_probe_${probe}/data.dat"
 
   # Create a tiny per-job script so we can write multi-line checks clearly
@@ -56,7 +56,7 @@ fi
 
 # compare files
 if [[ -f "\$TARGET_FILE" ]]; then
-  if cmp -s "$\DAT_SRC" "\$TARGET_FILE"; then
+  if cmp -s "\$DAT_SRC" "\$TARGET_FILE"; then
     echo "[\$(date)] \$TARGET_FILE is identical to source; skipping copy."
   else
     echo "[\$(date)] Checksums differ; copying \$DAT_SRC → \$TARGET_FILE"
