@@ -79,7 +79,7 @@ EOF
          --mem="$MEM" \
          --mail-user="$EMAIL" \
          --mail-type="$MAIL_FLAGS" \
-         --time=24:00:00 \
+         --time=12:00:00 \
          "$JOBSCRIPT"
 }
 
