@@ -29,6 +29,7 @@ from pynwb import NWBHDF5IO
 import get_session_paths
 import nwb_converter
 import conversion_utils
+import alignment_utils
 import numpy as np
 from neuroconv.utils import dict_deep_update, load_dict_from_file
 
@@ -181,10 +182,44 @@ def session_to_nwb(
         conversion_params.processed_source_data["JoystickPosition"] = dict(
             folder_path=joystick_path, id=joystick_id
         )
+    # -------------------------------------------------------------------
+    # ALIGNMENT: build per-clock -> Open Ephys transforms for this session.
+    #
+    # Eye, joystick, and trials are each recorded on a different machine/clock;
+    # only spikes/units are on the Open Ephys acquisition clock. We fit a linear
+    # map (offset + drift) from each device clock onto the Open Ephys clock using
+    # the per-trial sync anchors already produced by the ephys pipeline
+    # (open_ephys_events/open_ephys_trials.json + each folder's trial_info).
+    # -------------------------------------------------------------------
+    moog_events_dir = str(session_paths.behavior)  # .../results/moog_events
+    open_ephys_events_dir = str(
+        Path(session_paths.behavior).parent / "open_ephys_events"
+    )
+    # Recording-clock offset: open_ephys_trials.json is on the ABSOLUTE Open
+    # Ephys acquisition clock, but the published `units` are 0-based on the
+    # Kilosort/.dat recording clock. offset.csv (first recording sample number)
+    # sits one level above the Kilosort output for this probe; subtracting
+    # offset/fs lands behavior on the same clock as the immutable units.
+    offset_csv_path = str(Path(session_paths.ks_path).parent / "offset.csv")
+    session_transforms = alignment_utils.build_session_transforms(
+        eye_folder=str(session_paths.eye_path),
+        joystick_folder=str(session_paths.joystick_path),
+        moog_events_dir=moog_events_dir,
+        open_ephys_events_dir=open_ephys_events_dir,
+        offset_csv_path=offset_csv_path,
+    )
+    logging.info(
+        "Clock->OpenEphys transforms:\n"
+        + alignment_utils.transforms_report(session_transforms)
+    )
+
     # Add trials data
     logging.info("Adding trials data")
-    # Reads in trial-structured behavioral data as a dictionary of lists
-    trials = conversion_utils.read_trials_data(session_id)
+    # Reads in trial-structured behavioral data as a dictionary of lists,
+    # with start_time mapped onto the Open Ephys clock.
+    trials = conversion_utils.read_trials_data(
+        session_id, trials_transform=session_transforms["trials"]
+    )
     # session_paths, subject=subject, session=session)
 
     conversion_params.add_processed(
@@ -208,6 +243,30 @@ def session_to_nwb(
     processed_converter = nwb_converter.NWBConverter(
         source_data=processed_params,
     )
+
+    # -------------------------------------------------------------------
+    # ALIGNMENT: map eye / joystick timestamps onto the Open Ephys clock.
+    #
+    # EyePositionInterface and JoystickInterface load their raw device-clock
+    # timestamps in __init__ (get_original_timestamps). We now overwrite them
+    # with Open-Ephys-referenced timestamps via set_aligned_timestamps, so the
+    # SpatialSeries are written on the master clock. Without this call the raw
+    # EyeLink / MWorks-server clocks are written verbatim (the bug that put each
+    # stream on a disjoint time base).
+    # -------------------------------------------------------------------
+    interface_objs = processed_converter.data_interface_objects
+    if "EyePosition" in interface_objs:
+        eye_iface = interface_objs["EyePosition"]
+        eye_iface.set_aligned_timestamps(
+            session_transforms["eye"].apply(eye_iface.get_original_timestamps())
+        )
+    if "JoystickPosition" in interface_objs:
+        joy_iface = interface_objs["JoystickPosition"]
+        joy_iface.set_aligned_timestamps(
+            session_transforms["joystick"].apply(
+                joy_iface.get_original_timestamps()
+            )
+        )
     raw_source_data = {}
     recording_file = session_paths.ece_path
     recording_file = str(recording_file)
@@ -285,6 +344,21 @@ def session_to_nwb(
     metadata = _update_metadata(
         metadata, subject, session, session_id, session_paths
     )
+
+    # Show some metadata
+    rec = raw_converter.data_interface_objects[
+        "RecordingVP"
+    ].recording_extractor  # or your key
+
+    print("num_channels:", rec.get_num_channels())
+    print("num_frames:", rec.get_num_frames())
+    print("dtype:", rec.get_dtype())
+    print("sampl_freq:", rec.get_sampling_frequency())
+    # If supported:
+    try:
+        print("channel_ids:", rec.get_channel_ids()[:5], "...")
+    except Exception:
+        pass
     raw_converter.run_conversion(
         metadata=metadata,
         nwbfile_path=raw_nwb_path,

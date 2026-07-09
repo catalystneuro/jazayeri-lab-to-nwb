@@ -80,7 +80,18 @@ def reorganize_neural_data(dataT, df_bhv):
     return reorganized_data
 
 
-def read_trials_data(session_id: str):
+def read_trials_data(session_id: str, trials_transform=None):
+    """Read trial-structured behavioral data.
+
+    Args:
+        session_id: session date string.
+        trials_transform: optional alignment_utils.ClockTransform mapping the
+            MOOG Unix-epoch clock onto the Open Ephys acquisition clock. When
+            provided, ``start_time`` (and ``stop_time`` if present) are mapped
+            onto the Open Ephys clock so the trials table shares a time base
+            with spikes/eye/joystick. When None, the raw MOOG Unix times are
+            returned (legacy, misaligned behavior).
+    """
     trials = {}
     root = "/Volumes/Transfer/nwb_test/data/social_O_L/"
     if not pathlib.Path(root).exists():
@@ -111,8 +122,18 @@ def read_trials_data(session_id: str):
     for field in fields_to_extract:
         trials[field] = df_bhv[field].tolist()
 
-    # Add the trial start times
-    trials["start_time"] = df_bhv["trial_start_time"].tolist()
+    # Add the trial start times.
+    #
+    # ALIGNMENT: trial_start_time is in the MOOG Unix-epoch clock. The trials
+    # table (and its neuroconv-derived stop_time = next trial's start_time) must
+    # be expressed on the Open Ephys acquisition clock so it shares a time base
+    # with spikes, eye, and joystick. When a MOOG->OpenEphys transform is
+    # supplied we map start_time onto the Open Ephys clock; stop_time inherits
+    # the alignment because neuroconv derives it from start_time.
+    start_time = df_bhv["trial_start_time"].to_numpy(dtype=float)
+    if trials_transform is not None:
+        start_time = trials_transform.apply(start_time)
+    trials["start_time"] = start_time.tolist()
 
     return trials
 

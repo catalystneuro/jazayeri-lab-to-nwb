@@ -42,7 +42,15 @@ class TimestampsFromArrayInterface(BaseTemporalAlignmentInterface):
 
 
 class EyePositionInterface(TimestampsFromArrayInterface):
-    """Eye position interface."""
+    """Eye position interface.
+
+    Timestamps loaded here (eyex_t.npy) are in the EyeLink/MWorks-server clock
+    of the eye-tracking machine. They MUST be aligned to the Open Ephys
+    acquisition clock before writing, by calling ``set_aligned_timestamps(...)``
+    (done in main_convert_session.py using alignment_utils). If that call is
+    skipped, the eye SpatialSeries is written on the raw device clock and will
+    not share a time base with spikes/joystick/trials.
+    """
 
     def __init__(self, folder_path: FolderPathType):
         folder_path = Path(folder_path)
@@ -106,7 +114,14 @@ class EyePositionInterface(TimestampsFromArrayInterface):
 
 
 class JoystickInterface(TimestampsFromArrayInterface):
-    """Eye position interface."""
+    """Joystick position interface.
+
+    Timestamps loaded here (joyx{id}_t.npy) are in the main MWorks-server clock.
+    They MUST be aligned to the Open Ephys acquisition clock before writing, by
+    calling ``set_aligned_timestamps(...)`` (done in main_convert_session.py
+    using alignment_utils). If skipped, the joystick SpatialSeries is written on
+    the raw device clock and will not share a time base with the other streams.
+    """
 
     def __init__(self, folder_path: FolderPathType, id: int):
         folder_path = Path(folder_path)
