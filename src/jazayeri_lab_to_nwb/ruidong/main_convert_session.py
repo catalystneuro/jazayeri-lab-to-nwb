@@ -19,7 +19,7 @@ Usage:
         _OVERWRITE
     See comments below for descriptions of these variables.
 """
-
+import si_numpy2_patch  # noqa: F401 — fixes spikeinterface numpy-2 query bug
 import logging
 import os
 import sys
